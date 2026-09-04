@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Stockfish Chess</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
@@ -12,75 +13,151 @@
   box-sizing: border-box;
 }
 
+html,
 body {
   margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
   min-height: 100vh;
-  font-family: Arial, sans-serif;
+  font-family: Arial, Helvetica, sans-serif;
+
   background:
-    radial-gradient(circle at top, #26334d 0%, #101522 45%, #070a10 100%);
+    radial-gradient(
+      circle at 50% 0%,
+      #263a5c 0%,
+      #111a2b 40%,
+      #070b13 100%
+    );
+
   color: white;
+
   display: flex;
   justify-content: center;
   align-items: center;
+
   padding: 25px;
 }
 
+/* =========================
+   MAIN GAME
+========================= */
+
 .game {
-  width: min(1100px, 100%);
+  width: min(1150px, 100%);
 }
 
 .title {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
 }
 
 .title h1 {
   margin: 0;
-  font-size: clamp(32px, 6vw, 56px);
-  letter-spacing: 2px;
+
+  font-size: clamp(32px, 6vw, 58px);
+
+  letter-spacing: 3px;
+
+  text-shadow:
+    0 5px 20px rgba(0, 0, 0, .5);
 }
 
 .title p {
-  color: #aeb8cc;
   margin-top: 8px;
+
+  color: #aebbd0;
+
+  font-size: 16px;
 }
+
+/* =========================
+   LAYOUT
+========================= */
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(300px, 700px) 300px;
+
+  grid-template-columns:
+    minmax(300px, 720px)
+    310px;
+
   gap: 25px;
+
   justify-content: center;
+
   align-items: start;
 }
 
+/* =========================
+   BOARD
+========================= */
+
 .board-wrap {
-  position: relative;
   width: 100%;
-  aspect-ratio: 1;
-  border-radius: 18px;
+
+  aspect-ratio: 1 / 1;
+
   padding: 8px;
-  background: #20283a;
+
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #34415a,
+      #171e2c
+    );
+
   box-shadow:
-    0 25px 70px rgba(0,0,0,.55),
-    0 0 35px rgba(80,140,255,.12);
+    0 30px 80px rgba(0, 0, 0, .6),
+    0 0 45px rgba(80, 140, 255, .15);
 }
 
 .board {
   width: 100%;
   height: 100%;
+
   display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  border-radius: 12px;
+
+  grid-template-columns:
+    repeat(8, minmax(0, 1fr));
+
+  grid-template-rows:
+    repeat(8, minmax(0, 1fr));
+
+  border-radius: 13px;
+
   overflow: hidden;
 }
 
+/* =========================
+   SQUARES
+========================= */
+
 .square {
   position: relative;
+
+  width: 100%;
+  height: 100%;
+
+  min-width: 0;
+  min-height: 0;
+
   display: flex;
+
   justify-content: center;
   align-items: center;
+
   cursor: pointer;
+
   user-select: none;
+
+  transition:
+    filter .12s ease,
+    box-shadow .12s ease;
 }
 
 .light {
@@ -92,113 +169,256 @@ body {
 }
 
 .square:hover {
-  filter: brightness(1.12);
+  filter: brightness(1.1);
 }
 
+/* Selected square */
+
 .selected {
-  box-shadow: inset 0 0 0 5px rgba(255, 220, 70, .9);
+  box-shadow:
+    inset 0 0 0 5px
+    rgba(255, 220, 70, .95);
 }
+
+/* =========================
+   MOVE HIGHLIGHTS
+========================= */
 
 .possible::after {
   content: "";
+
+  position: absolute;
+
   width: 25%;
   height: 25%;
+
   border-radius: 50%;
-  background: rgba(30, 30, 30, .35);
-  position: absolute;
+
+  background:
+    rgba(20, 25, 30, .38);
 }
 
 .capture::after {
   content: "";
-  width: 75%;
-  height: 75%;
-  border-radius: 50%;
-  border: 5px solid rgba(220, 70, 70, .7);
+
   position: absolute;
+
+  width: 78%;
+  height: 78%;
+
+  border-radius: 50%;
+
+  border:
+    5px solid rgba(220, 65, 65, .72);
 }
 
+/* =========================
+   CHESS PIECES
+========================= */
+
 .piece {
-  font-family: "Arial Unicode MS", "DejaVu Sans", sans-serif;
-  font-size: clamp(30px, 7vw, 70px);
+  position: relative;
+
+  z-index: 5;
+
+  font-family:
+    "Arial Unicode MS",
+    "DejaVu Sans",
+    sans-serif;
+
+  font-size:
+    clamp(30px, 7vw, 72px);
+
   line-height: 1;
-  z-index: 2;
-  filter: drop-shadow(2px 4px 2px rgba(0,0,0,.45));
-  transition: transform .12s ease;
+
+  transition:
+    transform .12s ease;
 }
 
 .square:hover .piece {
-  transform: scale(1.06);
+  transform: scale(1.07);
 }
+
+/* WHITE */
+
+.white-piece {
+  color: #ffffff;
+
+  text-shadow:
+    0 3px 3px rgba(0, 0, 0, .75),
+    0 0 2px #000;
+}
+
+/* BLACK */
+
+.black-piece {
+  color: #111111;
+
+  text-shadow:
+    0 2px 3px rgba(255, 255, 255, .35),
+    0 0 2px #000;
+}
+
+/* =========================
+   SIDE PANEL
+========================= */
 
 .panel {
-  background: rgba(22, 28, 42, .88);
-  border: 1px solid rgba(255,255,255,.08);
-  border-radius: 18px;
+  background:
+    rgba(20, 27, 41, .9);
+
+  border:
+    1px solid rgba(255, 255, 255, .08);
+
+  border-radius: 20px;
+
   padding: 20px;
-  box-shadow: 0 20px 50px rgba(0,0,0,.35);
-  backdrop-filter: blur(12px);
+
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, .4);
+
+  backdrop-filter: blur(14px);
 }
+
+/* =========================
+   STATUS
+========================= */
 
 .status {
-  padding: 14px;
+  padding: 15px;
+
   border-radius: 12px;
-  background: rgba(255,255,255,.06);
+
+  background:
+    rgba(255, 255, 255, .06);
+
   margin-bottom: 18px;
+
   text-align: center;
+
   font-weight: bold;
+
+  min-height: 48px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
+/* =========================
+   EVALUATION BAR
+========================= */
+
 .eval {
+  width: 100%;
+
   height: 18px;
+
   border-radius: 10px;
+
   overflow: hidden;
-  background: #111;
-  margin-bottom: 18px;
-  border: 1px solid rgba(255,255,255,.1);
+
+  background: #101010;
+
+  border:
+    1px solid rgba(255,255,255,.1);
+
+  margin-bottom: 20px;
 }
 
 .eval-fill {
   width: 50%;
+
   height: 100%;
-  background: linear-gradient(90deg, #777, #eee);
-  transition: width .4s ease;
+
+  background:
+    linear-gradient(
+      90deg,
+      #777,
+      #eee
+    );
+
+  transition:
+    width .4s ease;
 }
+
+/* =========================
+   MOVE LIST
+========================= */
 
 h2 {
   margin-top: 0;
+
+  font-size: 22px;
 }
 
 .moves {
-  height: 280px;
+  height: 290px;
+
   overflow-y: auto;
-  background: rgba(0,0,0,.18);
-  border-radius: 10px;
+
+  background:
+    rgba(0, 0, 0, .2);
+
+  border-radius: 12px;
+
   padding: 10px;
+
   margin-bottom: 15px;
 }
 
 .move {
-  padding: 7px;
-  border-bottom: 1px solid rgba(255,255,255,.05);
-  color: #dce3f1;
+  padding: 8px;
+
+  border-bottom:
+    1px solid
+    rgba(255,255,255,.05);
+
+  color: #dce4f3;
 }
+
+/* =========================
+   BUTTON
+========================= */
 
 button {
   width: 100%;
-  border: 0;
-  border-radius: 12px;
+
+  border: none;
+
+  border-radius: 13px;
+
   padding: 14px;
-  margin-top: 8px;
+
+  margin-top: 5px;
+
   font-size: 16px;
+
   font-weight: bold;
-  cursor: pointer;
+
   color: white;
-  background: linear-gradient(135deg, #477cff, #7657ff);
-  transition: transform .15s, filter .15s;
+
+  cursor: pointer;
+
+  background:
+    linear-gradient(
+      135deg,
+      #477cff,
+      #7657ff
+    );
+
+  box-shadow:
+    0 8px 20px
+    rgba(70, 100, 255, .25);
+
+  transition:
+    transform .15s ease,
+    filter .15s ease;
 }
 
 button:hover {
   transform: translateY(-2px);
+
   filter: brightness(1.12);
 }
 
@@ -206,7 +426,16 @@ button:active {
   transform: translateY(0);
 }
 
-@media (max-width: 800px) {
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 850px) {
+
+  body {
+    padding: 15px;
+  }
+
   .layout {
     grid-template-columns: 1fr;
   }
@@ -214,6 +443,7 @@ button:active {
   .panel {
     width: 100%;
   }
+
 }
 </style>
 </head>
@@ -223,261 +453,554 @@ button:active {
 <div class="game">
 
   <div class="title">
+
     <h1>♟ STOCKFISH CHESS</h1>
-    <p>Play against Stockfish 18</p>
+
+    <p>
+      Play against Stockfish 18
+    </p>
+
   </div>
+
 
   <div class="layout">
 
+    <!-- BOARD -->
+
     <div class="board-wrap">
-      <div id="board" class="board"></div>
+
+      <div
+        id="board"
+        class="board">
+      </div>
+
     </div>
+
+
+    <!-- PANEL -->
 
     <div class="panel">
 
-      <div id="status" class="status">
+      <div
+        id="status"
+        class="status">
+
         Starting Stockfish...
+
       </div>
+
 
       <div class="eval">
-        <div id="evalFill" class="eval-fill"></div>
+
+        <div
+          id="evalFill"
+          class="eval-fill">
+        </div>
+
       </div>
 
-      <h2>Moves</h2>
 
-      <div id="moves" class="moves"></div>
+      <h2>
+        Moves
+      </h2>
 
-      <button onclick="newGame()">🔄 New Game</button>
+
+      <div
+        id="moves"
+        class="moves">
+      </div>
+
+
+      <button
+        onclick="newGame()">
+
+        🔄 New Game
+
+      </button>
 
     </div>
 
   </div>
+
 </div>
+
 
 <script>
 
-const boardElement = document.getElementById("board");
-const statusElement = document.getElementById("status");
-const movesElement = document.getElementById("moves");
-const evalFill = document.getElementById("evalFill");
+/* =========================
+   ELEMENTS
+========================= */
 
-let game = new Chess();
+const boardElement =
+  document.getElementById("board");
+
+const statusElement =
+  document.getElementById("status");
+
+const movesElement =
+  document.getElementById("moves");
+
+const evalFill =
+  document.getElementById("evalFill");
+
+
+/* =========================
+   CHESS
+========================= */
+
+let game =
+  new Chess();
+
 let engine = null;
+
 let selectedSquare = null;
+
 let engineReady = false;
+
 let thinking = false;
 
+
+/* =========================
+   PIECES
+========================= */
+
 const pieces = {
+
   wK: "♔",
   wQ: "♕",
   wR: "♖",
   wB: "♗",
   wN: "♘",
   wP: "♙",
+
   bK: "♚",
   bQ: "♛",
   bR: "♜",
   bB: "♝",
   bN: "♞",
   bP: "♟"
+
 };
+
+
+/* =========================
+   DRAW BOARD
+========================= */
 
 function drawBoard() {
 
   boardElement.innerHTML = "";
 
-  const board = game.board();
+  const board =
+    game.board();
 
-  for (let row = 0; row < 8; row++) {
 
-    for (let col = 0; col < 8; col++) {
+  for (
+    let row = 0;
+    row < 8;
+    row++
+  ) {
 
-      const square = document.createElement("div");
+    for (
+      let col = 0;
+      col < 8;
+      col++
+    ) {
 
-      const file = String.fromCharCode(97 + col);
-      const rank = 8 - row;
-      const squareName = file + rank;
+      const square =
+        document.createElement("div");
+
+
+      const file =
+        String.fromCharCode(
+          97 + col
+        );
+
+      const rank =
+        8 - row;
+
+
+      const squareName =
+        file + rank;
+
 
       square.className =
         "square " +
-        ((row + col) % 2 === 0 ? "light" : "dark");
+        (
+          (row + col) % 2 === 0
+            ? "light"
+            : "dark"
+        );
 
-      square.dataset.square = squareName;
 
-      const piece = board[row][col];
+      square.dataset.square =
+        squareName;
+
+
+      const piece =
+        board[row][col];
+
 
       if (piece) {
 
-        const span = document.createElement("span");
+        const span =
+          document.createElement("span");
 
-        span.className = "piece";
+
+        span.className =
+          "piece " +
+          (
+            piece.color === "w"
+              ? "white-piece"
+              : "black-piece"
+          );
+
 
         span.textContent =
-          pieces[piece.color + piece.type.toUpperCase()];
+          pieces[
+            piece.color +
+            piece.type.toUpperCase()
+          ];
+
 
         square.appendChild(span);
+
       }
 
-      if (squareName === selectedSquare) {
-        square.classList.add("selected");
+
+      if (
+        squareName ===
+        selectedSquare
+      ) {
+
+        square.classList.add(
+          "selected"
+        );
+
       }
 
-      square.onclick = () => clickSquare(squareName);
 
-      boardElement.appendChild(square);
+      square.onclick = () =>
+        clickSquare(squareName);
+
+
+      boardElement.appendChild(
+        square
+      );
+
     }
+
   }
+
 
   if (selectedSquare) {
-    highlightMoves(selectedSquare);
+
+    highlightMoves(
+      selectedSquare
+    );
+
   }
+
 }
+
+
+/* =========================
+   HIGHLIGHT MOVES
+========================= */
 
 function highlightMoves(square) {
 
-  const moves = game.moves({
-    square: square,
-    verbose: true
-  });
+  const moves =
+    game.moves({
+      square: square,
+      verbose: true
+    });
+
 
   moves.forEach(move => {
 
-    const target = document.querySelector(
-      `[data-square="${move.to}"]`
-    );
+    const target =
+      document.querySelector(
+        `[data-square="${move.to}"]`
+      );
+
 
     if (!target) return;
 
+
     if (move.captured) {
-      target.classList.add("capture");
+
+      target.classList.add(
+        "capture"
+      );
+
     } else {
-      target.classList.add("possible");
+
+      target.classList.add(
+        "possible"
+      );
+
     }
+
   });
+
 }
+
+
+/* =========================
+   CLICK SQUARE
+========================= */
 
 function clickSquare(square) {
 
-  if (!engineReady || thinking) return;
-
-  if (game.game_over()) return;
-
-  const piece = game.get(square);
-
-  if (!selectedSquare) {
-
-    if (!piece) return;
-
-    if (piece.color !== game.turn()) return;
-
-    selectedSquare = square;
-
-    drawBoard();
-
+  if (
+    !engineReady ||
+    thinking
+  ) {
     return;
   }
 
-  if (square === selectedSquare) {
-
-    selectedSquare = null;
-    drawBoard();
-
-    return;
-  }
-
-  const move = game.move({
-    from: selectedSquare,
-    to: square,
-    promotion: "q"
-  });
-
-  if (!move) {
-
-    if (piece && piece.color === game.turn()) {
-      selectedSquare = square;
-      drawBoard();
-    }
-
-    return;
-  }
-
-  selectedSquare = null;
-
-  updateMoves();
-  drawBoard();
-  updateStatus();
 
   if (game.game_over()) {
     return;
   }
 
+
+  const piece =
+    game.get(square);
+
+
+  /* Select piece */
+
+  if (!selectedSquare) {
+
+    if (!piece) {
+      return;
+    }
+
+
+    if (
+      piece.color !==
+      game.turn()
+    ) {
+      return;
+    }
+
+
+    selectedSquare =
+      square;
+
+
+    drawBoard();
+
+    return;
+  }
+
+
+  /* Unselect */
+
+  if (
+    square ===
+    selectedSquare
+  ) {
+
+    selectedSquare =
+      null;
+
+    drawBoard();
+
+    return;
+  }
+
+
+  /* Move */
+
+  const move =
+    game.move({
+
+      from:
+        selectedSquare,
+
+      to:
+        square,
+
+      promotion:
+        "q"
+
+    });
+
+
+  /* Illegal move */
+
+  if (!move) {
+
+    if (
+      piece &&
+      piece.color ===
+      game.turn()
+    ) {
+
+      selectedSquare =
+        square;
+
+      drawBoard();
+
+    }
+
+    return;
+  }
+
+
+  /* Successful move */
+
+  selectedSquare =
+    null;
+
+
+  updateMoves();
+
+  drawBoard();
+
+  updateStatus();
+
+
+  if (game.game_over()) {
+    return;
+  }
+
+
+  /* Stockfish thinking */
+
   thinking = true;
 
-  statusElement.textContent = "🤖 Stockfish is thinking...";
+
+  statusElement.textContent =
+    "🤖 Stockfish is thinking...";
+
 
   engine.postMessage(
-    "position fen " + game.fen()
+    "position fen " +
+    game.fen()
   );
+
 
   engine.postMessage(
     "go depth 12"
   );
+
 }
+
+
+/* =========================
+   MOVE LIST
+========================= */
 
 function updateMoves() {
 
   movesElement.innerHTML = "";
 
-  const history = game.history();
 
-  for (let i = 0; i < history.length; i += 2) {
+  const history =
+    game.history();
 
-    const moveNumber = Math.floor(i / 2) + 1;
 
-    const white = history[i] || "";
-    const black = history[i + 1] || "";
+  for (
+    let i = 0;
+    i < history.length;
+    i += 2
+  ) {
 
-    const div = document.createElement("div");
+    const moveNumber =
+      Math.floor(i / 2) + 1;
 
-    div.className = "move";
+
+    const white =
+      history[i] || "";
+
+
+    const black =
+      history[i + 1] || "";
+
+
+    const div =
+      document.createElement(
+        "div"
+      );
+
+
+    div.className =
+      "move";
+
 
     div.textContent =
-      moveNumber + ". " + white +
-      (black ? "    " + black : "");
+      moveNumber +
+      ". " +
+      white +
+      (
+        black
+          ? "    " + black
+          : ""
+      );
 
-    movesElement.appendChild(div);
+
+    movesElement.appendChild(
+      div
+    );
+
   }
 
-  movesElement.scrollTop = movesElement.scrollHeight;
+
+  movesElement.scrollTop =
+    movesElement.scrollHeight;
+
 }
+
+
+/* =========================
+   STATUS
+========================= */
 
 function updateStatus() {
 
-  if (game.in_checkmate()) {
+  if (
+    game.in_checkmate()
+  ) {
 
     statusElement.textContent =
       "🏆 Checkmate!";
 
     return;
+
   }
 
-  if (game.in_draw()) {
+
+  if (
+    game.in_draw()
+  ) {
 
     statusElement.textContent =
       "🤝 Draw!";
 
     return;
+
   }
 
-  if (game.in_check()) {
+
+  if (
+    game.in_check()
+  ) {
 
     statusElement.textContent =
       "⚠️ Check!";
 
     return;
+
   }
 
-  if (game.turn() === "w") {
+
+  if (
+    game.turn() === "w"
+  ) {
 
     statusElement.textContent =
       "♙ Your turn";
@@ -486,104 +1009,210 @@ function updateStatus() {
 
     statusElement.textContent =
       "♟ Black's turn";
+
   }
+
 }
+
+
+/* =========================
+   NEW GAME
+========================= */
 
 function newGame() {
 
   game.reset();
 
-  selectedSquare = null;
-  thinking = false;
+  selectedSquare =
+    null;
+
+  thinking =
+    false;
+
 
   updateMoves();
+
   drawBoard();
 
+
   if (engineReady) {
-    statusElement.textContent = "♙ Your turn";
+
+    statusElement.textContent =
+      "♙ Your turn";
+
   } else {
-    statusElement.textContent = "Starting Stockfish...";
+
+    statusElement.textContent =
+      "Starting Stockfish...";
+
   }
+
 }
+
+
+/* =========================
+   STOCKFISH
+========================= */
 
 function startEngine() {
 
   try {
 
-    engine = new Worker(
-      "./stockfish-18-lite-single.js"
-    );
+    engine =
+      new Worker(
+        "./stockfish-18-lite-single.js"
+      );
 
-    engine.onmessage = function(event) {
 
-      const message = String(event.data);
+    engine.onmessage =
+      function(event) {
 
-      console.log(message);
+        const message =
+          String(event.data);
 
-      if (message === "uciok") {
 
-        engineReady = true;
+        console.log(message);
 
-        statusElement.textContent =
-          "♙ Stockfish 18 is ready!";
 
-        engine.postMessage("isready");
-
-        return;
-      }
-
-      if (message.startsWith("bestmove")) {
-
-        const parts = message.split(" ");
-
-        const bestMove = parts[1];
+        /* UCI */
 
         if (
-          bestMove &&
-          bestMove !== "(none)" &&
-          bestMove.length >= 4
+          message ===
+          "uciok"
         ) {
 
-          const from = bestMove.substring(0, 2);
-          const to = bestMove.substring(2, 4);
+          engineReady =
+            true;
 
-          let promotion = "q";
 
-          if (bestMove.length >= 5) {
-            promotion = bestMove.substring(4, 5);
-          }
+          statusElement.textContent =
+            "♙ Stockfish 18 is ready!";
 
-          const move = game.move({
-            from: from,
-            to: to,
-            promotion: promotion
-          });
 
-          if (move) {
-            updateMoves();
-            drawBoard();
-          }
-        }
+          engine.postMessage(
+            "isready"
+          );
 
-        thinking = false;
 
-        updateStatus();
-
-        if (game.game_over()) {
           return;
+
         }
-      }
-    };
 
-    engine.onerror = function(event) {
 
-      statusElement.textContent =
-        "❌ Engine error: " +
-        (event.message || "Stockfish failed to start.");
+        /* BEST MOVE */
 
-    };
+        if (
+          message.startsWith(
+            "bestmove"
+          )
+        ) {
 
-    engine.postMessage("uci");
+          const parts =
+            message.split(" ");
+
+
+          const bestMove =
+            parts[1];
+
+
+          if (
+            bestMove &&
+            bestMove !== "(none)" &&
+            bestMove.length >= 4
+          ) {
+
+            const from =
+              bestMove.substring(
+                0,
+                2
+              );
+
+
+            const to =
+              bestMove.substring(
+                2,
+                4
+              );
+
+
+            let promotion =
+              "q";
+
+
+            if (
+              bestMove.length >= 5
+            ) {
+
+              promotion =
+                bestMove.substring(
+                  4,
+                  5
+                );
+
+            }
+
+
+            const move =
+              game.move({
+
+                from:
+                  from,
+
+                to:
+                  to,
+
+                promotion:
+                  promotion
+
+              });
+
+
+            if (move) {
+
+              updateMoves();
+
+              drawBoard();
+
+            }
+
+          }
+
+
+          thinking =
+            false;
+
+
+          updateStatus();
+
+
+          if (
+            game.game_over()
+          ) {
+            return;
+          }
+
+        }
+
+      };
+
+
+    engine.onerror =
+      function(event) {
+
+        statusElement.textContent =
+          "❌ Engine error: " +
+          (
+            event.message ||
+            "Stockfish failed to start."
+          );
+
+      };
+
+
+    engine.postMessage(
+      "uci"
+    );
+
 
   } catch (error) {
 
@@ -591,9 +1220,16 @@ function startEngine() {
       "❌ Could not start Stockfish.";
 
   }
+
 }
 
+
+/* =========================
+   START
+========================= */
+
 drawBoard();
+
 startEngine();
 
 </script>
