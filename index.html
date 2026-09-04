@@ -36,9 +36,9 @@
   --red: #ff6262;
 
   --board-max: min(
-    calc(100vh - 145px),
-    calc(100vw - 315px),
-    720px
+    590px,
+    calc(100vw - 310px),
+    calc(100vh - 175px)
   );
 }
 
@@ -81,14 +81,14 @@ body {
 /* ---------- TOP BAR ---------- */
 
 .topbar {
-  height: 64px;
-  flex: 0 0 64px;
+  height: 52px;
+  flex: 0 0 52px;
 
   display: flex;
   align-items: center;
   justify-content: space-between;
 
-  padding: 0 22px;
+  padding: 0 16px;
 
   border-bottom: 1px solid var(--line);
 
@@ -246,7 +246,7 @@ body {
 .clock {
   min-width: 76px;
 
-  padding: 7px 10px;
+  padding: 5px 9px;
 
   text-align: center;
 
@@ -256,7 +256,7 @@ body {
 
   font-variant-numeric: tabular-nums;
 
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 800;
 
   color: var(--text);
@@ -379,8 +379,8 @@ body {
 .piece {
   position: relative;
 
-  width: 72%;
-  height: 72%;
+  width: 68%;
+  height: 68%;
 
   display: grid;
   place-items: center;
@@ -391,7 +391,7 @@ body {
     "Noto Sans Symbols 2",
     serif;
 
-  font-size: clamp(25px, 5.2vw, 56px);
+  font-size: clamp(24px, 4.8vw, 52px);
 
   line-height: 1;
 
@@ -512,8 +512,8 @@ body {
   margin: 12px auto 0;
 
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 9px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
 }
 
 button,
@@ -526,7 +526,7 @@ select {
 
   color: var(--text);
 
-  padding: 10px 12px;
+  padding: 8px 9px;
 
   font: inherit;
   font-size: 13px;
