@@ -1,126 +1,292 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Stockfish Chess</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stockfish Chess</title>
 
-  <style>
-    body {
-      margin: 0;
-      min-height: 100vh;
-      background: #111827;
-      color: white;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
-    .game {
-      text-align: center;
-    }
+<style>
+* {
+  box-sizing: border-box;
+}
 
-    h1 {
-      margin-bottom: 20px;
-    }
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  background:
+    radial-gradient(circle at top, #26334d 0%, #101522 45%, #070a10 100%);
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 25px;
+}
 
-    #board {
-      width: min(90vw, 600px);
-      height: min(90vw, 600px);
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      border: 4px solid #333;
-      box-shadow: 0 15px 40px rgba(0,0,0,.5);
-    }
+.game {
+  width: min(1100px, 100%);
+}
 
-    .square {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: clamp(30px, 8vw, 65px);
-      cursor: pointer;
-      user-select: none;
-    }
+.title {
+  text-align: center;
+  margin-bottom: 20px;
+}
 
-    .light {
-      background: #f0d9b5;
-    }
+.title h1 {
+  margin: 0;
+  font-size: clamp(32px, 6vw, 56px);
+  letter-spacing: 2px;
+}
 
-    .dark {
-      background: #b58863;
-    }
+.title p {
+  color: #aeb8cc;
+  margin-top: 8px;
+}
 
-    .selected {
-      box-shadow: inset 0 0 0 5px #ffd700;
-    }
+.layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 700px) 300px;
+  gap: 25px;
+  justify-content: center;
+  align-items: start;
+}
 
-    #status {
-      margin-top: 18px;
-      font-size: 18px;
-    }
+.board-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 18px;
+  padding: 8px;
+  background: #20283a;
+  box-shadow:
+    0 25px 70px rgba(0,0,0,.55),
+    0 0 35px rgba(80,140,255,.12);
+}
 
-    button {
-      margin-top: 15px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-  </style>
+.board {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.square {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+.light {
+  background: #dce7f5;
+}
+
+.dark {
+  background: #55708f;
+}
+
+.square:hover {
+  filter: brightness(1.12);
+}
+
+.selected {
+  box-shadow: inset 0 0 0 5px rgba(255, 220, 70, .9);
+}
+
+.possible::after {
+  content: "";
+  width: 25%;
+  height: 25%;
+  border-radius: 50%;
+  background: rgba(30, 30, 30, .35);
+  position: absolute;
+}
+
+.capture::after {
+  content: "";
+  width: 75%;
+  height: 75%;
+  border-radius: 50%;
+  border: 5px solid rgba(220, 70, 70, .7);
+  position: absolute;
+}
+
+.piece {
+  font-family: "Arial Unicode MS", "DejaVu Sans", sans-serif;
+  font-size: clamp(30px, 7vw, 70px);
+  line-height: 1;
+  z-index: 2;
+  filter: drop-shadow(2px 4px 2px rgba(0,0,0,.45));
+  transition: transform .12s ease;
+}
+
+.square:hover .piece {
+  transform: scale(1.06);
+}
+
+.panel {
+  background: rgba(22, 28, 42, .88);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 20px 50px rgba(0,0,0,.35);
+  backdrop-filter: blur(12px);
+}
+
+.status {
+  padding: 14px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.06);
+  margin-bottom: 18px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.eval {
+  height: 18px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #111;
+  margin-bottom: 18px;
+  border: 1px solid rgba(255,255,255,.1);
+}
+
+.eval-fill {
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, #777, #eee);
+  transition: width .4s ease;
+}
+
+h2 {
+  margin-top: 0;
+}
+
+.moves {
+  height: 280px;
+  overflow-y: auto;
+  background: rgba(0,0,0,.18);
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+
+.move {
+  padding: 7px;
+  border-bottom: 1px solid rgba(255,255,255,.05);
+  color: #dce3f1;
+}
+
+button {
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  color: white;
+  background: linear-gradient(135deg, #477cff, #7657ff);
+  transition: transform .15s, filter .15s;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.12);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+@media (max-width: 800px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .panel {
+    width: 100%;
+  }
+}
+</style>
 </head>
 
 <body>
 
 <div class="game">
 
-  <h1>♟ Stockfish Chess</h1>
+  <div class="title">
+    <h1>♟ STOCKFISH CHESS</h1>
+    <p>Play against Stockfish 18</p>
+  </div>
 
-  <div id="board"></div>
+  <div class="layout">
 
-  <div id="status">Starting Stockfish...</div>
+    <div class="board-wrap">
+      <div id="board" class="board"></div>
+    </div>
 
-  <button onclick="resetGame()">New Game</button>
+    <div class="panel">
 
+      <div id="status" class="status">
+        Starting Stockfish...
+      </div>
+
+      <div class="eval">
+        <div id="evalFill" class="eval-fill"></div>
+      </div>
+
+      <h2>Moves</h2>
+
+      <div id="moves" class="moves"></div>
+
+      <button onclick="newGame()">🔄 New Game</button>
+
+    </div>
+
+  </div>
 </div>
 
 <script>
 
 const boardElement = document.getElementById("board");
 const statusElement = document.getElementById("status");
+const movesElement = document.getElementById("moves");
+const evalFill = document.getElementById("evalFill");
+
+let game = new Chess();
+let engine = null;
+let selectedSquare = null;
+let engineReady = false;
+let thinking = false;
 
 const pieces = {
-  r: "♜",
-  n: "♞",
-  b: "♝",
-  q: "♛",
-  k: "♚",
-  p: "♟",
-
-  R: "♖",
-  N: "♘",
-  B: "♗",
-  Q: "♕",
-  K: "♔",
-  P: "♙"
+  wK: "♔",
+  wQ: "♕",
+  wR: "♖",
+  wB: "♗",
+  wN: "♘",
+  wP: "♙",
+  bK: "♚",
+  bQ: "♛",
+  bR: "♜",
+  bB: "♝",
+  bN: "♞",
+  bP: "♟"
 };
-
-let board = [
-  "rnbqkbnr",
-  "pppppppp",
-  "........",
-  "........",
-  "........",
-  "........",
-  "PPPPPPPP",
-  "RNBQKBNR"
-];
-
-let selected = null;
-let engine = null;
 
 function drawBoard() {
 
   boardElement.innerHTML = "";
+
+  const board = game.board();
 
   for (let row = 0; row < 8; row++) {
 
@@ -128,178 +294,307 @@ function drawBoard() {
 
       const square = document.createElement("div");
 
+      const file = String.fromCharCode(97 + col);
+      const rank = 8 - row;
+      const squareName = file + rank;
+
       square.className =
         "square " +
         ((row + col) % 2 === 0 ? "light" : "dark");
 
-      if (
-        selected &&
-        selected.row === row &&
-        selected.col === col
-      ) {
-        square.classList.add("selected");
-      }
+      square.dataset.square = squareName;
 
       const piece = board[row][col];
 
-      square.textContent = pieces[piece] || "";
+      if (piece) {
 
-      square.onclick = () => selectSquare(row, col);
+        const span = document.createElement("span");
+
+        span.className = "piece";
+
+        span.textContent =
+          pieces[piece.color + piece.type.toUpperCase()];
+
+        square.appendChild(span);
+      }
+
+      if (squareName === selectedSquare) {
+        square.classList.add("selected");
+      }
+
+      square.onclick = () => clickSquare(squareName);
 
       boardElement.appendChild(square);
     }
   }
+
+  if (selectedSquare) {
+    highlightMoves(selectedSquare);
+  }
 }
 
-function selectSquare(row, col) {
+function highlightMoves(square) {
 
-  if (!selected) {
+  const moves = game.moves({
+    square: square,
+    verbose: true
+  });
 
-    if (board[row][col] !== ".") {
+  moves.forEach(move => {
 
-      selected = {
-        row: row,
-        col: col
-      };
+    const target = document.querySelector(
+      `[data-square="${move.to}"]`
+    );
 
+    if (!target) return;
+
+    if (move.captured) {
+      target.classList.add("capture");
+    } else {
+      target.classList.add("possible");
+    }
+  });
+}
+
+function clickSquare(square) {
+
+  if (!engineReady || thinking) return;
+
+  if (game.game_over()) return;
+
+  const piece = game.get(square);
+
+  if (!selectedSquare) {
+
+    if (!piece) return;
+
+    if (piece.color !== game.turn()) return;
+
+    selectedSquare = square;
+
+    drawBoard();
+
+    return;
+  }
+
+  if (square === selectedSquare) {
+
+    selectedSquare = null;
+    drawBoard();
+
+    return;
+  }
+
+  const move = game.move({
+    from: selectedSquare,
+    to: square,
+    promotion: "q"
+  });
+
+  if (!move) {
+
+    if (piece && piece.color === game.turn()) {
+      selectedSquare = square;
       drawBoard();
     }
 
     return;
   }
 
-  const fromRow = selected.row;
-  const fromCol = selected.col;
+  selectedSquare = null;
 
-  const piece = board[fromRow][fromCol];
-
-  const newBoard = board.map(row => row.split(""));
-
-  newBoard[row][col] = piece;
-  newBoard[fromRow][fromCol] = ".";
-
-  board = newBoard.map(row => row.join(""));
-
-  selected = null;
-
+  updateMoves();
   drawBoard();
+  updateStatus();
 
-  statusElement.textContent =
-    "Piece moved — Stockfish is analyzing...";
+  if (game.game_over()) {
+    return;
+  }
 
-  if (engine) {
+  thinking = true;
 
-    engine.postMessage("stop");
+  statusElement.textContent = "🤖 Stockfish is thinking...";
 
-    engine.postMessage(
-      "position fen " + createFEN()
-    );
+  engine.postMessage(
+    "position fen " + game.fen()
+  );
 
-    engine.postMessage(
-      "go depth 12"
-    );
+  engine.postMessage(
+    "go depth 12"
+  );
+}
+
+function updateMoves() {
+
+  movesElement.innerHTML = "";
+
+  const history = game.history();
+
+  for (let i = 0; i < history.length; i += 2) {
+
+    const moveNumber = Math.floor(i / 2) + 1;
+
+    const white = history[i] || "";
+    const black = history[i + 1] || "";
+
+    const div = document.createElement("div");
+
+    div.className = "move";
+
+    div.textContent =
+      moveNumber + ". " + white +
+      (black ? "    " + black : "");
+
+    movesElement.appendChild(div);
+  }
+
+  movesElement.scrollTop = movesElement.scrollHeight;
+}
+
+function updateStatus() {
+
+  if (game.in_checkmate()) {
+
+    statusElement.textContent =
+      "🏆 Checkmate!";
+
+    return;
+  }
+
+  if (game.in_draw()) {
+
+    statusElement.textContent =
+      "🤝 Draw!";
+
+    return;
+  }
+
+  if (game.in_check()) {
+
+    statusElement.textContent =
+      "⚠️ Check!";
+
+    return;
+  }
+
+  if (game.turn() === "w") {
+
+    statusElement.textContent =
+      "♙ Your turn";
+
+  } else {
+
+    statusElement.textContent =
+      "♟ Black's turn";
   }
 }
 
-function createFEN() {
+function newGame() {
 
-  const rows = board.map(row => {
+  game.reset();
 
-    let result = "";
-    let empty = 0;
+  selectedSquare = null;
+  thinking = false;
 
-    for (const piece of row) {
-
-      if (piece === ".") {
-
-        empty++;
-
-      } else {
-
-        if (empty > 0) {
-          result += empty;
-          empty = 0;
-        }
-
-        result += piece;
-      }
-    }
-
-    if (empty > 0) {
-      result += empty;
-    }
-
-    return result;
-  });
-
-  return rows.join("/") + " w - - 0 1";
-}
-
-function resetGame() {
-
-  board = [
-    "rnbqkbnr",
-    "pppppppp",
-    "........",
-    "........",
-    "........",
-    "........",
-    "PPPPPPPP",
-    "RNBQKBNR"
-  ];
-
-  selected = null;
-
+  updateMoves();
   drawBoard();
 
-  statusElement.textContent =
-    "Starting position...";
+  if (engineReady) {
+    statusElement.textContent = "♙ Your turn";
+  } else {
+    statusElement.textContent = "Starting Stockfish...";
+  }
+}
+
+function startEngine() {
+
+  try {
+
+    engine = new Worker(
+      "./stockfish-18-lite-single.js"
+    );
+
+    engine.onmessage = function(event) {
+
+      const message = String(event.data);
+
+      console.log(message);
+
+      if (message === "uciok") {
+
+        engineReady = true;
+
+        statusElement.textContent =
+          "♙ Stockfish 18 is ready!";
+
+        engine.postMessage("isready");
+
+        return;
+      }
+
+      if (message.startsWith("bestmove")) {
+
+        const parts = message.split(" ");
+
+        const bestMove = parts[1];
+
+        if (
+          bestMove &&
+          bestMove !== "(none)" &&
+          bestMove.length >= 4
+        ) {
+
+          const from = bestMove.substring(0, 2);
+          const to = bestMove.substring(2, 4);
+
+          let promotion = "q";
+
+          if (bestMove.length >= 5) {
+            promotion = bestMove.substring(4, 5);
+          }
+
+          const move = game.move({
+            from: from,
+            to: to,
+            promotion: promotion
+          });
+
+          if (move) {
+            updateMoves();
+            drawBoard();
+          }
+        }
+
+        thinking = false;
+
+        updateStatus();
+
+        if (game.game_over()) {
+          return;
+        }
+      }
+    };
+
+    engine.onerror = function(event) {
+
+      statusElement.textContent =
+        "❌ Engine error: " +
+        (event.message || "Stockfish failed to start.");
+
+    };
+
+    engine.postMessage("uci");
+
+  } catch (error) {
+
+    statusElement.textContent =
+      "❌ Could not start Stockfish.";
+
+  }
 }
 
 drawBoard();
-
-/*
-  Stockfish is in the same GitHub Pages folder.
-*/
-
-try {
-
-  engine = new Worker(
-    "./stockfish-18-lite-single.js"
-  );
-
-  engine.onmessage = function(event) {
-
-    const message = String(event.data);
-
-    if (message === "uciok") {
-
-      statusElement.textContent =
-        "♟ Stockfish 18 is ready!";
-
-    }
-
-    if (message.startsWith("bestmove")) {
-
-      statusElement.textContent =
-        "🤖 " + message;
-    }
-  };
-
-  engine.onerror = function(event) {
-
-    statusElement.textContent =
-      "Engine error: " +
-      (event.message || "Stockfish could not start.");
-  };
-
-  engine.postMessage("uci");
-
-} catch (error) {
-
-  statusElement.textContent =
-    "Could not start Stockfish.";
-}
+startEngine();
 
 </script>
 
