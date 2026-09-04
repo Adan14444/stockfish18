@@ -2,9 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0,
-               maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
 <title>Nova Chess</title>
 
@@ -12,21 +10,19 @@
 
 <style>
 :root{
-    --bg:#070a12;
-    --panel:#101522;
-    --panel2:#151b2b;
+    --bg:#080b13;
+    --panel:#111724;
+    --panel2:#171e2e;
     --border:rgba(255,255,255,.09);
-    --text:#f4f7ff;
-    --muted:#8993aa;
+    --text:#f5f7ff;
+    --muted:#8b96ad;
     --accent:#7c5cff;
     --accent2:#00d4ff;
-    --good:#42e695;
+    --good:#43e69a;
     --danger:#ff5577;
 
-    --light:#e7edf5;
-    --dark:#61708c;
-
-    --sq:min(9.1vw,9.1vh);
+    --light:#e8edf5;
+    --dark:#62718d;
 }
 
 *{
@@ -34,7 +30,8 @@
     -webkit-tap-highlight-color:transparent;
 }
 
-html,body{
+html,
+body{
     width:100%;
     height:100%;
     margin:0;
@@ -42,23 +39,17 @@ html,body{
 }
 
 body{
-    font-family:
-        Inter,
-        system-ui,
-        -apple-system,
-        BlinkMacSystemFont,
-        "Segoe UI",
-        sans-serif;
-
+    font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
     color:var(--text);
 
     background:
-        radial-gradient(circle at 15% 15%,rgba(124,92,255,.15),transparent 30%),
-        radial-gradient(circle at 85% 85%,rgba(0,212,255,.10),transparent 30%),
+        radial-gradient(circle at 10% 10%,rgba(124,92,255,.15),transparent 32%),
+        radial-gradient(circle at 90% 90%,rgba(0,212,255,.09),transparent 32%),
         var(--bg);
 }
 
-button,select{
+button,
+select{
     font:inherit;
 }
 
@@ -66,118 +57,122 @@ button{
     cursor:pointer;
 }
 
+/* =========================================================
+   APP
+========================================================= */
+
 .app{
     width:100%;
     height:100dvh;
 
     display:flex;
-    align-items:center;
     justify-content:center;
+    align-items:center;
 
-    padding:12px;
+    padding:10px;
 }
 
 .shell{
-    width:min(1320px,100%);
-    height:min(850px,100%);
+    width:min(1240px,100%);
+    height:min(760px,100%);
 
     display:grid;
-    grid-template-columns:minmax(0,1fr) 330px;
-    gap:14px;
+    grid-template-columns:minmax(0,1fr) 300px;
+
+    gap:12px;
 }
 
-/* =========================
-   BOARD AREA
-========================= */
+/* =========================================================
+   BOARD PANEL
+========================================================= */
 
 .board-panel{
     min-width:0;
     min-height:0;
-
-    border:1px solid var(--border);
-    border-radius:22px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.045),
-            rgba(255,255,255,.015)
-        );
-
-    box-shadow:
-        0 25px 80px rgba(0,0,0,.4),
-        inset 0 1px rgba(255,255,255,.04);
-
-    backdrop-filter:blur(18px);
 
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:center;
 
-    padding:18px;
+    padding:12px;
+
+    border:1px solid var(--border);
+    border-radius:20px;
+
+    background:rgba(15,21,34,.72);
+
+    box-shadow:
+        0 20px 60px rgba(0,0,0,.4),
+        inset 0 1px rgba(255,255,255,.04);
+
+    backdrop-filter:blur(14px);
 }
 
 .topbar{
-    width:min(100%,760px);
+    width:min(100%,660px);
 
     display:flex;
     justify-content:space-between;
     align-items:center;
 
-    margin-bottom:10px;
+    margin-bottom:8px;
 }
 
 .logo{
     display:flex;
     align-items:center;
-    gap:9px;
+    gap:8px;
 
-    font-size:18px;
-    font-weight:800;
-    letter-spacing:-.5px;
+    font-size:17px;
+    font-weight:850;
 }
 
 .logo-icon{
-    width:34px;
-    height:34px;
+    width:31px;
+    height:31px;
 
     display:grid;
     place-items:center;
 
-    border-radius:11px;
+    border-radius:9px;
 
-    background:
-        linear-gradient(135deg,var(--accent),var(--accent2));
+    background:linear-gradient(
+        135deg,
+        var(--accent),
+        var(--accent2)
+    );
 
-    box-shadow:0 8px 25px rgba(124,92,255,.3);
+    box-shadow:0 6px 20px rgba(124,92,255,.25);
 }
 
 .turn-label{
     color:var(--muted);
-    font-size:13px;
-    font-weight:600;
+    font-size:12px;
+    font-weight:700;
 }
 
-.board-wrap{
-    position:relative;
+/* =========================================================
+   BOARD
+========================================================= */
 
+.board-wrap{
     width:min(
         100%,
-        calc(100vh - 170px),
-        760px
+        calc(100vh - 145px),
+        660px
     );
 
-    aspect-ratio:1/1;
-
-    border-radius:12px;
+    aspect-ratio:1;
 
     padding:5px;
 
-    background:#0b0f19;
+    border-radius:13px;
+
+    background:#090d16;
 
     box-shadow:
-        0 25px 60px rgba(0,0,0,.5),
+        0 20px 50px rgba(0,0,0,.5),
         0 0 0 1px rgba(255,255,255,.06);
 }
 
@@ -186,10 +181,12 @@ button{
     height:100%;
 
     display:grid;
+
     grid-template-columns:repeat(8,1fr);
     grid-template-rows:repeat(8,1fr);
 
     overflow:hidden;
+
     border-radius:8px;
 }
 
@@ -201,10 +198,7 @@ button{
     justify-content:center;
 
     user-select:none;
-
-    transition:
-        filter .12s ease,
-        box-shadow .12s ease;
+    touch-action:manipulation;
 }
 
 .square.light{
@@ -218,46 +212,50 @@ button{
 .square.selected{
     box-shadow:
         inset 0 0 0 4px rgba(124,92,255,.9),
-        inset 0 0 25px rgba(124,92,255,.35);
+        inset 0 0 24px rgba(124,92,255,.35);
 
-    z-index:2;
+    z-index:5;
 }
 
 .square.last{
-    filter:brightness(1.08);
-    box-shadow:inset 0 0 0 999px rgba(255,220,80,.12);
+    box-shadow:
+        inset 0 0 0 999px rgba(255,220,70,.14);
 }
 
 .square.check{
     box-shadow:
-        inset 0 0 0 999px rgba(255,50,80,.35),
-        inset 0 0 30px rgba(255,50,80,.55);
+        inset 0 0 0 999px rgba(255,50,75,.36),
+        inset 0 0 25px rgba(255,50,75,.6);
 }
 
 .square.legal::after{
     content:"";
 
-    width:23%;
-    height:23%;
+    position:absolute;
+
+    width:22%;
+    height:22%;
 
     border-radius:50%;
 
-    background:rgba(20,30,45,.32);
+    background:rgba(20,28,42,.35);
 
-    position:absolute;
+    z-index:2;
 }
 
 .square.capture::after{
     content:"";
 
-    width:72%;
-    height:72%;
+    position:absolute;
+
+    width:70%;
+    height:70%;
 
     border-radius:50%;
 
-    border:5px solid rgba(255,255,255,.35);
+    border:4px solid rgba(255,255,255,.35);
 
-    position:absolute;
+    z-index:2;
 }
 
 .piece{
@@ -270,25 +268,17 @@ button{
         "DejaVu Sans",
         serif;
 
-    font-size:clamp(29px,7vw,76px);
+    font-size:clamp(27px,6.8vw,68px);
 
     line-height:1;
 
     user-select:none;
 
-    transform:translateY(-1px);
+    pointer-events:none;
 
     text-shadow:
-        0 2px 3px rgba(0,0,0,.28),
-        0 5px 15px rgba(0,0,0,.16);
-
-    transition:
-        transform .12s ease,
-        filter .12s ease;
-}
-
-.square:hover .piece{
-    transform:translateY(-2px) scale(1.025);
+        0 2px 3px rgba(0,0,0,.3),
+        0 5px 13px rgba(0,0,0,.15);
 }
 
 .white-piece{
@@ -296,22 +286,20 @@ button{
 }
 
 .black-piece{
-    color:#161b25;
+    color:#171c26;
 }
-
-/* Board coordinates */
 
 .coord{
     position:absolute;
 
-    font-size:9px;
-    font-weight:800;
-
-    opacity:.7;
-
     z-index:4;
 
     pointer-events:none;
+
+    font-size:8px;
+    font-weight:850;
+
+    opacity:.65;
 }
 
 .coord.file{
@@ -329,49 +317,47 @@ button{
 }
 
 .dark .coord{
-    color:#e7edf5;
+    color:#eef3ff;
 }
 
+/* =========================================================
+   BOARD CONTROLS
+========================================================= */
+
 .board-controls{
-    width:min(100%,760px);
+    width:min(100%,660px);
 
-    display:flex;
-    gap:8px;
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
 
-    margin-top:10px;
+    gap:7px;
+
+    margin-top:8px;
 }
 
 .control-btn{
-    flex:1;
+    min-width:0;
+
+    padding:8px;
 
     border:1px solid var(--border);
+    border-radius:10px;
 
-    background:rgba(255,255,255,.04);
+    background:rgba(255,255,255,.045);
 
     color:var(--text);
 
-    border-radius:11px;
-
-    padding:9px 10px;
-
-    font-size:12px;
-    font-weight:700;
-
-    transition:.15s ease;
+    font-size:11px;
+    font-weight:750;
 }
 
 .control-btn:hover{
     background:rgba(255,255,255,.08);
-    border-color:rgba(124,92,255,.4);
 }
 
-.control-btn:active{
-    transform:scale(.97);
-}
-
-/* =========================
+/* =========================================================
    SIDEBAR
-========================= */
+========================================================= */
 
 .sidebar{
     min-height:0;
@@ -379,9 +365,9 @@ button{
     display:flex;
     flex-direction:column;
 
-    gap:10px;
+    gap:8px;
 
-    overflow:auto;
+    overflow-y:auto;
 
     scrollbar-width:none;
 }
@@ -391,320 +377,95 @@ button{
 }
 
 .card{
-    border:1px solid var(--border);
-    border-radius:17px;
+    padding:11px;
 
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255,255,255,.045),
-            rgba(255,255,255,.018)
-        );
+    border:1px solid var(--border);
+    border-radius:15px;
+
+    background:rgba(16,22,36,.78);
 
     box-shadow:
-        0 15px 40px rgba(0,0,0,.2),
+        0 12px 30px rgba(0,0,0,.2),
         inset 0 1px rgba(255,255,255,.03);
-
-    padding:13px;
 }
 
 .card-title{
     display:flex;
-    align-items:center;
     justify-content:space-between;
+    align-items:center;
 
-    margin-bottom:9px;
-
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:1px;
+    margin-bottom:8px;
 
     color:var(--muted);
-    font-weight:800;
+
+    font-size:10px;
+    font-weight:850;
+
+    letter-spacing:1px;
+    text-transform:uppercase;
 }
 
-/* Engine */
+/* =========================================================
+   ENGINE
+========================================================= */
 
 .engine-status{
     display:flex;
     align-items:center;
     gap:8px;
 
-    font-size:13px;
-    font-weight:700;
+    font-size:12px;
+    font-weight:750;
 }
 
 .status-dot{
     width:8px;
     height:8px;
 
+    flex:none;
+
     border-radius:50%;
 
     background:#777;
-
-    box-shadow:0 0 0 4px rgba(255,255,255,.04);
 }
 
 .status-dot.loading{
     background:#ffbd4a;
-    box-shadow:
-        0 0 0 4px rgba(255,189,74,.1),
-        0 0 14px rgba(255,189,74,.5);
+    box-shadow:0 0 12px rgba(255,189,74,.55);
 }
 
 .status-dot.ready{
     background:var(--good);
-    box-shadow:
-        0 0 0 4px rgba(66,230,149,.1),
-        0 0 14px rgba(66,230,149,.5);
+    box-shadow:0 0 12px rgba(67,230,154,.55);
 }
 
 .status-dot.error{
     background:var(--danger);
-    box-shadow:
-        0 0 0 4px rgba(255,85,119,.1),
-        0 0 14px rgba(255,85,119,.5);
+    box-shadow:0 0 12px rgba(255,85,119,.55);
 }
 
 .diagnostic{
     display:none;
 
-    margin-top:9px;
+    margin-top:8px;
 
-    padding:9px;
+    padding:8px;
 
-    border-radius:10px;
+    border-radius:9px;
 
     background:rgba(255,85,119,.08);
 
-    border:1px solid rgba(255,85,119,.18);
+    border:1px solid rgba(255,85,119,.2);
 
-    color:#ff9aae;
+    color:#ff9bad;
 
     font-size:10px;
-    line-height:1.45;
+    line-height:1.4;
 }
 
 .diagnostic.show{
     display:block;
 }
-
-/* Clock */
-
-.clocks{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:8px;
-}
-
-.clock{
-    padding:10px;
-
-    border-radius:12px;
-
-    background:rgba(255,255,255,.035);
-
-    border:1px solid rgba(255,255,255,.055);
-}
-
-.clock-label{
-    color:var(--muted);
-
-    font-size:10px;
-    font-weight:700;
-
-    margin-bottom:3px;
-}
-
-.clock-time{
-    font-variant-numeric:tabular-nums;
-
-    font-size:23px;
-    font-weight:850;
-
-    letter-spacing:-1px;
-}
-
-.clock.active{
-    border-color:rgba(124,92,255,.5);
-
-    background:
-        linear-gradient(
-            135deg,
-            rgba(124,92,255,.12),
-            rgba(255,255,255,.03)
-        );
-
-    box-shadow:
-        0 0 25px rgba(124,92,255,.08);
-}
-
-.clock.low .clock-time{
-    color:#ff6f87;
-}
-
-/* Eval */
-
-.eval{
-    height:8px;
-
-    background:rgba(255,255,255,.07);
-
-    border-radius:99px;
-
-    overflow:hidden;
-
-    margin:10px 0 7px;
-}
-
-.eval-fill{
-    height:100%;
-    width:50%;
-
-    background:
-        linear-gradient(
-            90deg,
-            #5f6b80,
-            #f4f7ff
-        );
-
-    border-radius:99px;
-
-    transition:width .35s ease;
-}
-
-.eval-number{
-    text-align:center;
-
-    font-size:12px;
-    font-weight:800;
-
-    font-variant-numeric:tabular-nums;
-
-    color:var(--muted);
-}
-
-/* Moves */
-
-.moves{
-    max-height:190px;
-
-    overflow:auto;
-
-    scrollbar-width:thin;
-}
-
-.move-row{
-    display:grid;
-    grid-template-columns:30px 1fr 1fr;
-
-    padding:4px 5px;
-
-    border-radius:7px;
-
-    font-size:12px;
-}
-
-.move-row:nth-child(odd){
-    background:rgba(255,255,255,.025);
-}
-
-.move-number{
-    color:var(--muted);
-}
-
-.move{
-    font-weight:700;
-}
-
-.empty{
-    color:var(--muted);
-    font-size:11px;
-    text-align:center;
-    padding:10px;
-}
-
-/* Settings */
-
-.setting{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-
-    gap:10px;
-
-    margin:7px 0;
-}
-
-.setting label{
-    font-size:12px;
-    color:#d9dfed;
-    font-weight:600;
-}
-
-select{
-    min-width:125px;
-
-    border:1px solid var(--border);
-
-    background:#171d2c;
-
-    color:var(--text);
-
-    border-radius:8px;
-
-    padding:6px 8px;
-
-    outline:none;
-
-    font-size:11px;
-}
-
-/* Buttons */
-
-.actions{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:7px;
-}
-
-.action{
-    border:1px solid var(--border);
-
-    background:rgba(255,255,255,.045);
-
-    color:var(--text);
-
-    border-radius:10px;
-
-    padding:9px;
-
-    font-size:11px;
-    font-weight:750;
-}
-
-.action:hover{
-    background:rgba(255,255,255,.08);
-}
-
-.action.primary{
-    border:none;
-
-    background:
-        linear-gradient(
-            135deg,
-            var(--accent),
-            #5b8cff
-        );
-
-    box-shadow:0 8px 25px rgba(124,92,255,.2);
-}
-
-.action.danger{
-    color:#ff8298;
-}
-
-/* Thinking */
 
 .thinking{
     display:none;
@@ -712,12 +473,13 @@ select{
     align-items:center;
     justify-content:center;
 
-    gap:8px;
+    gap:7px;
 
     margin-top:8px;
 
-    font-size:10px;
     color:var(--muted);
+
+    font-size:10px;
 }
 
 .thinking.show{
@@ -737,26 +499,241 @@ select{
 }
 
 @keyframes spin{
-    to{transform:rotate(360deg)}
+    to{
+        transform:rotate(360deg);
+    }
 }
 
-/* =========================
+/* =========================================================
+   CLOCK
+========================================================= */
+
+.clocks{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+
+    gap:7px;
+}
+
+.clock{
+    padding:9px;
+
+    border-radius:10px;
+
+    background:rgba(255,255,255,.035);
+
+    border:1px solid rgba(255,255,255,.06);
+}
+
+.clock.active{
+    border-color:rgba(124,92,255,.5);
+
+    background:rgba(124,92,255,.1);
+}
+
+.clock.low .clock-time{
+    color:#ff6f87;
+}
+
+.clock-label{
+    color:var(--muted);
+
+    font-size:9px;
+    font-weight:750;
+}
+
+.clock-time{
+    margin-top:2px;
+
+    font-size:21px;
+    font-weight:850;
+
+    letter-spacing:-1px;
+
+    font-variant-numeric:tabular-nums;
+}
+
+/* =========================================================
+   EVALUATION
+========================================================= */
+
+.eval{
+    height:7px;
+
+    overflow:hidden;
+
+    border-radius:99px;
+
+    background:rgba(255,255,255,.07);
+}
+
+.eval-fill{
+    width:50%;
+    height:100%;
+
+    border-radius:99px;
+
+    background:linear-gradient(
+        90deg,
+        #59667c,
+        #f4f7ff
+    );
+
+    transition:width .25s ease;
+}
+
+.eval-number{
+    margin-top:6px;
+
+    text-align:center;
+
+    color:var(--muted);
+
+    font-size:11px;
+    font-weight:800;
+
+    font-variant-numeric:tabular-nums;
+}
+
+/* =========================================================
+   MOVES
+========================================================= */
+
+.moves{
+    max-height:145px;
+
+    overflow:auto;
+
+    scrollbar-width:thin;
+}
+
+.move-row{
+    display:grid;
+    grid-template-columns:27px 1fr 1fr;
+
+    padding:4px;
+
+    border-radius:6px;
+
+    font-size:11px;
+}
+
+.move-row:nth-child(odd){
+    background:rgba(255,255,255,.025);
+}
+
+.move-number{
+    color:var(--muted);
+}
+
+.move{
+    font-weight:750;
+}
+
+.empty{
+    padding:9px;
+
+    color:var(--muted);
+
+    text-align:center;
+
+    font-size:10px;
+}
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
+.setting{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    gap:7px;
+
+    margin:6px 0;
+}
+
+.setting label{
+    color:#d9dfed;
+
+    font-size:11px;
+    font-weight:650;
+}
+
+select{
+    min-width:116px;
+
+    padding:5px 7px;
+
+    border:1px solid var(--border);
+    border-radius:8px;
+
+    outline:none;
+
+    background:#171e2e;
+    color:var(--text);
+
+    font-size:10px;
+}
+
+/* =========================================================
+   ACTIONS
+========================================================= */
+
+.actions{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+
+    gap:6px;
+}
+
+.action{
+    padding:8px;
+
+    border:1px solid var(--border);
+    border-radius:9px;
+
+    background:rgba(255,255,255,.045);
+
+    color:var(--text);
+
+    font-size:10px;
+    font-weight:800;
+}
+
+.action.primary{
+    border:0;
+
+    background:linear-gradient(
+        135deg,
+        var(--accent),
+        #5b8cff
+    );
+
+    box-shadow:0 7px 20px rgba(124,92,255,.2);
+}
+
+.action.danger{
+    color:#ff8298;
+}
+
+/* =========================================================
    MODALS
-========================= */
+========================================================= */
 
 .overlay{
     position:fixed;
-
     inset:0;
 
     display:none;
     place-items:center;
 
-    background:rgba(0,0,0,.65);
-
-    backdrop-filter:blur(10px);
-
     z-index:100;
+
+    background:rgba(0,0,0,.68);
+
+    backdrop-filter:blur(8px);
 }
 
 .overlay.show{
@@ -764,76 +741,72 @@ select{
 }
 
 .modal{
-    width:min(350px,calc(100% - 30px));
+    width:min(340px,calc(100% - 28px));
 
     padding:20px;
 
-    border-radius:20px;
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:18px;
 
     background:#111725;
 
-    border:1px solid rgba(255,255,255,.1);
-
-    box-shadow:0 30px 90px rgba(0,0,0,.6);
+    box-shadow:0 30px 80px rgba(0,0,0,.6);
 
     text-align:center;
 }
 
 .modal h2{
-    margin:0 0 7px;
+    margin:0 0 6px;
 
-    font-size:20px;
+    font-size:19px;
 }
 
 .modal p{
-    margin:0 0 15px;
+    margin:0 0 14px;
 
     color:var(--muted);
 
-    font-size:12px;
+    font-size:11px;
 }
 
 .promotion-grid{
     display:grid;
     grid-template-columns:repeat(4,1fr);
-    gap:8px;
+
+    gap:7px;
 }
 
 .promo{
+    padding:7px;
+
     border:1px solid var(--border);
+    border-radius:11px;
 
     background:rgba(255,255,255,.05);
 
-    border-radius:12px;
-
-    padding:8px;
-
     color:var(--text);
 
-    font-size:35px;
+    font-size:32px;
 }
 
-.promo:hover{
-    background:rgba(124,92,255,.15);
-}
-
-/* =========================
+/* =========================================================
    MOBILE
-========================= */
+========================================================= */
 
 @media(max-width:900px){
 
-    html,body{
+    html,
+    body{
         overflow:auto;
     }
 
     .app{
-        min-height:100dvh;
         height:auto;
+        min-height:100dvh;
 
         align-items:flex-start;
 
-        padding:8px;
+        padding:7px;
     }
 
     .shell{
@@ -843,16 +816,14 @@ select{
     }
 
     .board-panel{
-        padding:9px;
-
-        border-radius:16px;
+        padding:8px;
+        border-radius:15px;
     }
 
     .board-wrap{
         width:min(
-            100%,
-            calc(100vw - 30px),
-            calc(100vh - 130px)
+            calc(100vw - 25px),
+            calc(100vh - 125px)
         );
     }
 
@@ -863,27 +834,27 @@ select{
 
 @media(max-height:700px) and (min-width:901px){
 
-    .board-panel{
-        padding:10px;
-    }
-
     .board-wrap{
         width:min(
             calc(100vh - 120px),
-            calc(100vw - 390px)
+            calc(100vw - 365px)
         );
     }
 
+    .board-panel{
+        padding:8px;
+    }
+
     .card{
-        padding:9px;
+        padding:8px;
     }
 
     .sidebar{
-        gap:7px;
+        gap:6px;
     }
 
     .moves{
-        max-height:130px;
+        max-height:115px;
     }
 }
 </style>
@@ -892,22 +863,21 @@ select{
 <body>
 
 <div class="app">
-
 <div class="shell">
-
-<!-- ================= BOARD ================= -->
 
 <section class="board-panel">
 
     <div class="topbar">
+
         <div class="logo">
             <div class="logo-icon">♞</div>
             <span>Nova Chess</span>
         </div>
 
-        <div class="turn-label" id="turnLabel">
+        <div id="turnLabel" class="turn-label">
             Your move
         </div>
+
     </div>
 
     <div class="board-wrap">
@@ -915,27 +885,27 @@ select{
     </div>
 
     <div class="board-controls">
-        <button class="control-btn" id="undoBtn">
+
+        <button id="undoBtn" class="control-btn">
             ↶ Undo
         </button>
 
-        <button class="control-btn" id="flipBtn">
+        <button id="flipBtn" class="control-btn">
             ⇄ Flip
         </button>
 
-        <button class="control-btn" id="soundBtn">
+        <button id="soundBtn" class="control-btn">
             🔊 Sound
         </button>
 
-        <button class="control-btn" id="resignBtn">
+        <button id="resignBtn" class="control-btn">
             ⚑ Resign
         </button>
+
     </div>
 
 </section>
 
-
-<!-- ================= SIDEBAR ================= -->
 
 <aside class="sidebar">
 
@@ -943,12 +913,14 @@ select{
 
         <div class="card-title">
             <span>Engine</span>
-            <span id="engineVersion">SF 18</span>
+            <span>SF 18</span>
         </div>
 
         <div class="engine-status">
             <span id="statusDot" class="status-dot loading"></span>
-            <span id="engineStatus">Starting Stockfish…</span>
+            <span id="engineStatus">
+                Starting Stockfish…
+            </span>
         </div>
 
         <div id="diagnostic" class="diagnostic"></div>
@@ -1014,9 +986,7 @@ select{
         </div>
 
         <div id="moves" class="moves">
-            <div class="empty">
-                No moves yet
-            </div>
+            <div class="empty">No moves yet</div>
         </div>
 
     </div>
@@ -1029,42 +999,23 @@ select{
         </div>
 
         <div class="setting">
+
             <label>Time control</label>
 
             <select id="modeSelect">
 
                 <option value="60+0">Bullet 1+0</option>
                 <option value="120+1">Bullet 2+1</option>
-
-                <option value="300+0" selected>
-                    Blitz 5+0
-                </option>
-
-                <option value="300+3">
-                    Blitz 5+3
-                </option>
-
-                <option value="180+2">
-                    Blitz 3+2
-                </option>
-
-                <option value="600+0">
-                    Rapid 10+0
-                </option>
-
-                <option value="600+5">
-                    Rapid 10+5
-                </option>
-
-                <option value="900+10">
-                    Rapid 15+10
-                </option>
-
-                <option value="1800+0">
-                    Classical 30+0
-                </option>
+                <option value="300+0" selected>Blitz 5+0</option>
+                <option value="300+3">Blitz 5+3</option>
+                <option value="180+2">Blitz 3+2</option>
+                <option value="600+0">Rapid 10+0</option>
+                <option value="600+5">Rapid 10+5</option>
+                <option value="900+10">Rapid 15+10</option>
+                <option value="1800+0">Classical 30+0</option>
 
             </select>
+
         </div>
 
 
@@ -1074,21 +1025,10 @@ select{
 
             <select id="difficultySelect">
 
-                <option value="250">
-                    Easy
-                </option>
-
-                <option value="700" selected>
-                    Medium
-                </option>
-
-                <option value="1400">
-                    Hard
-                </option>
-
-                <option value="2500">
-                    Expert
-                </option>
+                <option value="500">Easy</option>
+                <option value="1500" selected>Medium</option>
+                <option value="3000">Hard</option>
+                <option value="5000">Expert</option>
 
             </select>
 
@@ -1101,13 +1041,8 @@ select{
 
             <select id="themeSelect">
 
-                <option value="classic" selected>
-                    Classic
-                </option>
-
-                <option value="blue">
-                    Blue
-                </option>
+                <option value="classic" selected>Classic</option>
+                <option value="blue">Blue</option>
 
             </select>
 
@@ -1120,15 +1055,11 @@ select{
 
         <div class="actions">
 
-            <button
-                id="newGameBtn"
-                class="action primary">
+            <button id="newGameBtn" class="action primary">
                 New Game
             </button>
 
-            <button
-                id="settingsBtn"
-                class="action">
+            <button id="settingsBtn" class="action">
                 Settings
             </button>
 
@@ -1142,7 +1073,9 @@ select{
 </div>
 
 
-<!-- ================= PROMOTION ================= -->
+<!-- =========================================================
+     PROMOTION
+========================================================= -->
 
 <div id="promotionOverlay" class="overlay">
 
@@ -1150,27 +1083,14 @@ select{
 
         <h2>Choose promotion</h2>
 
-        <p>
-            Pick the piece for your pawn.
-        </p>
+        <p>Pick the piece for your pawn.</p>
 
         <div class="promotion-grid">
 
-            <button class="promo" data-piece="q">
-                ♕
-            </button>
-
-            <button class="promo" data-piece="r">
-                ♖
-            </button>
-
-            <button class="promo" data-piece="b">
-                ♗
-            </button>
-
-            <button class="promo" data-piece="n">
-                ♘
-            </button>
+            <button class="promo" data-piece="q">♕</button>
+            <button class="promo" data-piece="r">♖</button>
+            <button class="promo" data-piece="b">♗</button>
+            <button class="promo" data-piece="n">♘</button>
 
         </div>
 
@@ -1179,15 +1099,15 @@ select{
 </div>
 
 
-<!-- ================= GAME OVER ================= -->
+<!-- =========================================================
+     GAME OVER
+========================================================= -->
 
 <div id="gameOverOverlay" class="overlay">
 
     <div class="modal">
 
-        <h2 id="gameOverTitle">
-            Game Over
-        </h2>
+        <h2 id="gameOverTitle">Game Over</h2>
 
         <p id="gameOverText"></p>
 
@@ -1207,64 +1127,65 @@ select{
 
 /* =========================================================
    NOVA CHESS
-   ========================================================= */
+   Stockfish 18 ASM-JS
+========================================================= */
 
 
-/* =========================
+/* =========================================================
    GAME
-========================= */
+========================================================= */
 
 let game = new Chess();
 
-let boardEl =
+const boardEl =
     document.getElementById("board");
 
-let movesEl =
+const movesEl =
     document.getElementById("moves");
 
-let moveCountEl =
+const moveCountEl =
     document.getElementById("moveCount");
 
-let turnLabel =
+const turnLabel =
     document.getElementById("turnLabel");
 
-let engineStatusEl =
+const engineStatusEl =
     document.getElementById("engineStatus");
 
-let statusDot =
+const statusDot =
     document.getElementById("statusDot");
 
-let diagnosticEl =
+const diagnosticEl =
     document.getElementById("diagnostic");
 
-let thinkingEl =
+const thinkingEl =
     document.getElementById("thinking");
 
-let evalFill =
+const evalFill =
     document.getElementById("evalFill");
 
-let evalNumber =
+const evalNumber =
     document.getElementById("evalNumber");
 
-let whiteTimeEl =
+const whiteTimeEl =
     document.getElementById("whiteTime");
 
-let blackTimeEl =
+const blackTimeEl =
     document.getElementById("blackTime");
 
-let whiteClockEl =
+const whiteClockEl =
     document.getElementById("whiteClock");
 
-let blackClockEl =
+const blackClockEl =
     document.getElementById("blackClock");
 
-let modeLabelEl =
+const modeLabelEl =
     document.getElementById("modeLabel");
 
 
-/* =========================
-   BOARD
-========================= */
+/* =========================================================
+   PIECES
+========================================================= */
 
 const pieceSymbols = {
 
@@ -1288,6 +1209,11 @@ const pieceSymbols = {
 
 };
 
+
+/* =========================================================
+   BOARD STATE
+========================================================= */
+
 let orientation = "w";
 
 let selectedSquare = null;
@@ -1301,36 +1227,32 @@ let squareMap = {};
 let pendingPromotion = null;
 
 
-/* =========================
+/* =========================================================
    ENGINE
-========================= */
+========================================================= */
 
 /*
    IMPORTANT:
 
-   Stockfish.js supports the:
+   We are using ONLY:
 
-   stockfish.js#stockfish.wasm
+       stockfish-18-asm.js
 
-   worker path format.
+   It must be in the same folder as index.html.
 
-   Both files should be beside index.html:
-
-   index.html
-   stockfish-18-lite-single.js
-   stockfish-18-lite-single.wasm
+   There is NO .wasm dependency.
 */
 
-const workerURL =
-    "./stockfish-18-lite-single.js#./stockfish-18-lite-single.wasm";
+const ENGINE_FILE =
+    "./stockfish-18-asm.js";
 
 let engine = null;
 
 let engineReady = false;
 
-let engineInitializing = false;
-
 let engineThinking = false;
+
+let engineInitializing = false;
 
 let pendingEngineMove = false;
 
@@ -1340,17 +1262,12 @@ let searchGeneration = 0;
 
 let activeSearchGeneration = null;
 
-
-/* =========================
-   DIFFICULTY
-========================= */
-
-let engineThinkTime = 700;
+let engineThinkTime = 1500;
 
 
-/* =========================
+/* =========================================================
    CLOCK
-========================= */
+========================================================= */
 
 let whiteSeconds = 300;
 
@@ -1367,18 +1284,18 @@ let gameStarted = false;
 let gameFinished = false;
 
 
-/* =========================
+/* =========================================================
    SOUND
-========================= */
+========================================================= */
 
 let soundEnabled = true;
 
 let audioContext = null;
 
 
-/* =========================
-   MODE
-========================= */
+/* =========================================================
+   MODES
+========================================================= */
 
 const modeNames = {
 
@@ -1401,18 +1318,15 @@ const modeNames = {
 let currentMode = "300+0";
 
 
-/* =========================
+/* =========================================================
    BOARD CREATION
-========================= */
+========================================================= */
 
 function createBoard(){
 
     boardEl.innerHTML = "";
 
     squareMap = {};
-
-    const fragment =
-        document.createDocumentFragment();
 
     for(let rank=8;rank>=1;rank--){
 
@@ -1421,7 +1335,7 @@ function createBoard(){
             const fileChar =
                 String.fromCharCode(97 + file);
 
-            const squareName =
+            const name =
                 fileChar + rank;
 
             const square =
@@ -1429,12 +1343,13 @@ function createBoard(){
 
             square.className =
                 "square " +
-                (((file + rank) % 2 === 0)
+                (
+                    (file + rank) % 2 === 0
                     ? "light"
-                    : "dark");
+                    : "dark"
+                );
 
-            square.dataset.square =
-                squareName;
+            square.dataset.square = name;
 
             square.addEventListener(
                 "click",
@@ -1444,55 +1359,71 @@ function createBoard(){
             const fileCoord =
                 document.createElement("span");
 
-            fileCoord.className =
-                "coord file";
-
-            fileCoord.textContent =
-                fileChar;
+            fileCoord.className = "coord file";
+            fileCoord.textContent = fileChar;
 
             const rankCoord =
                 document.createElement("span");
 
-            rankCoord.className =
-                "coord rank";
-
-            rankCoord.textContent =
-                rank;
+            rankCoord.className = "coord rank";
+            rankCoord.textContent = rank;
 
             square.appendChild(fileCoord);
             square.appendChild(rankCoord);
 
-            squareMap[squareName] =
-                square;
+            boardEl.appendChild(square);
 
-            fragment.appendChild(square);
+            squareMap[name] = square;
         }
     }
-
-    boardEl.appendChild(fragment);
 
     renderBoard();
 }
 
 
-/* =========================
+/* =========================================================
    BOARD RENDER
-========================= */
+========================================================= */
 
 function renderBoard(){
+
+    const files =
+        orientation === "w"
+        ? ["a","b","c","d","e","f","g","h"]
+        : ["h","g","f","e","d","c","b","a"];
+
+    const ranks =
+        orientation === "w"
+        ? [8,7,6,5,4,3,2,1]
+        : [1,2,3,4,5,6,7,8];
+
+
+    /*
+       Put the squares into orientation order.
+
+       We reuse the existing DOM nodes instead
+       of recreating the entire board.
+    */
 
     const fragment =
         document.createDocumentFragment();
 
-    const files =
-        orientation === "w"
-            ? ["a","b","c","d","e","f","g","h"]
-            : ["h","g","f","e","d","c","b","a"];
+    for(const rank of ranks){
 
-    const ranks =
-        orientation === "w"
-            ? [8,7,6,5,4,3,2,1]
-            : [1,2,3,4,5,6,7,8];
+        for(const file of files){
+
+            fragment.appendChild(
+                squareMap[file + rank]
+            );
+        }
+    }
+
+    boardEl.appendChild(fragment);
+
+
+    /*
+       Clear visual state.
+    */
 
     Object.values(squareMap).forEach(
         square => {
@@ -1508,16 +1439,18 @@ function renderBoard(){
             const oldPiece =
                 square.querySelector(".piece");
 
-            if(oldPiece){
+            if(oldPiece)
                 oldPiece.remove();
-            }
         }
     );
 
+
+    /*
+       Add pieces.
+    */
+
     const board =
         game.board();
-
-    const pieces = {};
 
     for(let r=0;r<8;r++){
 
@@ -1528,88 +1461,73 @@ function renderBoard(){
 
             if(!piece) continue;
 
-            const square =
+            const squareName =
                 String.fromCharCode(97 + f)
                 + (8-r);
-
-            pieces[square] =
-                piece;
-        }
-    }
-
-
-    for(const rank of ranks){
-
-        for(const file of files){
-
-            const squareName =
-                file + rank;
 
             const square =
                 squareMap[squareName];
 
-            fragment.appendChild(square);
+            const pieceEl =
+                document.createElement("span");
 
-            const piece =
-                pieces[squareName];
+            pieceEl.className =
+                "piece " +
+                (
+                    piece.color === "w"
+                    ? "white-piece"
+                    : "black-piece"
+                );
 
-            if(piece){
+            pieceEl.textContent =
+                pieceSymbols[
+                    piece.color
+                ][piece.type];
 
-                const pieceEl =
-                    document.createElement("span");
-
-                pieceEl.className =
-                    "piece " +
-                    (piece.color === "w"
-                        ? "white-piece"
-                        : "black-piece");
-
-                pieceEl.textContent =
-                    pieceSymbols[
-                        piece.color
-                    ][piece.type];
-
-                square.appendChild(pieceEl);
-            }
+            square.appendChild(pieceEl);
         }
     }
 
-    boardEl.appendChild(fragment);
 
+    /*
+       Selected square.
+    */
 
-    /* selection */
-
-    if(selectedSquare &&
-       squareMap[selectedSquare]){
+    if(
+        selectedSquare &&
+        squareMap[selectedSquare]
+    ){
 
         squareMap[selectedSquare]
             .classList.add("selected");
     }
 
 
-    /* legal moves */
+    /*
+       Legal moves.
+    */
 
-    legalTargets.forEach(
-        target => {
+    for(const target of legalTargets){
 
-            const square =
-                squareMap[target];
+        const square =
+            squareMap[target];
 
-            if(!square) return;
+        if(!square) continue;
 
-            const piece =
-                game.get(target);
+        const piece =
+            game.get(target);
 
-            square.classList.add(
-                piece
-                    ? "capture"
-                    : "legal"
-            );
-        }
-    );
+        square.classList.add(
+            piece
+            ? "capture"
+            : "legal"
+        );
+    }
 
 
-    /* last move */
+    /*
+       Last move.
+    */
 
     if(lastMove){
 
@@ -1623,45 +1541,47 @@ function renderBoard(){
     }
 
 
-    /* check */
-
-    const turn =
-        game.turn();
+    /*
+       Check indicator.
+    */
 
     if(game.in_check()){
 
-        game.board().forEach(
-            (row,r) => {
+        const turn =
+            game.turn();
 
-                row.forEach(
-                    (piece,f) => {
+        const board =
+            game.board();
 
-                        if(
-                            piece &&
-                            piece.type === "k" &&
-                            piece.color === turn
-                        ){
+        for(let r=0;r<8;r++){
 
-                            const square =
-                                String.fromCharCode(
-                                    97 + f
-                                ) + (8-r);
+            for(let f=0;f<8;f++){
 
-                            if(squareMap[square])
-                                squareMap[square]
-                                    .classList.add("check");
-                        }
-                    }
-                );
+                const piece =
+                    board[r][f];
+
+                if(
+                    piece &&
+                    piece.type === "k" &&
+                    piece.color === turn
+                ){
+
+                    const name =
+                        String.fromCharCode(97 + f)
+                        + (8-r);
+
+                    squareMap[name]
+                        .classList.add("check");
+                }
             }
-        );
+        }
     }
 }
 
 
-/* =========================
+/* =========================================================
    PLAYER INPUT
-========================= */
+========================================================= */
 
 function onSquareClick(event){
 
@@ -1694,11 +1614,10 @@ function onSquareClick(event){
 
     if(
         piece &&
-        piece.color === game.turn()
+        piece.color === "w"
     ){
 
-        selectedSquare =
-            square;
+        selectedSquare = square;
 
         legalTargets =
             game.moves({
@@ -1722,9 +1641,9 @@ function onSquareClick(event){
 }
 
 
-/* =========================
+/* =========================================================
    MOVE
-========================= */
+========================================================= */
 
 function attemptMove(from,to){
 
@@ -1734,14 +1653,9 @@ function attemptMove(from,to){
     if(!piece) return;
 
 
-    /* promotion */
-
     if(
         piece.type === "p" &&
-        (
-            (piece.color === "w" && to[1] === "8") ||
-            (piece.color === "b" && to[1] === "1")
-        )
+        to[1] === "8"
     ){
 
         pendingPromotion = {
@@ -1757,18 +1671,18 @@ function attemptMove(from,to){
     }
 
 
-    makeMove({
+    makePlayerMove({
         from:from,
         to:to
     });
 }
 
 
-/* =========================
-   MAKE MOVE
-========================= */
+/* =========================================================
+   PLAYER MOVE
+========================================================= */
 
-function makeMove(move){
+function makePlayerMove(move){
 
     const result =
         game.move(move);
@@ -1785,13 +1699,22 @@ function makeMove(move){
 
     playMoveSound(result);
 
-    if(gameStarted === false){
+    if(!gameStarted){
+
         gameStarted = true;
+
         startClock();
     }
 
     currentTurn =
         game.turn();
+
+    /*
+       Increment belongs to the player
+       who just moved.
+    */
+
+    whiteSeconds += incrementSeconds;
 
     renderBoard();
 
@@ -1803,17 +1726,20 @@ function makeMove(move){
 
     checkGameState();
 
-    if(!gameFinished &&
-       game.turn() === "b"){
+
+    if(
+        !gameFinished &&
+        game.turn() === "b"
+    ){
 
         requestEngineMove();
     }
 }
 
 
-/* =========================
+/* =========================================================
    ENGINE START
-========================= */
+========================================================= */
 
 function startEngine(){
 
@@ -1828,10 +1754,11 @@ function startEngine(){
 
     diagnosticEl.classList.remove("show");
 
+
     try{
 
         engine =
-            new Worker(workerURL);
+            new Worker(ENGINE_FILE);
 
     }catch(error){
 
@@ -1852,18 +1779,11 @@ function startEngine(){
             if(!line) return;
 
 
-            /* UCI handshake */
+            /*
+               UCI IDENTIFICATION
+            */
 
             if(line === "uciok"){
-
-                /*
-                   DO NOT send:
-
-                   setoption name Threads value 1
-
-                   The lite single-thread build
-                   does not need that option.
-                */
 
                 engine.postMessage(
                     "setoption name Hash value 16"
@@ -1877,6 +1797,10 @@ function startEngine(){
             }
 
 
+            /*
+               ENGINE READY
+            */
+
             if(line === "readyok"){
 
                 clearTimeout(engineTimeout);
@@ -1889,6 +1813,7 @@ function startEngine(){
                     "ready",
                     "Stockfish 18 ready"
                 );
+
 
                 if(
                     pendingEngineMove &&
@@ -1905,6 +1830,10 @@ function startEngine(){
             }
 
 
+            /*
+               EVALUATION
+            */
+
             if(line.startsWith("info ")){
 
                 parseEvaluation(line);
@@ -1913,13 +1842,19 @@ function startEngine(){
             }
 
 
+            /*
+               ENGINE MOVE
+            */
+
             if(line.startsWith("bestmove ")){
 
                 if(!engineThinking)
                     return;
 
+
                 const generation =
                     activeSearchGeneration;
+
 
                 if(
                     generation === null ||
@@ -1933,13 +1868,12 @@ function startEngine(){
                 const moveText =
                     line.split(/\s+/)[1];
 
+
                 engineThinking = false;
 
                 activeSearchGeneration = null;
 
-                thinkingEl
-                    .classList
-                    .remove("show");
+                thinkingEl.classList.remove("show");
 
 
                 if(
@@ -1953,9 +1887,7 @@ function startEngine(){
                 }
 
 
-                makeEngineMove(
-                    moveText
-                );
+                makeEngineMove(moveText);
             }
         };
 
@@ -1964,7 +1896,7 @@ function startEngine(){
         function(){
 
             failEngine(
-                "Stockfish could not load. Make sure the JS and WASM files are deployed together."
+                "Stockfish could not load. Make sure stockfish-18-asm.js is in the same folder as index.html."
             );
         };
 
@@ -1973,16 +1905,10 @@ function startEngine(){
         function(){
 
             failEngine(
-                "The Stockfish worker stopped responding."
+                "Stockfish stopped responding."
             );
         };
 
-
-    /*
-       If the worker never answers, show
-       a useful message instead of staying
-       on Loading forever.
-    */
 
     engineTimeout =
         setTimeout(
@@ -1991,22 +1917,35 @@ function startEngine(){
                 if(!engineReady){
 
                     failEngine(
-                        "Stockfish timed out while loading. Make sure these 3 files are in the same folder: index.html, stockfish-18-lite-single.js, and stockfish-18-lite-single.wasm."
+                        "Stockfish timed out. Make sure stockfish-18-asm.js is beside index.html."
                     );
                 }
 
             },
-            15000
+            20000
         );
 
 
-    engine.postMessage("uci");
+    /*
+       Start UCI.
+    */
+
+    try{
+
+        engine.postMessage("uci");
+
+    }catch(error){
+
+        failEngine(
+            "Could not send commands to Stockfish."
+        );
+    }
 }
 
 
-/* =========================
+/* =========================================================
    ENGINE ERROR
-========================= */
+========================================================= */
 
 function failEngine(message){
 
@@ -2020,9 +1959,7 @@ function failEngine(message){
 
     activeSearchGeneration = null;
 
-    thinkingEl
-        .classList
-        .remove("show");
+    thinkingEl.classList.remove("show");
 
     setEngineStatus(
         "error",
@@ -2046,9 +1983,9 @@ function failEngine(message){
 }
 
 
-/* =========================
-   ENGINE MOVE
-========================= */
+/* =========================================================
+   ENGINE MOVE REQUEST
+========================================================= */
 
 function requestEngineMove(){
 
@@ -2082,22 +2019,15 @@ function requestEngineMove(){
 
     engineThinking = true;
 
-    thinkingEl
-        .classList
-        .add("show");
+    thinkingEl.classList.add("show");
 
     setEngineStatus(
         "ready",
         "Stockfish calculating…"
     );
 
+    updateTurnUI();
 
-    /*
-       Every search gets a generation.
-
-       If a new game happens before Stockfish
-       finishes, the old bestmove is ignored.
-    */
 
     const generation =
         ++searchGeneration;
@@ -2106,26 +2036,35 @@ function requestEngineMove(){
         generation;
 
 
-    engine.postMessage(
-        "position fen " + game.fen()
-    );
+    try{
 
+        engine.postMessage(
+            "position fen " + game.fen()
+        );
 
-    /*
-       movetime is much more predictable
-       than depth on a Chromebook.
-    */
+        engine.postMessage(
+            "go movetime " +
+            engineThinkTime
+        );
 
-    engine.postMessage(
-        "go movetime " +
-        engineThinkTime
-    );
+    }catch(error){
+
+        engineThinking = false;
+
+        activeSearchGeneration = null;
+
+        thinkingEl.classList.remove("show");
+
+        failEngine(
+            "Stockfish could not start calculating."
+        );
+    }
 }
 
 
-/* =========================
-   ENGINE MOVE APPLY
-========================= */
+/* =========================================================
+   ENGINE MOVE
+========================================================= */
 
 function makeEngineMove(moveText){
 
@@ -2135,15 +2074,15 @@ function makeEngineMove(moveText){
 
 
     const from =
-        moveText.slice(0,2);
+        moveText.substring(0,2);
 
     const to =
-        moveText.slice(2,4);
+        moveText.substring(2,4);
 
     const promotion =
         moveText.length >= 5
-            ? moveText[4]
-            : undefined;
+        ? moveText.substring(4,5)
+        : undefined;
 
 
     const move = {
@@ -2151,9 +2090,9 @@ function makeEngineMove(moveText){
         to:to
     };
 
+
     if(promotion)
-        move.promotion =
-            promotion;
+        move.promotion = promotion;
 
 
     const result =
@@ -2164,7 +2103,7 @@ function makeEngineMove(moveText){
 
         setEngineStatus(
             "error",
-            "Engine returned an invalid move"
+            "Stockfish returned an invalid move."
         );
 
         return;
@@ -2175,6 +2114,13 @@ function makeEngineMove(moveText){
         from:result.from,
         to:result.to
     };
+
+
+    /*
+       Black's increment.
+    */
+
+    blackSeconds += incrementSeconds;
 
 
     currentTurn =
@@ -2195,9 +2141,9 @@ function makeEngineMove(moveText){
 }
 
 
-/* =========================
-   ENGINE STOP
-========================= */
+/* =========================================================
+   CANCEL ENGINE
+========================================================= */
 
 function cancelEngineSearch(){
 
@@ -2209,9 +2155,8 @@ function cancelEngineSearch(){
 
     pendingEngineMove = false;
 
-    thinkingEl
-        .classList
-        .remove("show");
+    thinkingEl.classList.remove("show");
+
 
     if(engine){
 
@@ -2222,27 +2167,27 @@ function cancelEngineSearch(){
 }
 
 
-/* =========================
+/* =========================================================
    ENGINE STATUS
-========================= */
+========================================================= */
 
 function setEngineStatus(type,text){
 
-    engineStatusEl.textContent =
-        text;
+    engineStatusEl.textContent = text;
 
     statusDot.className =
         "status-dot " + type;
 }
 
 
-/* =========================
+/* =========================================================
    EVALUATION
-========================= */
+========================================================= */
 
 function parseEvaluation(line){
 
     if(!engineThinking) return;
+
 
     const match =
         line.match(
@@ -2264,26 +2209,23 @@ function parseEvaluation(line){
 
     if(type === "cp"){
 
-        score =
-            value / 100;
+        score = value / 100;
 
     }else{
 
         score =
             value > 0
-                ? 10
-                : -10;
+            ? 10
+            : -10;
     }
 
 
     /*
-       Stockfish score is from side to move.
-       Since engine is thinking for Black,
-       invert it so positive means White.
+       Stockfish is calculating Black's position.
+       Positive display = White advantage.
     */
 
     score *= -1;
-
 
     score =
         Math.max(
@@ -2306,10 +2248,6 @@ function parseEvaluation(line){
 }
 
 
-/* =========================
-   STATIC EVAL
-========================= */
-
 function updateEvaluationFromPosition(){
 
     if(engineThinking) return;
@@ -2320,9 +2258,9 @@ function updateEvaluationFromPosition(){
 }
 
 
-/* =========================
-   MOVES LIST
-========================= */
+/* =========================================================
+   MOVES
+========================================================= */
 
 function updateMoves(){
 
@@ -2354,15 +2292,13 @@ function updateMoves(){
         const row =
             document.createElement("div");
 
-        row.className =
-            "move-row";
+        row.className = "move-row";
 
 
         const number =
             document.createElement("span");
 
-        number.className =
-            "move-number";
+        number.className = "move-number";
 
         number.textContent =
             (Math.floor(i/2)+1) + ".";
@@ -2371,8 +2307,7 @@ function updateMoves(){
         const white =
             document.createElement("span");
 
-        white.className =
-            "move";
+        white.className = "move";
 
         white.textContent =
             history[i] || "";
@@ -2381,8 +2316,7 @@ function updateMoves(){
         const black =
             document.createElement("span");
 
-        black.className =
-            "move";
+        black.className = "move";
 
         black.textContent =
             history[i+1] || "";
@@ -2401,9 +2335,9 @@ function updateMoves(){
 }
 
 
-/* =========================
+/* =========================================================
    TURN UI
-========================= */
+========================================================= */
 
 function updateTurnUI(){
 
@@ -2419,28 +2353,26 @@ function updateTurnUI(){
 
         turnLabel.textContent =
             engineThinking
-                ? "Stockfish thinking…"
-                : "Black to move";
+            ? "Stockfish thinking…"
+            : "Black to move";
     }
 
 
-    whiteClockEl
-        .classList.toggle(
-            "active",
-            game.turn() === "w"
-        );
+    whiteClockEl.classList.toggle(
+        "active",
+        game.turn() === "w"
+    );
 
-    blackClockEl
-        .classList.toggle(
-            "active",
-            game.turn() === "b"
-        );
+    blackClockEl.classList.toggle(
+        "active",
+        game.turn() === "b"
+    );
 }
 
 
-/* =========================
+/* =========================================================
    GAME STATE
-========================= */
+========================================================= */
 
 function checkGameState(){
 
@@ -2448,8 +2380,8 @@ function checkGameState(){
 
         finishGame(
             game.turn() === "w"
-                ? "Black wins"
-                : "White wins",
+            ? "Black wins"
+            : "White wins",
             "Checkmate."
         );
 
@@ -2505,9 +2437,9 @@ function checkGameState(){
 }
 
 
-/* =========================
-   FINISH
-========================= */
+/* =========================================================
+   GAME OVER
+========================================================= */
 
 function finishGame(title,text){
 
@@ -2517,13 +2449,16 @@ function finishGame(title,text){
 
     stopClock();
 
+
     document.getElementById(
         "gameOverTitle"
     ).textContent = title;
 
+
     document.getElementById(
         "gameOverText"
     ).textContent = text;
+
 
     document.getElementById(
         "gameOverOverlay"
@@ -2531,9 +2466,9 @@ function finishGame(title,text){
 }
 
 
-/* =========================
+/* =========================================================
    CLOCK
-========================= */
+========================================================= */
 
 function parseMode(value){
 
@@ -2541,11 +2476,8 @@ function parseMode(value){
         value.split("+");
 
     return {
-        initial:
-            parseInt(parts[0],10),
-
-        increment:
-            parseInt(parts[1],10)
+        initial:parseInt(parts[0],10),
+        increment:parseInt(parts[1],10)
     };
 }
 
@@ -2553,10 +2485,10 @@ function parseMode(value){
 function formatTime(seconds){
 
     seconds =
-        Math.max(0,seconds);
+        Math.max(0,Math.floor(seconds));
 
     const minutes =
-        Math.floor(seconds/60);
+        Math.floor(seconds / 60);
 
     const secs =
         seconds % 60;
@@ -2594,7 +2526,6 @@ function startClock(){
 
     if(clockInterval)
         return;
-
 
     clockInterval =
         setInterval(
@@ -2664,9 +2595,9 @@ function tickClock(){
 }
 
 
-/* =========================
+/* =========================================================
    NEW GAME
-========================= */
+========================================================= */
 
 function newGame(){
 
@@ -2718,15 +2649,12 @@ function newGame(){
 
     document
         .getElementById("gameOverOverlay")
-        .classList.remove("show");
+        .classList
+        .remove("show");
 
 
     /*
-       Reset engine state safely.
-
-       We don't destroy the worker because
-       restarting a WASM engine unnecessarily
-       is slow on a Chromebook.
+       Reset the existing engine.
     */
 
     if(engine){
@@ -2737,6 +2665,7 @@ function newGame(){
             "loading",
             "Resetting Stockfish…"
         );
+
 
         try{
 
@@ -2762,9 +2691,9 @@ function newGame(){
 }
 
 
-/* =========================
+/* =========================================================
    UNDO
-========================= */
+========================================================= */
 
 function undoMove(){
 
@@ -2774,8 +2703,12 @@ function undoMove(){
 
 
     /*
-       Undo the player's move and the engine's
-       previous move when possible.
+       Usually the position is:
+
+       White move
+       Black move
+
+       So remove both.
     */
 
     if(game.history().length >= 2){
@@ -2796,13 +2729,9 @@ function undoMove(){
     legalTargets = [];
 
 
-    /*
-       chess.js doesn't store clocks, so return
-       to the selected mode's initial clock.
-    */
-
     const mode =
         parseMode(currentMode);
+
 
     whiteSeconds =
         mode.initial;
@@ -2830,24 +2759,24 @@ function undoMove(){
 }
 
 
-/* =========================
+/* =========================================================
    FLIP
-========================= */
+========================================================= */
 
 function flipBoard(){
 
     orientation =
         orientation === "w"
-            ? "b"
-            : "w";
+        ? "b"
+        : "w";
 
     renderBoard();
 }
 
 
-/* =========================
+/* =========================================================
    PROMOTION
-========================= */
+========================================================= */
 
 document
     .querySelectorAll(".promo")
@@ -2874,7 +2803,7 @@ document
                         .remove("show");
 
 
-                    makeMove({
+                    makePlayerMove({
 
                         from:
                             pendingPromotion.from,
@@ -2894,9 +2823,9 @@ document
     );
 
 
-/* =========================
+/* =========================================================
    SOUND
-========================= */
+========================================================= */
 
 function playMoveSound(move){
 
@@ -2924,24 +2853,25 @@ function playMoveSound(move){
 
         oscillator.type =
             move.captured
-                ? "square"
-                : "sine";
+            ? "square"
+            : "sine";
 
 
         oscillator.frequency.value =
             move.captured
-                ? 180
-                : 320;
+            ? 180
+            : 320;
 
 
         gain.gain.setValueAtTime(
-            0.045,
+            .04,
             audioContext.currentTime
         );
 
+
         gain.gain.exponentialRampToValueAtTime(
-            0.001,
-            audioContext.currentTime + .09
+            .001,
+            audioContext.currentTime + .08
         );
 
 
@@ -2955,16 +2885,16 @@ function playMoveSound(move){
         oscillator.start();
 
         oscillator.stop(
-            audioContext.currentTime + .09
+            audioContext.currentTime + .08
         );
 
     }catch(error){}
 }
 
 
-/* =========================
+/* =========================================================
    SETTINGS
-========================= */
+========================================================= */
 
 document
     .getElementById("difficultySelect")
@@ -3004,10 +2934,7 @@ document
         "change",
         function(){
 
-            const theme =
-                this.value;
-
-            if(theme === "blue"){
+            if(this.value === "blue"){
 
                 document.documentElement
                     .style.setProperty(
@@ -3026,22 +2953,22 @@ document
                 document.documentElement
                     .style.setProperty(
                         "--light",
-                        "#e7edf5"
+                        "#e8edf5"
                     );
 
                 document.documentElement
                     .style.setProperty(
                         "--dark",
-                        "#61708c"
+                        "#62718d"
                     );
             }
         }
     );
 
 
-/* =========================
+/* =========================================================
    BUTTONS
-========================= */
+========================================================= */
 
 document
     .getElementById("newGameBtn")
@@ -3086,8 +3013,8 @@ document
 
             this.textContent =
                 soundEnabled
-                    ? "🔊 Sound"
-                    : "🔇 Sound";
+                ? "🔊 Sound"
+                : "🔇 Sound";
         }
     );
 
@@ -3108,9 +3035,26 @@ document
     );
 
 
-/* =========================
+/* =========================================================
+   SETTINGS BUTTON
+========================================================= */
+
+document
+    .getElementById("settingsBtn")
+    .addEventListener(
+        "click",
+        function(){
+
+            document
+                .getElementById("difficultySelect")
+                .focus();
+        }
+    );
+
+
+/* =========================================================
    INITIALIZE
-========================= */
+========================================================= */
 
 createBoard();
 
