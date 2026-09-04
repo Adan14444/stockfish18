@@ -960,6 +960,28 @@ button:disabled {
     );
   }
 }
+
+.engine-debug {
+  margin-top: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(0,0,0,.16);
+  font-size: 11px;
+  line-height: 1.35;
+}
+.engine-debug div {
+  display: grid;
+  grid-template-columns: 78px 1fr;
+  gap: 7px;
+  margin: 4px 0;
+}
+.engine-debug span { color: var(--muted); }
+.engine-debug b {
+  color: var(--text);
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
 </style>
 </head>
 
@@ -1207,6 +1229,12 @@ button:disabled {
             Loading Stockfish…
           </div>
 
+          <div id="engineDebug" class="engine-debug">
+            <div><span>State</span><b>Starting</b></div>
+            <div><span>Last command</span><b>—</b></div>
+            <div><span>Last output</span><b>—</b></div>
+          </div>
+
         </div>
 
       </section>
@@ -1267,6 +1295,9 @@ let engineThinking = false;
 
 let engineStartTimer = null;
 let engineMoveTimer = null;
+let engineSearchId = 0;
+let engineLastCommand = "";
+let engineLastOutput = "";
 
 
 /* ---------- CHESS ---------- */
@@ -1359,6 +1390,9 @@ const timeControl =
 const promotionModal =
   document.getElementById("promotionModal");
 
+const engineDebug =
+  document.getElementById("engineDebug");
+
 
 /* =========================================================
    PIECES
@@ -1410,6 +1444,13 @@ function setEngineStatus(
       : type === "error"
         ? "bad"
         : "");
+
+  if (engineDebug) {
+    const rows = engineDebug.querySelectorAll("div");
+    if (rows[0]) rows[0].querySelector("b").textContent = text;
+    if (rows[1]) rows[1].querySelector("b").textContent = engineLastCommand || "—";
+    if (rows[2]) rows[2].querySelector("b").textContent = engineLastOutput || "—";
+  }
 
 }
 
@@ -1548,6 +1589,14 @@ function startEngine() {
    ========================================================= */
 
 function handleEngineLine(line) {
+
+  engineLastOutput = line;
+
+  if (engineDebug) {
+    const rows = engineDebug.querySelectorAll("div");
+    if (rows[1]) rows[1].querySelector("b").textContent = engineLastCommand || "—";
+    if (rows[2]) rows[2].querySelector("b").textContent = line;
+  }
 
   /*
     UCI handshake
@@ -2340,109 +2389,85 @@ document
 function requestEngineMove() {
 
   if (!engineReady) {
-
     setEngineStatus(
-      "Waiting for Stockfish…"
+      "Waiting for Stockfish…",
+      ""
     );
-
     return;
   }
 
-  if (game.game_over()) {
+  if (game.game_over() || game.turn() !== "b") {
     return;
   }
-
-  engineThinking = true;
-
-  thinkingOverlay.classList.add(
-    "show"
-  );
-
-  enginePill.className =
-    "engine-pill thinking";
-
-  engineText.textContent =
-    "Nova is thinking";
-
-  engineStatus.textContent =
-    "Nova is calculating a move…";
-
-
-  /*
-    Stop old move timeout.
-  */
 
   clearTimeout(engineMoveTimer);
 
+  const mySearchId = ++engineSearchId;
+  engineThinking = true;
+
+  thinkingOverlay.classList.add("show");
+  enginePill.className = "engine-pill thinking";
+  engineText.textContent = "Nova is thinking";
+  engineStatus.className = "status";
+  engineStatus.textContent = "Preparing engine search…";
 
   /*
-    Get current FEN.
+    IMPORTANT: feed Stockfish the complete move history instead of a FEN.
+    This is especially reliable with the older ASM-JS build.
   */
+  const history = game.history({ verbose: true });
+  const uciMoves = history.map(function(move) {
+    return move.from + move.to + (move.promotion || "");
+  });
 
-  const fen =
-    game.fen();
+  const positionCommand =
+    "position startpos" +
+    (uciMoves.length ? " moves " + uciMoves.join(" ") : "");
 
+  /* Use depth rather than movetime: the ASM build is much happier with
+     a finite search depth and it guarantees a search boundary. */
+  const depth =
+    engineThinkTime <= 500 ? 7 :
+    engineThinkTime <= 1200 ? 10 :
+    engineThinkTime <= 2200 ? 13 : 16;
+
+  const goCommand = "go depth " + depth;
 
   try {
+    engine.postMessage("stop");
+    engineLastCommand = "ucinewgame";
+    engine.postMessage("ucinewgame");
 
-    engine.postMessage(
-      "stop"
-    );
+    engineLastCommand = positionCommand;
+    engine.postMessage(positionCommand);
 
-    engine.postMessage(
-      "position fen " + fen
-    );
+    engineLastCommand = goCommand;
+    engine.postMessage(goCommand);
 
-    engine.postMessage(
-      "go movetime " +
-      engineThinkTime
-    );
+    engineStatus.textContent =
+      "Searching…  Depth " + depth;
 
   } catch (error) {
-
     finishEngineThinking();
-
     engineError(
-      "Could not send position: " +
-      error.message
+      "Could not start search: " + error.message
     );
-
     return;
   }
 
-
   /*
-    Safety timeout.
-
-    If ASM somehow doesn't return bestmove,
-    the UI won't stay frozen forever.
+    Visible watchdog. If the engine doesn't produce bestmove, stop it and
+    show the actual state instead of leaving the player wondering.
   */
-
-  engineMoveTimer =
-    setTimeout(
-      function() {
-
-        if (engineThinking) {
-
-          try {
-            engine.postMessage("stop");
-          } catch (_) {}
-
-          finishEngineThinking();
-
-          engineError(
-            "Stockfish timed out before returning bestmove."
-          );
-
-        }
-
-      },
-      Math.max(
-        engineThinkTime + 15000,
-        20000
-      )
-    );
-
+  engineMoveTimer = setTimeout(function() {
+    if (engineThinking && mySearchId === engineSearchId) {
+      try { engine.postMessage("stop"); } catch (_) {}
+      finishEngineThinking();
+      engineError(
+        "Search timed out. Last command: " + engineLastCommand
+      );
+    }
+  }, Math.max(engineThinkTime + 12000, 18000));
 }
 
 
