@@ -1455,6 +1455,15 @@ function setEngineStatus(
 }
 
 
+function updateEngineDebug() {
+  if (!engineDebug) return;
+  const rows = engineDebug.querySelectorAll("div");
+  if (rows[0]) rows[0].querySelector("b").textContent = engineText.textContent || "—";
+  if (rows[1]) rows[1].querySelector("b").textContent = engineLastCommand || "—";
+  if (rows[2]) rows[2].querySelector("b").textContent = engineLastOutput || "—";
+}
+
+
 function engineError(message) {
 
   engineReady = false;
@@ -2327,12 +2336,13 @@ function makePlayerMove(
   renderMoves();
   updateClocks();
 
-  checkGameEnd();
+  const gameEnded = checkGameEnd();
 
-  if (!game.game_over()) {
+  // After a legal white move, chess.js should always hand the turn to Black.
+  // Start the clock and engine immediately unless the game actually ended.
+  if (!gameEnded && game.turn() === "b") {
 
     startClock();
-
     requestEngineMove();
 
   }
@@ -2388,6 +2398,13 @@ document
 
 function requestEngineMove() {
 
+  // Visible diagnostic: reaching this function is itself important.
+  engineLastCommand = "REQUEST ENGINE MOVE";
+  if (engineDebug) {
+    const rows = engineDebug.querySelectorAll("div");
+    if (rows[1]) rows[1].querySelector("b").textContent = engineLastCommand;
+  }
+
   if (!engineReady) {
     setEngineStatus(
       "Waiting for Stockfish…",
@@ -2434,14 +2451,21 @@ function requestEngineMove() {
   const goCommand = "go depth " + depth;
 
   try {
+    // Stop any previous search, then give Stockfish a fresh game state.
+    engineLastCommand = "stop";
+    updateEngineDebug();
     engine.postMessage("stop");
+
     engineLastCommand = "ucinewgame";
+    updateEngineDebug();
     engine.postMessage("ucinewgame");
 
     engineLastCommand = positionCommand;
+    updateEngineDebug();
     engine.postMessage(positionCommand);
 
     engineLastCommand = goCommand;
+    updateEngineDebug();
     engine.postMessage(goCommand);
 
     engineStatus.textContent =
