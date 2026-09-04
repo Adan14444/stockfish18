@@ -3,117 +3,286 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Stockfish Chess</title>
+<title>Stockfish — Premium Chess</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
 <style>
+/* =========================================================
+   RESET
+========================================================= */
+
 * {
   box-sizing: border-box;
 }
 
-html,
-body {
-  margin: 0;
-  padding: 0;
-  min-height: 100%;
+html {
+  background: #070a0f;
 }
 
 body {
+  margin: 0;
   min-height: 100vh;
-  font-family: Arial, Helvetica, sans-serif;
+
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  color: #f4f7fb;
 
   background:
     radial-gradient(
-      circle at 50% 0%,
-      #263a5c 0%,
-      #111a2b 40%,
-      #070b13 100%
+      circle at 15% 10%,
+      rgba(77, 113, 170, .18),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at 85% 80%,
+      rgba(115, 83, 180, .14),
+      transparent 35%
+    ),
+    linear-gradient(
+      135deg,
+      #06090e,
+      #0c111b 50%,
+      #080b11
     );
 
-  color: white;
+  overflow-x: hidden;
+}
 
+/* =========================================================
+   BACKGROUND LIGHT
+========================================================= */
+
+body::before {
+  content: "";
+
+  position: fixed;
+
+  width: 650px;
+  height: 650px;
+
+  left: 50%;
+  top: -350px;
+
+  transform: translateX(-50%);
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(125, 170, 255, .08),
+      transparent 68%
+    );
+
+  pointer-events: none;
+}
+
+/* =========================================================
+   APP
+========================================================= */
+
+.app {
+  width: min(1500px, 100%);
+  margin: auto;
+
+  padding:
+    28px
+    28px
+    45px;
+}
+
+/* =========================================================
+   TOP BAR
+========================================================= */
+
+.topbar {
   display: flex;
-  justify-content: center;
+
+  justify-content: space-between;
   align-items: center;
 
-  padding: 25px;
-}
-
-/* =========================
-   MAIN GAME
-========================= */
-
-.game {
-  width: min(1150px, 100%);
-}
-
-.title {
-  text-align: center;
   margin-bottom: 25px;
+
+  padding:
+    15px
+    18px;
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(24,31,44,.82),
+      rgba(12,17,26,.72)
+    );
+
+  box-shadow:
+    0 15px 45px rgba(0,0,0,.3);
+
+  backdrop-filter: blur(18px);
 }
 
-.title h1 {
-  margin: 0;
-
-  font-size: clamp(32px, 6vw, 58px);
-
-  letter-spacing: 3px;
-
-  text-shadow:
-    0 5px 20px rgba(0, 0, 0, .5);
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 13px;
 }
 
-.title p {
-  margin-top: 8px;
+.brand-icon {
+  width: 42px;
+  height: 42px;
 
-  color: #aebbd0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
-  font-size: 16px;
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #ffffff,
+      #aeb8c8
+    );
+
+  color: #111722;
+
+  font-size: 25px;
+
+  box-shadow:
+    0 5px 20px rgba(255,255,255,.08);
 }
 
-/* =========================
-   LAYOUT
-========================= */
+.brand-name {
+  font-weight: 800;
 
-.layout {
+  letter-spacing: 1.5px;
+
+  font-size: 18px;
+}
+
+.brand-subtitle {
+  color: #7f8ba0;
+
+  font-size: 12px;
+
+  margin-top: 2px;
+}
+
+.engine-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding:
+    8px
+    12px;
+
+  border-radius: 999px;
+
+  background:
+    rgba(255,255,255,.045);
+
+  border:
+    1px solid rgba(255,255,255,.07);
+
+  color: #aab5c8;
+
+  font-size: 12px;
+}
+
+.engine-dot {
+  width: 8px;
+  height: 8px;
+
+  border-radius: 50%;
+
+  background: #777;
+
+  box-shadow:
+    0 0 10px rgba(255,255,255,.15);
+}
+
+.engine-dot.ready {
+  background: #62e6a5;
+
+  box-shadow:
+    0 0 14px rgba(98,230,165,.65);
+}
+
+/* =========================================================
+   MAIN
+========================================================= */
+
+.main {
   display: grid;
 
   grid-template-columns:
-    minmax(300px, 720px)
-    310px;
+    minmax(420px, 850px)
+    minmax(290px, 360px);
 
-  gap: 25px;
+  gap: 24px;
 
   justify-content: center;
 
   align-items: start;
 }
 
-/* =========================
-   BOARD
-========================= */
+/* =========================================================
+   BOARD AREA
+========================================================= */
 
-.board-wrap {
+.board-section {
+  position: relative;
+}
+
+.board-shell {
+  position: relative;
+
   width: 100%;
 
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 1;
 
-  padding: 8px;
+  padding: 9px;
 
-  border-radius: 20px;
+  border-radius: 25px;
 
   background:
     linear-gradient(
       145deg,
-      #34415a,
-      #171e2c
+      #39475e,
+      #151c29 42%,
+      #0d121b
     );
 
   box-shadow:
-    0 30px 80px rgba(0, 0, 0, .6),
-    0 0 45px rgba(80, 140, 255, .15);
+    0 35px 90px rgba(0,0,0,.55),
+    0 0 0 1px rgba(255,255,255,.05),
+    inset 0 1px 0 rgba(255,255,255,.08);
+
+  animation:
+    boardEnter .7s cubic-bezier(.2,.8,.2,1);
+}
+
+@keyframes boardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .board {
@@ -123,19 +292,22 @@ body {
   display: grid;
 
   grid-template-columns:
-    repeat(8, minmax(0, 1fr));
+    repeat(8, minmax(0,1fr));
 
   grid-template-rows:
-    repeat(8, minmax(0, 1fr));
-
-  border-radius: 13px;
+    repeat(8, minmax(0,1fr));
 
   overflow: hidden;
+
+  border-radius: 17px;
+
+  box-shadow:
+    inset 0 0 0 1px rgba(0,0,0,.25);
 }
 
-/* =========================
+/* =========================================================
    SQUARES
-========================= */
+========================================================= */
 
 .square {
   position: relative;
@@ -148,54 +320,130 @@ body {
 
   display: flex;
 
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 
   cursor: pointer;
 
   user-select: none;
 
   transition:
-    filter .12s ease,
-    box-shadow .12s ease;
+    filter .14s ease,
+    box-shadow .14s ease;
 }
 
 .light {
-  background: #dce7f5;
+  background:
+    linear-gradient(
+      145deg,
+      #dfe8f3,
+      #c9d5e4
+    );
 }
 
 .dark {
-  background: #55708f;
+  background:
+    linear-gradient(
+      145deg,
+      #617894,
+      #506983
+    );
 }
 
 .square:hover {
-  filter: brightness(1.1);
+  filter: brightness(1.08);
 }
 
-/* Selected square */
+/* =========================================================
+   COORDINATES
+========================================================= */
+
+.coordinate {
+  position: absolute;
+
+  font-size: 11px;
+
+  font-weight: 700;
+
+  opacity: .65;
+
+  pointer-events: none;
+}
+
+.file-coordinate {
+  bottom: 5px;
+  right: 7px;
+}
+
+.rank-coordinate {
+  top: 5px;
+  left: 7px;
+}
+
+.light .coordinate {
+  color: #617087;
+}
+
+.dark .coordinate {
+  color: #dce5f0;
+}
+
+/* =========================================================
+   LAST MOVE
+========================================================= */
+
+.last-move {
+  box-shadow:
+    inset 0 0 0 999px
+    rgba(245, 204, 74, .17);
+}
+
+/* =========================================================
+   SELECTED
+========================================================= */
 
 .selected {
   box-shadow:
-    inset 0 0 0 5px
-    rgba(255, 220, 70, .95);
+    inset 0 0 0 4px
+    rgba(255, 220, 90, .95),
+    inset 0 0 35px
+    rgba(255,220,90,.16);
 }
 
-/* =========================
-   MOVE HIGHLIGHTS
-========================= */
+/* =========================================================
+   LEGAL MOVES
+========================================================= */
 
 .possible::after {
   content: "";
 
   position: absolute;
 
-  width: 25%;
-  height: 25%;
+  width: 20%;
+  height: 20%;
 
   border-radius: 50%;
 
   background:
-    rgba(20, 25, 30, .38);
+    rgba(25,31,40,.42);
+
+  box-shadow:
+    0 1px 5px rgba(0,0,0,.25);
+
+  animation:
+    dotIn .15s ease;
+}
+
+@keyframes dotIn {
+  from {
+    opacity: 0;
+    transform: scale(.4);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .capture::after {
@@ -203,18 +451,53 @@ body {
 
   position: absolute;
 
-  width: 78%;
-  height: 78%;
+  width: 76%;
+  height: 76%;
 
   border-radius: 50%;
 
   border:
-    5px solid rgba(220, 65, 65, .72);
+    4px solid
+    rgba(255,255,255,.58);
+
+  box-shadow:
+    inset 0 0 0 999px
+    rgba(190,45,55,.10);
+
+  animation:
+    capturePulse .7s ease infinite alternate;
 }
 
-/* =========================
-   CHESS PIECES
-========================= */
+@keyframes capturePulse {
+  from {
+    opacity: .65;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* =========================================================
+   CHECK
+========================================================= */
+
+.in-check {
+  background:
+    radial-gradient(
+      circle,
+      rgba(255,67,67,.65),
+      rgba(190,40,50,.35)
+    ) !important;
+
+  box-shadow:
+    inset 0 0 35px
+    rgba(255,50,50,.45);
+}
+
+/* =========================================================
+   PIECES
+========================================================= */
 
 .piece {
   position: relative;
@@ -227,270 +510,851 @@ body {
     sans-serif;
 
   font-size:
-    clamp(30px, 7vw, 72px);
+    clamp(34px, 7vw, 78px);
 
   line-height: 1;
 
+  transform-origin: center;
+
   transition:
-    transform .12s ease;
+    transform .12s cubic-bezier(.2,.8,.2,1);
+
+  pointer-events: none;
 }
 
 .square:hover .piece {
-  transform: scale(1.07);
+  transform: translateY(-2px) scale(1.035);
 }
 
-/* WHITE */
+/* White */
 
 .white-piece {
   color: #ffffff;
 
   text-shadow:
-    0 3px 3px rgba(0, 0, 0, .75),
-    0 0 2px #000;
+    0 2px 0 #c7ced8,
+    0 5px 8px rgba(0,0,0,.42),
+    0 0 2px #4a5260;
 }
 
-/* BLACK */
+/* Black */
 
 .black-piece {
-  color: #111111;
+  color: #161b24;
 
   text-shadow:
-    0 2px 3px rgba(255, 255, 255, .35),
-    0 0 2px #000;
+    0 2px 0 #303845,
+    0 5px 8px rgba(0,0,0,.55),
+    0 0 2px rgba(255,255,255,.35);
 }
 
-/* =========================
+/* =========================================================
    SIDE PANEL
-========================= */
+========================================================= */
 
 .panel {
-  background:
-    rgba(20, 27, 41, .9);
+  min-width: 0;
 
   border:
-    1px solid rgba(255, 255, 255, .08);
+    1px solid rgba(255,255,255,.075);
 
-  border-radius: 20px;
+  border-radius: 22px;
 
-  padding: 20px;
-
-  box-shadow:
-    0 25px 60px rgba(0, 0, 0, .4);
-
-  backdrop-filter: blur(14px);
-}
-
-/* =========================
-   STATUS
-========================= */
-
-.status {
-  padding: 15px;
-
-  border-radius: 12px;
+  padding: 18px;
 
   background:
-    rgba(255, 255, 255, .06);
+    linear-gradient(
+      145deg,
+      rgba(25,33,47,.9),
+      rgba(13,18,28,.88)
+    );
 
-  margin-bottom: 18px;
+  box-shadow:
+    0 25px 65px rgba(0,0,0,.4);
 
-  text-align: center;
+  backdrop-filter: blur(20px);
 
-  font-weight: bold;
-
-  min-height: 48px;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  animation:
+    panelEnter .7s .08s both
+    cubic-bezier(.2,.8,.2,1);
 }
 
-/* =========================
-   EVALUATION BAR
-========================= */
+@keyframes panelEnter {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
 
-.eval {
-  width: 100%;
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-  height: 18px;
+/* =========================================================
+   STATUS
+========================================================= */
+
+.status-card {
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+
+  padding: 14px;
+
+  border-radius: 15px;
+
+  background:
+    rgba(255,255,255,.045);
+
+  border:
+    1px solid rgba(255,255,255,.055);
+
+  margin-bottom: 14px;
+}
+
+.status-icon {
+  width: 35px;
+  height: 35px;
+
+  flex: 0 0 auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   border-radius: 10px;
 
+  background:
+    rgba(255,255,255,.07);
+
+  font-size: 17px;
+}
+
+.status-main {
+  font-size: 14px;
+
+  font-weight: 700;
+}
+
+.status-sub {
+  color: #7f8b9f;
+
+  font-size: 11px;
+
+  margin-top: 3px;
+}
+
+/* =========================================================
+   EVALUATION
+========================================================= */
+
+.eval-header {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin:
+    18px
+    2px
+    7px;
+}
+
+.eval-title {
+  color: #7f8b9f;
+
+  font-size: 11px;
+
+  text-transform: uppercase;
+
+  letter-spacing: 1px;
+}
+
+.eval-value {
+  font-size: 12px;
+
+  font-weight: 800;
+
+  color: #dce5f3;
+}
+
+.eval-container {
+  height: 15px;
+
+  border-radius: 99px;
+
   overflow: hidden;
 
-  background: #101010;
+  background: #090c11;
 
   border:
-    1px solid rgba(255,255,255,.1);
+    1px solid rgba(255,255,255,.08);
 
-  margin-bottom: 20px;
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,.5);
 }
 
 .eval-fill {
-  width: 50%;
-
   height: 100%;
+
+  width: 50%;
 
   background:
     linear-gradient(
       90deg,
-      #777,
-      #eee
+      #5e6b7d,
+      #f4f6f9
     );
 
   transition:
-    width .4s ease;
+    width .45s cubic-bezier(.2,.8,.2,1);
 }
 
-/* =========================
-   MOVE LIST
-========================= */
+/* =========================================================
+   CONTROLS
+========================================================= */
 
-h2 {
-  margin-top: 0;
+.controls {
+  display: grid;
 
-  font-size: 22px;
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 9px;
+
+  margin-top: 17px;
 }
 
-.moves {
-  height: 290px;
-
-  overflow-y: auto;
-
-  background:
-    rgba(0, 0, 0, .2);
-
-  border-radius: 12px;
-
-  padding: 10px;
-
-  margin-bottom: 15px;
-}
-
-.move {
-  padding: 8px;
-
-  border-bottom:
-    1px solid
-    rgba(255,255,255,.05);
-
-  color: #dce4f3;
-}
-
-/* =========================
-   BUTTON
-========================= */
-
-button {
-  width: 100%;
-
-  border: none;
+.control {
+  padding: 12px;
 
   border-radius: 13px;
 
-  padding: 14px;
+  border:
+    1px solid rgba(255,255,255,.07);
 
-  margin-top: 5px;
+  background:
+    rgba(255,255,255,.045);
 
-  font-size: 16px;
-
-  font-weight: bold;
-
-  color: white;
+  color: #e8edf5;
 
   cursor: pointer;
 
+  font-size: 12px;
+
+  font-weight: 700;
+
+  transition:
+    background .15s ease,
+    transform .15s ease,
+    border-color .15s ease;
+}
+
+.control:hover {
+  background:
+    rgba(255,255,255,.08);
+
+  border-color:
+    rgba(255,255,255,.13);
+
+  transform: translateY(-1px);
+}
+
+.control.primary {
   background:
     linear-gradient(
       135deg,
-      #477cff,
-      #7657ff
+      #4d7dff,
+      #765cff
     );
 
+  border-color:
+    rgba(255,255,255,.12);
+
   box-shadow:
-    0 8px 20px
-    rgba(70, 100, 255, .25);
-
-  transition:
-    transform .15s ease,
-    filter .15s ease;
+    0 8px 25px
+    rgba(80,100,255,.2);
 }
 
-button:hover {
-  transform: translateY(-2px);
-
-  filter: brightness(1.12);
-}
-
-button:active {
+.control:active {
   transform: translateY(0);
 }
 
-/* =========================
-   MOBILE
-========================= */
+/* =========================================================
+   SELECT
+========================================================= */
 
-@media (max-width: 850px) {
+.settings {
+  margin-top: 16px;
 
-  body {
-    padding: 15px;
+  padding-top: 15px;
+
+  border-top:
+    1px solid
+    rgba(255,255,255,.06);
+}
+
+.setting-row {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-bottom: 10px;
+}
+
+.setting-label {
+  color: #8d99ac;
+
+  font-size: 12px;
+}
+
+select {
+  color: #edf2f9;
+
+  background:
+    #161d29;
+
+  border:
+    1px solid
+    rgba(255,255,255,.09);
+
+  border-radius: 9px;
+
+  padding:
+    7px
+    9px;
+
+  outline: none;
+
+  font-weight: 700;
+}
+
+/* =========================================================
+   MOVES
+========================================================= */
+
+.moves-title {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin-top: 19px;
+
+  margin-bottom: 9px;
+}
+
+.moves-title h2 {
+  margin: 0;
+
+  font-size: 15px;
+}
+
+.move-count {
+  color: #68758a;
+
+  font-size: 11px;
+}
+
+.moves {
+  height: 280px;
+
+  overflow-y: auto;
+
+  border-radius: 14px;
+
+  background:
+    rgba(0,0,0,.17);
+
+  border:
+    1px solid rgba(255,255,255,.045);
+
+  padding: 7px;
+
+  scrollbar-width: thin;
+}
+
+.moves::-webkit-scrollbar {
+  width: 5px;
+}
+
+.moves::-webkit-scrollbar-thumb {
+  background: #3a4556;
+
+  border-radius: 99px;
+}
+
+.move-row {
+  display: grid;
+
+  grid-template-columns:
+    38px 1fr 1fr;
+
+  padding:
+    9px
+    7px;
+
+  border-radius: 9px;
+
+  font-size: 12px;
+
+  transition:
+    background .15s ease;
+}
+
+.move-row:hover {
+  background:
+    rgba(255,255,255,.045);
+}
+
+.move-number {
+  color: #647188;
+
+  font-weight: 700;
+}
+
+.move-white,
+.move-black {
+  color: #dce4f0;
+
+  font-weight: 600;
+}
+
+.empty-moves {
+  height: 100%;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  color: #566174;
+
+  font-size: 12px;
+}
+
+/* =========================================================
+   CLOCKS
+========================================================= */
+
+.clocks {
+  display: grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap: 9px;
+
+  margin-top: 14px;
+}
+
+.clock {
+  padding: 11px 13px;
+
+  border-radius: 12px;
+
+  background:
+    rgba(255,255,255,.04);
+
+  border:
+    1px solid rgba(255,255,255,.055);
+}
+
+.clock-label {
+  color: #68758a;
+
+  font-size: 9px;
+
+  text-transform: uppercase;
+
+  letter-spacing: 1px;
+}
+
+.clock-time {
+  margin-top: 3px;
+
+  font-size: 18px;
+
+  font-weight: 800;
+
+  letter-spacing: 1px;
+}
+
+.clock.active {
+  border-color:
+    rgba(91,137,255,.45);
+
+  box-shadow:
+    inset 0 0 20px
+    rgba(80,120,255,.07);
+}
+
+/* =========================================================
+   THINKING
+========================================================= */
+
+.thinking {
+  display: none;
+
+  align-items: center;
+
+  gap: 6px;
+
+  color: #8290a6;
+
+  font-size: 10px;
+
+  margin-top: 12px;
+}
+
+.thinking.show {
+  display: flex;
+}
+
+.thinking-dot {
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: #7d9cff;
+
+  animation:
+    think 1s infinite ease-in-out;
+}
+
+.thinking-dot:nth-child(2) {
+  animation-delay: .15s;
+}
+
+.thinking-dot:nth-child(3) {
+  animation-delay: .3s;
+}
+
+@keyframes think {
+  0%, 80%, 100% {
+    opacity: .25;
+    transform: translateY(0);
   }
 
-  .layout {
+  40% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+/* =========================================================
+   GAME OVER
+========================================================= */
+
+.game-over {
+  position: absolute;
+
+  inset: 9px;
+
+  display: none;
+
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 17px;
+
+  background:
+    rgba(5,8,13,.73);
+
+  backdrop-filter:
+    blur(8px);
+
+  z-index: 30;
+}
+
+.game-over.show {
+  display: flex;
+}
+
+.game-over-card {
+  width: min(320px, 80%);
+
+  padding: 27px;
+
+  text-align: center;
+
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(30,39,55,.96),
+      rgba(13,18,27,.97)
+    );
+
+  border:
+    1px solid
+    rgba(255,255,255,.1);
+
+  box-shadow:
+    0 25px 70px
+    rgba(0,0,0,.6);
+
+  animation:
+    pop .3s ease;
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(.9);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.game-over-icon {
+  font-size: 42px;
+
+  margin-bottom: 8px;
+}
+
+.game-over-title {
+  font-size: 23px;
+
+  font-weight: 800;
+}
+
+.game-over-sub {
+  color: #8995a8;
+
+  font-size: 12px;
+
+  margin-top: 6px;
+}
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 1000px) {
+
+  .main {
     grid-template-columns: 1fr;
   }
 
   .panel {
+    max-width: 850px;
+
     width: 100%;
+
+    margin: auto;
+  }
+}
+
+@media (max-width: 600px) {
+
+  .app {
+    padding:
+      12px
+      12px
+      30px;
   }
 
+  .topbar {
+    padding: 12px;
+  }
+
+  .brand-name {
+    font-size: 15px;
+  }
+
+  .engine-pill {
+    display: none;
+  }
+
+  .board-shell {
+    padding: 6px;
+
+    border-radius: 18px;
+  }
+
+  .board {
+    border-radius: 12px;
+  }
+
+  .piece {
+    font-size: 11vw;
+  }
+
+  .coordinate {
+    font-size: 8px;
+  }
 }
 </style>
 </head>
 
 <body>
 
-<div class="game">
+<div class="app">
 
-  <div class="title">
+  <!-- =====================================================
+       TOP BAR
+  ====================================================== -->
 
-    <h1>♟ STOCKFISH CHESS</h1>
+  <header class="topbar">
 
-    <p>
-      Play against Stockfish 18
-    </p>
+    <div class="brand">
 
-  </div>
+      <div class="brand-icon">
+        ♞
+      </div>
 
+      <div>
+        <div class="brand-name">
+          STOCKFISH
+        </div>
 
-  <div class="layout">
-
-    <!-- BOARD -->
-
-    <div class="board-wrap">
-
-      <div
-        id="board"
-        class="board">
+        <div class="brand-subtitle">
+          Premium Chess
+        </div>
       </div>
 
     </div>
 
 
-    <!-- PANEL -->
+    <div class="engine-pill">
 
-    <div class="panel">
+      <span
+        id="engineDot"
+        class="engine-dot">
+      </span>
 
-      <div
-        id="status"
-        class="status">
+      <span id="engineText">
+        Connecting to engine...
+      </span>
 
-        Starting Stockfish...
+    </div>
+
+  </header>
+
+
+  <!-- =====================================================
+       MAIN
+  ====================================================== -->
+
+  <main class="main">
+
+    <!-- BOARD -->
+
+    <section class="board-section">
+
+      <div class="board-shell">
+
+        <div
+          id="board"
+          class="board">
+        </div>
+
+
+        <!-- GAME OVER -->
+
+        <div
+          id="gameOver"
+          class="game-over">
+
+          <div class="game-over-card">
+
+            <div
+              id="gameOverIcon"
+              class="game-over-icon">
+              🏆
+            </div>
+
+            <div
+              id="gameOverTitle"
+              class="game-over-title">
+              Game Over
+            </div>
+
+            <div
+              id="gameOverSub"
+              class="game-over-sub">
+              Well played.
+            </div>
+
+            <button
+              class="control primary"
+              style="width:100%; margin-top:18px;"
+              onclick="newGame()">
+              Play Again
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- SIDE PANEL -->
+
+    <aside class="panel">
+
+      <!-- STATUS -->
+
+      <div class="status-card">
+
+        <div
+          id="statusIcon"
+          class="status-icon">
+          ♙
+        </div>
+
+        <div>
+
+          <div
+            id="statusMain"
+            class="status-main">
+            Starting Stockfish...
+          </div>
+
+          <div
+            id="statusSub"
+            class="status-sub">
+            Initializing chess engine
+          </div>
+
+        </div>
 
       </div>
 
 
-      <div class="eval">
+      <!-- EVALUATION -->
+
+      <div class="eval-header">
+
+        <span class="eval-title">
+          Engine Evaluation
+        </span>
+
+        <span
+          id="evalValue"
+          class="eval-value">
+          0.00
+        </span>
+
+      </div>
+
+      <div class="eval-container">
 
         <div
           id="evalFill"
@@ -500,69 +1364,253 @@ button:active {
       </div>
 
 
-      <h2>
-        Moves
-      </h2>
+      <!-- CLOCKS -->
+
+      <div class="clocks">
+
+        <div
+          id="whiteClock"
+          class="clock active">
+
+          <div class="clock-label">
+            You · White
+          </div>
+
+          <div
+            id="whiteTime"
+            class="clock-time">
+            10:00
+          </div>
+
+        </div>
+
+
+        <div
+          id="blackClock"
+          class="clock">
+
+          <div class="clock-label">
+            Engine · Black
+          </div>
+
+          <div
+            id="blackTime"
+            class="clock-time">
+            10:00
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- THINKING -->
+
+      <div
+        id="thinking"
+        class="thinking">
+
+        <span>
+          Stockfish is thinking
+        </span>
+
+        <span class="thinking-dot"></span>
+        <span class="thinking-dot"></span>
+        <span class="thinking-dot"></span>
+
+      </div>
+
+
+      <!-- BUTTONS -->
+
+      <div class="controls">
+
+        <button
+          class="control primary"
+          onclick="newGame()">
+          ↻ New Game
+        </button>
+
+        <button
+          class="control"
+          onclick="undoMove()">
+          ↶ Undo
+        </button>
+
+      </div>
+
+
+      <!-- SETTINGS -->
+
+      <div class="settings">
+
+        <div class="setting-row">
+
+          <span class="setting-label">
+            Difficulty
+          </span>
+
+          <select id="difficulty">
+
+            <option value="8">
+              Beginner
+            </option>
+
+            <option value="12" selected>
+              Intermediate
+            </option>
+
+            <option value="16">
+              Advanced
+            </option>
+
+            <option value="20">
+              Expert
+            </option>
+
+          </select>
+
+        </div>
+
+      </div>
+
+
+      <!-- MOVES -->
+
+      <div class="moves-title">
+
+        <h2>
+          Move History
+        </h2>
+
+        <span
+          id="moveCount"
+          class="move-count">
+          0 moves
+        </span>
+
+      </div>
 
 
       <div
         id="moves"
         class="moves">
+
+        <div class="empty-moves">
+          Your game starts here
+        </div>
+
       </div>
 
+    </aside>
 
-      <button
-        onclick="newGame()">
-
-        🔄 New Game
-
-      </button>
-
-    </div>
-
-  </div>
+  </main>
 
 </div>
 
 
 <script>
 
-/* =========================
+/* =========================================================
    ELEMENTS
-========================= */
+========================================================= */
 
 const boardElement =
   document.getElementById("board");
 
-const statusElement =
-  document.getElementById("status");
+const statusMain =
+  document.getElementById("statusMain");
+
+const statusSub =
+  document.getElementById("statusSub");
+
+const statusIcon =
+  document.getElementById("statusIcon");
 
 const movesElement =
   document.getElementById("moves");
 
+const moveCount =
+  document.getElementById("moveCount");
+
 const evalFill =
   document.getElementById("evalFill");
 
+const evalValue =
+  document.getElementById("evalValue");
 
-/* =========================
+const engineDot =
+  document.getElementById("engineDot");
+
+const engineText =
+  document.getElementById("engineText");
+
+const thinkingElement =
+  document.getElementById("thinking");
+
+const difficulty =
+  document.getElementById("difficulty");
+
+const whiteTime =
+  document.getElementById("whiteTime");
+
+const blackTime =
+  document.getElementById("blackTime");
+
+const whiteClock =
+  document.getElementById("whiteClock");
+
+const blackClock =
+  document.getElementById("blackClock");
+
+const gameOver =
+  document.getElementById("gameOver");
+
+const gameOverIcon =
+  document.getElementById("gameOverIcon");
+
+const gameOverTitle =
+  document.getElementById("gameOverTitle");
+
+const gameOverSub =
+  document.getElementById("gameOverSub");
+
+
+/* =========================================================
    CHESS
-========================= */
+========================================================= */
 
 let game =
   new Chess();
 
-let engine = null;
+let engine =
+  null;
 
-let selectedSquare = null;
+let engineReady =
+  false;
 
-let engineReady = false;
+let thinking =
+  false;
 
-let thinking = false;
+let selectedSquare =
+  null;
+
+let lastMove =
+  null;
+
+let whiteSeconds =
+  600;
+
+let blackSeconds =
+  600;
+
+let clockInterval =
+  null;
 
 
-/* =========================
+/* =========================================================
    PIECES
-========================= */
+========================================================= */
 
 const pieces = {
 
@@ -583,9 +1631,87 @@ const pieces = {
 };
 
 
-/* =========================
+/* =========================================================
+   SOUND
+========================================================= */
+
+let audioContext = null;
+
+function playSound(type) {
+
+  try {
+
+    if (!audioContext) {
+
+      audioContext =
+        new (
+          window.AudioContext ||
+          window.webkitAudioContext
+        )();
+
+    }
+
+    const oscillator =
+      audioContext.createOscillator();
+
+    const gain =
+      audioContext.createGain();
+
+    oscillator.connect(gain);
+
+    gain.connect(
+      audioContext.destination
+    );
+
+
+    let frequency = 420;
+
+    if (type === "capture") {
+      frequency = 260;
+    }
+
+    if (type === "check") {
+      frequency = 620;
+    }
+
+
+    oscillator.frequency.value =
+      frequency;
+
+    oscillator.type =
+      "sine";
+
+
+    gain.gain.setValueAtTime(
+      .0001,
+      audioContext.currentTime
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+      .045,
+      audioContext.currentTime + .01
+    );
+
+    gain.gain.exponentialRampToValueAtTime(
+      .0001,
+      audioContext.currentTime + .12
+    );
+
+
+    oscillator.start();
+
+    oscillator.stop(
+      audioContext.currentTime + .13
+    );
+
+  } catch (e) {}
+
+}
+
+
+/* =========================================================
    DRAW BOARD
-========================= */
+========================================================= */
 
 function drawBoard() {
 
@@ -619,8 +1745,7 @@ function drawBoard() {
       const rank =
         8 - row;
 
-
-      const squareName =
+      const name =
         file + rank;
 
 
@@ -634,8 +1759,65 @@ function drawBoard() {
 
 
       square.dataset.square =
-        squareName;
+        name;
 
+
+      /* Last move */
+
+      if (
+        lastMove &&
+        (
+          name === lastMove.from ||
+          name === lastMove.to
+        )
+      ) {
+
+        square.classList.add(
+          "last-move"
+        );
+
+      }
+
+
+      /* Selected */
+
+      if (
+        name === selectedSquare
+      ) {
+
+        square.classList.add(
+          "selected"
+        );
+
+      }
+
+
+      /* Check */
+
+      if (
+        game.in_check()
+      ) {
+
+        const piece =
+          board[row][col];
+
+
+        if (
+          piece &&
+          piece.type === "k" &&
+          piece.color === game.turn()
+        ) {
+
+          square.classList.add(
+            "in-check"
+          );
+
+        }
+
+      }
+
+
+      /* Piece */
 
       const piece =
         board[row][col];
@@ -644,7 +1826,9 @@ function drawBoard() {
       if (piece) {
 
         const span =
-          document.createElement("span");
+          document.createElement(
+            "span"
+          );
 
 
         span.className =
@@ -663,25 +1847,57 @@ function drawBoard() {
           ];
 
 
-        square.appendChild(span);
-
-      }
-
-
-      if (
-        squareName ===
-        selectedSquare
-      ) {
-
-        square.classList.add(
-          "selected"
+        square.appendChild(
+          span
         );
 
       }
 
 
-      square.onclick = () =>
-        clickSquare(squareName);
+      /* Coordinates */
+
+      if (row === 7) {
+
+        const coord =
+          document.createElement(
+            "span"
+          );
+
+        coord.className =
+          "coordinate file-coordinate";
+
+        coord.textContent =
+          file;
+
+        square.appendChild(
+          coord
+        );
+
+      }
+
+
+      if (col === 0) {
+
+        const coord =
+          document.createElement(
+            "span"
+          );
+
+        coord.className =
+          "coordinate rank-coordinate";
+
+        coord.textContent =
+          rank;
+
+        square.appendChild(
+          coord
+        );
+
+      }
+
+
+      square.onclick =
+        () => clickSquare(name);
 
 
       boardElement.appendChild(
@@ -704,9 +1920,9 @@ function drawBoard() {
 }
 
 
-/* =========================
-   HIGHLIGHT MOVES
-========================= */
+/* =========================================================
+   LEGAL MOVES
+========================================================= */
 
 function highlightMoves(square) {
 
@@ -717,52 +1933,65 @@ function highlightMoves(square) {
     });
 
 
-  moves.forEach(move => {
+  moves.forEach(
+    move => {
 
-    const target =
-      document.querySelector(
-        `[data-square="${move.to}"]`
-      );
-
-
-    if (!target) return;
+      const target =
+        document.querySelector(
+          `[data-square="${move.to}"]`
+        );
 
 
-    if (move.captured) {
+      if (!target) {
+        return;
+      }
 
-      target.classList.add(
-        "capture"
-      );
 
-    } else {
+      if (move.captured) {
 
-      target.classList.add(
-        "possible"
-      );
+        target.classList.add(
+          "capture"
+        );
+
+      } else {
+
+        target.classList.add(
+          "possible"
+        );
+
+      }
 
     }
-
-  });
+  );
 
 }
 
 
-/* =========================
-   CLICK SQUARE
-========================= */
+/* =========================================================
+   CLICK
+========================================================= */
 
 function clickSquare(square) {
 
   if (
     !engineReady ||
-    thinking
+    thinking ||
+    game.game_over()
   ) {
+
     return;
+
   }
 
 
-  if (game.game_over()) {
+  /* Only allow White */
+
+  if (
+    game.turn() !== "w"
+  ) {
+
     return;
+
   }
 
 
@@ -770,50 +1999,48 @@ function clickSquare(square) {
     game.get(square);
 
 
-  /* Select piece */
+  /* Select */
 
   if (!selectedSquare) {
 
-    if (!piece) {
-      return;
-    }
-
-
     if (
-      piece.color !==
-      game.turn()
+      !piece ||
+      piece.color !== "w"
     ) {
+
       return;
+
     }
 
 
     selectedSquare =
       square;
 
-
     drawBoard();
 
     return;
+
   }
 
 
-  /* Unselect */
+  /* Reselect */
 
   if (
-    square ===
-    selectedSquare
+    piece &&
+    piece.color === "w"
   ) {
 
     selectedSquare =
-      null;
+      square;
 
     drawBoard();
 
     return;
+
   }
 
 
-  /* Move */
+  /* Try move */
 
   const move =
     game.move({
@@ -830,229 +2057,86 @@ function clickSquare(square) {
     });
 
 
-  /* Illegal move */
-
   if (!move) {
 
-    if (
-      piece &&
-      piece.color ===
-      game.turn()
-    ) {
-
-      selectedSquare =
-        square;
-
-      drawBoard();
-
-    }
-
     return;
+
   }
 
 
-  /* Successful move */
+  lastMove = {
+    from: move.from,
+    to: move.to
+  };
+
 
   selectedSquare =
     null;
 
 
-  updateMoves();
+  if (move.captured) {
 
-  drawBoard();
+    playSound("capture");
 
-  updateStatus();
+  } else {
 
+    playSound("move");
 
-  if (game.game_over()) {
-    return;
   }
 
 
-  /* Stockfish thinking */
+  if (game.in_check()) {
 
-  thinking = true;
+    playSound("check");
 
-
-  statusElement.textContent =
-    "🤖 Stockfish is thinking...";
+  }
 
 
-  engine.postMessage(
-    "position fen " +
-    game.fen()
-  );
+  updateEverything();
+
+  checkGameOver();
 
 
-  engine.postMessage(
-    "go depth 12"
-  );
-
-}
-
-
-/* =========================
-   MOVE LIST
-========================= */
-
-function updateMoves() {
-
-  movesElement.innerHTML = "";
-
-
-  const history =
-    game.history();
-
-
-  for (
-    let i = 0;
-    i < history.length;
-    i += 2
+  if (
+    !game.game_over()
   ) {
 
-    const moveNumber =
-      Math.floor(i / 2) + 1;
+    thinking =
+      true;
+
+    setThinking(true);
+
+    statusMain.textContent =
+      "Stockfish is thinking...";
+
+    statusSub.textContent =
+      "Calculating the best move";
 
 
-    const white =
-      history[i] || "";
+    engine.postMessage(
+      "position fen " +
+      game.fen()
+    );
 
 
-    const black =
-      history[i + 1] || "";
-
-
-    const div =
-      document.createElement(
-        "div"
+    const depth =
+      Number(
+        difficulty.value
       );
 
 
-    div.className =
-      "move";
-
-
-    div.textContent =
-      moveNumber +
-      ". " +
-      white +
-      (
-        black
-          ? "    " + black
-          : ""
-      );
-
-
-    movesElement.appendChild(
-      div
+    engine.postMessage(
+      "go depth " + depth
     );
 
   }
 
-
-  movesElement.scrollTop =
-    movesElement.scrollHeight;
-
 }
 
 
-/* =========================
-   STATUS
-========================= */
-
-function updateStatus() {
-
-  if (
-    game.in_checkmate()
-  ) {
-
-    statusElement.textContent =
-      "🏆 Checkmate!";
-
-    return;
-
-  }
-
-
-  if (
-    game.in_draw()
-  ) {
-
-    statusElement.textContent =
-      "🤝 Draw!";
-
-    return;
-
-  }
-
-
-  if (
-    game.in_check()
-  ) {
-
-    statusElement.textContent =
-      "⚠️ Check!";
-
-    return;
-
-  }
-
-
-  if (
-    game.turn() === "w"
-  ) {
-
-    statusElement.textContent =
-      "♙ Your turn";
-
-  } else {
-
-    statusElement.textContent =
-      "♟ Black's turn";
-
-  }
-
-}
-
-
-/* =========================
-   NEW GAME
-========================= */
-
-function newGame() {
-
-  game.reset();
-
-  selectedSquare =
-    null;
-
-  thinking =
-    false;
-
-
-  updateMoves();
-
-  drawBoard();
-
-
-  if (engineReady) {
-
-    statusElement.textContent =
-      "♙ Your turn";
-
-  } else {
-
-    statusElement.textContent =
-      "Starting Stockfish...";
-
-  }
-
-}
-
-
-/* =========================
-   STOCKFISH
-========================= */
+/* =========================================================
+   ENGINE
+========================================================= */
 
 function startEngine() {
 
@@ -1071,22 +2155,28 @@ function startEngine() {
           String(event.data);
 
 
-        console.log(message);
-
-
-        /* UCI */
-
         if (
-          message ===
-          "uciok"
+          message === "uciok"
         ) {
 
           engineReady =
             true;
 
 
-          statusElement.textContent =
-            "♙ Stockfish 18 is ready!";
+          engineDot.classList.add(
+            "ready"
+          );
+
+
+          engineText.textContent =
+            "Stockfish 18 · Online";
+
+
+          statusMain.textContent =
+            "Your turn";
+
+          statusSub.textContent =
+            "White to move";
 
 
           engine.postMessage(
@@ -1099,7 +2189,20 @@ function startEngine() {
         }
 
 
-        /* BEST MOVE */
+        /* Evaluation */
+
+        if (
+          message.startsWith("info")
+        ) {
+
+          parseEvaluation(
+            message
+          );
+
+        }
+
+
+        /* Best move */
 
         if (
           message.startsWith(
@@ -1107,89 +2210,9 @@ function startEngine() {
           )
         ) {
 
-          const parts =
-            message.split(" ");
-
-
-          const bestMove =
-            parts[1];
-
-
-          if (
-            bestMove &&
-            bestMove !== "(none)" &&
-            bestMove.length >= 4
-          ) {
-
-            const from =
-              bestMove.substring(
-                0,
-                2
-              );
-
-
-            const to =
-              bestMove.substring(
-                2,
-                4
-              );
-
-
-            let promotion =
-              "q";
-
-
-            if (
-              bestMove.length >= 5
-            ) {
-
-              promotion =
-                bestMove.substring(
-                  4,
-                  5
-                );
-
-            }
-
-
-            const move =
-              game.move({
-
-                from:
-                  from,
-
-                to:
-                  to,
-
-                promotion:
-                  promotion
-
-              });
-
-
-            if (move) {
-
-              updateMoves();
-
-              drawBoard();
-
-            }
-
-          }
-
-
-          thinking =
-            false;
-
-
-          updateStatus();
-
-
-          if (
-            game.game_over()
-          ) {
-            return;
-          }
+          makeEngineMove(
+            message
+          );
 
         }
 
@@ -1197,14 +2220,26 @@ function startEngine() {
 
 
     engine.onerror =
-      function(event) {
+      function() {
 
-        statusElement.textContent =
-          "❌ Engine error: " +
-          (
-            event.message ||
-            "Stockfish failed to start."
-          );
+        engineReady =
+          false;
+
+
+        engineDot.classList.remove(
+          "ready"
+        );
+
+
+        engineText.textContent =
+          "Engine error";
+
+
+        statusMain.textContent =
+          "Engine error";
+
+        statusSub.textContent =
+          "Stockfish could not start";
 
       };
 
@@ -1213,24 +2248,829 @@ function startEngine() {
       "uci"
     );
 
-
   } catch (error) {
 
-    statusElement.textContent =
-      "❌ Could not start Stockfish.";
+    statusMain.textContent =
+      "Engine error";
+
+    statusSub.textContent =
+      "Could not create worker";
 
   }
 
 }
 
 
-/* =========================
+/* =========================================================
+   ENGINE MOVE
+========================================================= */
+
+function makeEngineMove(message) {
+
+  const parts =
+    message.split(" ");
+
+  const bestMove =
+    parts[1];
+
+
+  if (
+    !bestMove ||
+    bestMove === "(none)"
+  ) {
+
+    thinking =
+      false;
+
+    setThinking(false);
+
+    updateStatus();
+
+    return;
+
+  }
+
+
+  const from =
+    bestMove.substring(
+      0,
+      2
+    );
+
+  const to =
+    bestMove.substring(
+      2,
+      4
+    );
+
+
+  let promotion =
+    "q";
+
+
+  if (
+    bestMove.length >= 5
+  ) {
+
+    promotion =
+      bestMove.substring(
+        4,
+        5
+      );
+
+  }
+
+
+  const move =
+    game.move({
+
+      from: from,
+
+      to: to,
+
+      promotion: promotion
+
+    });
+
+
+  if (move) {
+
+    lastMove = {
+      from: move.from,
+      to: move.to
+    };
+
+
+    if (move.captured) {
+
+      playSound(
+        "capture"
+      );
+
+    } else {
+
+      playSound(
+        "move"
+      );
+
+    }
+
+
+    if (game.in_check()) {
+
+      playSound(
+        "check"
+      );
+
+    }
+
+  }
+
+
+  thinking =
+    false;
+
+  setThinking(false);
+
+  updateEverything();
+
+  checkGameOver();
+
+}
+
+
+/* =========================================================
+   EVALUATION
+========================================================= */
+
+function parseEvaluation(message) {
+
+  const match =
+    message.match(
+      /\bscore cp (-?\d+)/
+    );
+
+
+  if (!match) {
+    return;
+  }
+
+
+  const cp =
+    Number(match[1]);
+
+
+  const score =
+    Math.max(
+      -1000,
+      Math.min(
+        1000,
+        cp
+      )
+    );
+
+
+  const percent =
+    50 +
+    score /
+    20;
+
+
+  evalFill.style.width =
+    Math.max(
+      5,
+      Math.min(
+        95,
+        percent
+      )
+    ) + "%";
+
+
+  const value =
+    cp / 100;
+
+
+  evalValue.textContent =
+    (
+      value >= 0
+        ? "+"
+        : ""
+    ) +
+    value.toFixed(2);
+
+}
+
+
+/* =========================================================
+   STATUS
+========================================================= */
+
+function updateStatus() {
+
+  if (
+    game.game_over()
+  ) {
+
+    return;
+
+  }
+
+
+  if (
+    game.in_check()
+  ) {
+
+    statusIcon.textContent =
+      "⚠️";
+
+    statusMain.textContent =
+      "Check!";
+
+    statusSub.textContent =
+      game.turn() === "w"
+        ? "Your king is under attack"
+        : "Stockfish is in check";
+
+    return;
+
+  }
+
+
+  if (
+    game.turn() === "w"
+  ) {
+
+    statusIcon.textContent =
+      "♙";
+
+    statusMain.textContent =
+      "Your turn";
+
+    statusSub.textContent =
+      "White to move";
+
+  } else {
+
+    statusIcon.textContent =
+      "♟";
+
+    statusMain.textContent =
+      "Stockfish's turn";
+
+    statusSub.textContent =
+      "Black to move";
+
+  }
+
+}
+
+
+/* =========================================================
+   EVERYTHING
+========================================================= */
+
+function updateEverything() {
+
+  drawBoard();
+
+  updateMoves();
+
+  updateStatus();
+
+  updateClocks();
+
+}
+
+
+/* =========================================================
+   MOVES
+========================================================= */
+
+function updateMoves() {
+
+  const history =
+    game.history();
+
+
+  moveCount.textContent =
+    history.length +
+    (
+      history.length === 1
+        ? " move"
+        : " moves"
+    );
+
+
+  if (!history.length) {
+
+    movesElement.innerHTML = `
+      <div class="empty-moves">
+        Your game starts here
+      </div>
+    `;
+
+    return;
+
+  }
+
+
+  movesElement.innerHTML =
+    "";
+
+
+  for (
+    let i = 0;
+    i < history.length;
+    i += 2
+  ) {
+
+    const row =
+      document.createElement(
+        "div"
+      );
+
+
+    row.className =
+      "move-row";
+
+
+    const number =
+      document.createElement(
+        "span"
+      );
+
+    number.className =
+      "move-number";
+
+    number.textContent =
+      (i / 2 + 1) + ".";
+
+
+    const white =
+      document.createElement(
+        "span"
+      );
+
+    white.className =
+      "move-white";
+
+    white.textContent =
+      history[i] || "";
+
+
+    const black =
+      document.createElement(
+        "span"
+      );
+
+    black.className =
+      "move-black";
+
+    black.textContent =
+      history[i + 1] || "";
+
+
+    row.appendChild(
+      number
+    );
+
+    row.appendChild(
+      white
+    );
+
+    row.appendChild(
+      black
+    );
+
+
+    movesElement.appendChild(
+      row
+    );
+
+  }
+
+
+  movesElement.scrollTop =
+    movesElement.scrollHeight;
+
+}
+
+
+/* =========================================================
+   GAME OVER
+========================================================= */
+
+function checkGameOver() {
+
+  if (
+    !game.game_over()
+  ) {
+
+    return;
+
+  }
+
+
+  stopClock();
+
+
+  let title =
+    "Game Over";
+
+  let subtitle =
+    "Well played.";
+
+  let icon =
+    "🏁";
+
+
+  if (
+    game.in_checkmate()
+  ) {
+
+    icon =
+      "🏆";
+
+
+    if (
+      game.turn() === "b"
+    ) {
+
+      title =
+        "Checkmate — You Win!";
+
+      subtitle =
+        "A brilliant finish.";
+
+    } else {
+
+      title =
+        "Checkmate";
+
+      subtitle =
+        "Stockfish wins this round.";
+
+    }
+
+  } else if (
+    game.in_draw()
+  ) {
+
+    icon =
+      "🤝";
+
+    title =
+      "Draw";
+
+    subtitle =
+      "Neither side could win.";
+
+  }
+
+
+  gameOverIcon.textContent =
+    icon;
+
+  gameOverTitle.textContent =
+    title;
+
+  gameOverSub.textContent =
+    subtitle;
+
+
+  gameOver.classList.add(
+    "show"
+  );
+
+}
+
+
+/* =========================================================
+   THINKING
+========================================================= */
+
+function setThinking(show) {
+
+  if (show) {
+
+    thinkingElement.classList.add(
+      "show"
+    );
+
+  } else {
+
+    thinkingElement.classList.remove(
+      "show"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   NEW GAME
+========================================================= */
+
+function newGame() {
+
+  game.reset();
+
+
+  selectedSquare =
+    null;
+
+  lastMove =
+    null;
+
+  thinking =
+    false;
+
+
+  setThinking(
+    false
+  );
+
+
+  gameOver.classList.remove(
+    "show"
+  );
+
+
+  whiteSeconds =
+    600;
+
+  blackSeconds =
+    600;
+
+
+  evalFill.style.width =
+    "50%";
+
+  evalValue.textContent =
+    "0.00";
+
+
+  updateEverything();
+
+
+  if (engineReady) {
+
+    statusIcon.textContent =
+      "♙";
+
+    statusMain.textContent =
+      "Your turn";
+
+    statusSub.textContent =
+      "White to move";
+
+  }
+
+
+  startClock();
+
+}
+
+
+/* =========================================================
+   UNDO
+========================================================= */
+
+function undoMove() {
+
+  if (
+    thinking
+  ) {
+
+    return;
+
+  }
+
+
+  const history =
+    game.history();
+
+
+  if (
+    history.length === 0
+  ) {
+
+    return;
+
+  }
+
+
+  /* Undo engine move */
+
+  if (
+    history.length >= 2
+  ) {
+
+    game.undo();
+
+  }
+
+
+  /* Undo player's move */
+
+  game.undo();
+
+
+  const remaining =
+    game.history();
+
+
+  if (
+    remaining.length === 0
+  ) {
+
+    lastMove =
+      null;
+
+  }
+
+
+  selectedSquare =
+    null;
+
+
+  updateEverything();
+
+  startClock();
+
+}
+
+
+/* =========================================================
+   CLOCK
+========================================================= */
+
+function startClock() {
+
+  stopClock();
+
+
+  clockInterval =
+    setInterval(
+      () => {
+
+        if (
+          thinking
+        ) {
+
+          blackSeconds--;
+
+        } else {
+
+          whiteSeconds--;
+
+        }
+
+
+        updateClocks();
+
+
+        if (
+          whiteSeconds <= 0
+        ) {
+
+          endOnTime(
+            "You ran out of time."
+          );
+
+        }
+
+
+        if (
+          blackSeconds <= 0
+        ) {
+
+          endOnTime(
+            "Stockfish ran out of time."
+          );
+
+        }
+
+      },
+      1000
+    );
+
+}
+
+
+function stopClock() {
+
+  if (
+    clockInterval
+  ) {
+
+    clearInterval(
+      clockInterval
+    );
+
+    clockInterval =
+      null;
+
+  }
+
+}
+
+
+function endOnTime(reason) {
+
+  stopClock();
+
+  thinking =
+    false;
+
+  setThinking(false);
+
+
+  gameOverIcon.textContent =
+    "⏱️";
+
+  gameOverTitle.textContent =
+    reason.includes("You")
+      ? "Time's Up — Stockfish Wins"
+      : "Time's Up — You Win";
+
+  gameOverSub.textContent =
+    "The clock decided the game.";
+
+  gameOver.classList.add(
+    "show"
+  );
+
+}
+
+
+function formatTime(seconds) {
+
+  seconds =
+    Math.max(
+      0,
+      seconds
+    );
+
+
+  const minutes =
+    Math.floor(
+      seconds / 60
+    );
+
+
+  const secs =
+    seconds % 60;
+
+
+  return (
+    String(minutes)
+      .padStart(2, "0")
+    +
+    ":"
+    +
+    String(secs)
+      .padStart(2, "0")
+  );
+
+}
+
+
+function updateClocks() {
+
+  whiteTime.textContent =
+    formatTime(
+      whiteSeconds
+    );
+
+  blackTime.textContent =
+    formatTime(
+      blackSeconds
+    );
+
+
+  if (
+    game.turn() === "w" &&
+    !thinking
+  ) {
+
+    whiteClock.classList.add(
+      "active"
+    );
+
+    blackClock.classList.remove(
+      "active"
+    );
+
+  } else {
+
+    whiteClock.classList.remove(
+      "active"
+    );
+
+    blackClock.classList.add(
+      "active"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
    START
-========================= */
+========================================================= */
 
 drawBoard();
 
+updateMoves();
+
+updateClocks();
+
 startEngine();
+
+startClock();
 
 </script>
 
