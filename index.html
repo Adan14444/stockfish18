@@ -2,1199 +2,689 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Stockfish — Premium Chess</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Stockfish Chess — V2</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
 <style>
-/* =========================================================
-   RESET
-========================================================= */
-
-* {
-  box-sizing: border-box;
+*{
+  box-sizing:border-box;
+  -webkit-tap-highlight-color:transparent;
 }
 
-html {
-  background: #070a0f;
+:root{
+  --bg:#070910;
+  --panel:rgba(18,22,34,.72);
+  --panel2:rgba(255,255,255,.055);
+  --line:rgba(255,255,255,.10);
+  --text:#f5f7ff;
+  --muted:#8e96aa;
+  --accent:#8b7cff;
+  --accent2:#57d9ff;
+
+  --light:#dfe7f2;
+  --dark:#66748b;
+
+  --board-size:min(72vh, min(72vw, 760px));
 }
 
-body {
-  margin: 0;
-  min-height: 100vh;
+html,body{
+  margin:0;
+  min-height:100%;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
 
-  font-family:
-    Inter,
-    ui-sans-serif,
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    sans-serif;
+body{
+  overflow-x:hidden;
+  background:
+    radial-gradient(circle at 15% 10%,rgba(105,88,255,.18),transparent 28%),
+    radial-gradient(circle at 90% 85%,rgba(35,197,255,.12),transparent 30%),
+    linear-gradient(145deg,#060810,#0a0d16 55%,#070910);
+}
 
-  color: #f4f7fb;
+body:before{
+  content:"";
+  position:fixed;
+  inset:-30%;
+  pointer-events:none;
+  background:
+    radial-gradient(circle,rgba(139,124,255,.08) 0 1px,transparent 1px);
+  background-size:42px 42px;
+  transform:rotate(12deg);
+  opacity:.4;
+}
+
+button,select{
+  font:inherit;
+}
+
+button{
+  color:inherit;
+}
+
+.app{
+  width:min(1500px,96vw);
+  margin:auto;
+  min-height:100vh;
+  padding:22px 0 35px;
+  position:relative;
+}
+
+.topbar{
+  height:70px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 18px;
+  margin-bottom:22px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:rgba(15,18,29,.72);
+  backdrop-filter:blur(22px);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,.25),
+    inset 0 1px rgba(255,255,255,.06);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:13px;
+}
+
+.logo{
+  width:42px;
+  height:42px;
+  border-radius:13px;
+  display:grid;
+  place-items:center;
+  font-size:23px;
+  background:linear-gradient(135deg,#9d91ff,#4bd7ff);
+  box-shadow:0 8px 25px rgba(102,125,255,.35);
+}
+
+.title{
+  font-weight:800;
+  letter-spacing:-.5px;
+}
+
+.subtitle{
+  color:var(--muted);
+  font-size:12px;
+  margin-top:2px;
+}
+
+.engine-pill{
+  display:flex;
+  align-items:center;
+  gap:9px;
+  padding:9px 13px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:rgba(255,255,255,.045);
+  color:#cbd1df;
+  font-size:12px;
+  font-weight:700;
+}
+
+.engine-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#4cff9b;
+  box-shadow:0 0 14px #4cff9b;
+}
+
+.engine-pill.thinking .engine-dot{
+  animation:pulse .75s infinite alternate;
+}
+
+@keyframes pulse{
+  from{transform:scale(.7);opacity:.45}
+  to{transform:scale(1.25);opacity:1}
+}
+
+.main{
+  display:grid;
+  grid-template-columns:minmax(500px,1fr) 350px;
+  gap:25px;
+  align-items:start;
+}
+
+.board-area{
+  display:flex;
+  justify-content:center;
+}
+
+.board-shell{
+  width:var(--board-size);
+  height:var(--board-size);
+  padding:11px;
+  border-radius:28px;
+  position:relative;
 
   background:
-    radial-gradient(
-      circle at 15% 10%,
-      rgba(77, 113, 170, .18),
-      transparent 35%
-    ),
-    radial-gradient(
-      circle at 85% 80%,
-      rgba(115, 83, 180, .14),
-      transparent 35%
-    ),
-    linear-gradient(
-      135deg,
-      #06090e,
-      #0c111b 50%,
-      #080b11
-    );
+    linear-gradient(145deg,
+      rgba(255,255,255,.16),
+      rgba(255,255,255,.035) 35%,
+      rgba(0,0,0,.3));
 
-  overflow-x: hidden;
-}
-
-/* =========================================================
-   BACKGROUND LIGHT
-========================================================= */
-
-body::before {
-  content: "";
-
-  position: fixed;
-
-  width: 650px;
-  height: 650px;
-
-  left: 50%;
-  top: -350px;
-
-  transform: translateX(-50%);
-
-  background:
-    radial-gradient(
-      circle,
-      rgba(125, 170, 255, .08),
-      transparent 68%
-    );
-
-  pointer-events: none;
-}
-
-/* =========================================================
-   APP
-========================================================= */
-
-.app {
-  width: min(1500px, 100%);
-  margin: auto;
-
-  padding:
-    28px
-    28px
-    45px;
-}
-
-/* =========================================================
-   TOP BAR
-========================================================= */
-
-.topbar {
-  display: flex;
-
-  justify-content: space-between;
-  align-items: center;
-
-  margin-bottom: 25px;
-
-  padding:
-    15px
-    18px;
-
-  border:
-    1px solid rgba(255,255,255,.08);
-
-  border-radius: 18px;
-
-  background:
-    linear-gradient(
-      135deg,
-      rgba(24,31,44,.82),
-      rgba(12,17,26,.72)
-    );
+  border:1px solid rgba(255,255,255,.12);
 
   box-shadow:
-    0 15px 45px rgba(0,0,0,.3);
-
-  backdrop-filter: blur(18px);
+    0 35px 90px rgba(0,0,0,.48),
+    0 0 80px rgba(100,100,255,.10),
+    inset 0 1px rgba(255,255,255,.12);
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 13px;
+.board{
+  width:100%;
+  height:100%;
+  position:relative;
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  grid-template-rows:repeat(8,1fr);
+  overflow:hidden;
+  border-radius:18px;
+  isolation:isolate;
 }
 
-.brand-icon {
-  width: 42px;
-  height: 42px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 12px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #ffffff,
-      #aeb8c8
-    );
-
-  color: #111722;
-
-  font-size: 25px;
-
-  box-shadow:
-    0 5px 20px rgba(255,255,255,.08);
-}
-
-.brand-name {
-  font-weight: 800;
-
-  letter-spacing: 1.5px;
-
-  font-size: 18px;
-}
-
-.brand-subtitle {
-  color: #7f8ba0;
-
-  font-size: 12px;
-
-  margin-top: 2px;
-}
-
-.engine-pill {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  padding:
-    8px
-    12px;
-
-  border-radius: 999px;
-
-  background:
-    rgba(255,255,255,.045);
-
-  border:
-    1px solid rgba(255,255,255,.07);
-
-  color: #aab5c8;
-
-  font-size: 12px;
-}
-
-.engine-dot {
-  width: 8px;
-  height: 8px;
-
-  border-radius: 50%;
-
-  background: #777;
-
-  box-shadow:
-    0 0 10px rgba(255,255,255,.15);
-}
-
-.engine-dot.ready {
-  background: #62e6a5;
-
-  box-shadow:
-    0 0 14px rgba(98,230,165,.65);
-}
-
-/* =========================================================
-   MAIN
-========================================================= */
-
-.main {
-  display: grid;
-
-  grid-template-columns:
-    minmax(420px, 850px)
-    minmax(290px, 360px);
-
-  gap: 24px;
-
-  justify-content: center;
-
-  align-items: start;
-}
-
-/* =========================================================
-   BOARD AREA
-========================================================= */
-
-.board-section {
-  position: relative;
-}
-
-.board-shell {
-  position: relative;
-
-  width: 100%;
-
-  aspect-ratio: 1;
-
-  padding: 9px;
-
-  border-radius: 25px;
-
-  background:
-    linear-gradient(
-      145deg,
-      #39475e,
-      #151c29 42%,
-      #0d121b
-    );
-
-  box-shadow:
-    0 35px 90px rgba(0,0,0,.55),
-    0 0 0 1px rgba(255,255,255,.05),
-    inset 0 1px 0 rgba(255,255,255,.08);
-
-  animation:
-    boardEnter .7s cubic-bezier(.2,.8,.2,1);
-}
-
-@keyframes boardEnter {
-  from {
-    opacity: 0;
-    transform: translateY(14px) scale(.985);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.board {
-  width: 100%;
-  height: 100%;
-
-  display: grid;
-
-  grid-template-columns:
-    repeat(8, minmax(0,1fr));
-
-  grid-template-rows:
-    repeat(8, minmax(0,1fr));
-
-  overflow: hidden;
-
-  border-radius: 17px;
-
-  box-shadow:
-    inset 0 0 0 1px rgba(0,0,0,.25);
-}
-
-/* =========================================================
-   SQUARES
-========================================================= */
-
-.square {
-  position: relative;
-
-  width: 100%;
-  height: 100%;
-
-  min-width: 0;
-  min-height: 0;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  cursor: pointer;
-
-  user-select: none;
-
+.square{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  user-select:none;
   transition:
-    filter .14s ease,
-    box-shadow .14s ease;
+    filter .16s ease,
+    box-shadow .16s ease;
 }
 
-.light {
+.square.light{
   background:
-    linear-gradient(
-      145deg,
-      #dfe8f3,
-      #c9d5e4
-    );
+    linear-gradient(145deg,#edf2f8,#d6dfeb);
 }
 
-.dark {
+.square.dark{
   background:
-    linear-gradient(
-      145deg,
-      #617894,
-      #506983
-    );
+    linear-gradient(145deg,#718097,#59687e);
 }
 
-.square:hover {
-  filter: brightness(1.08);
+.square:hover{
+  filter:brightness(1.08);
 }
 
-/* =========================================================
-   COORDINATES
-========================================================= */
-
-.coordinate {
-  position: absolute;
-
-  font-size: 11px;
-
-  font-weight: 700;
-
-  opacity: .65;
-
-  pointer-events: none;
+.square.last{
+  box-shadow:inset 0 0 0 999px rgba(255,210,78,.18);
 }
 
-.file-coordinate {
-  bottom: 5px;
-  right: 7px;
-}
-
-.rank-coordinate {
-  top: 5px;
-  left: 7px;
-}
-
-.light .coordinate {
-  color: #617087;
-}
-
-.dark .coordinate {
-  color: #dce5f0;
-}
-
-/* =========================================================
-   LAST MOVE
-========================================================= */
-
-.last-move {
+.square.selected{
   box-shadow:
-    inset 0 0 0 999px
-    rgba(245, 204, 74, .17);
+    inset 0 0 0 999px rgba(123,108,255,.30),
+    inset 0 0 30px rgba(123,108,255,.5);
 }
 
-/* =========================================================
-   SELECTED
-========================================================= */
-
-.selected {
+.square.check{
   box-shadow:
-    inset 0 0 0 4px
-    rgba(255, 220, 90, .95),
-    inset 0 0 35px
-    rgba(255,220,90,.16);
+    inset 0 0 0 999px rgba(255,57,82,.28),
+    inset 0 0 38px rgba(255,44,70,.75);
+  animation:checkPulse .9s infinite alternate;
 }
 
-/* =========================================================
-   LEGAL MOVES
-========================================================= */
-
-.possible::after {
-  content: "";
-
-  position: absolute;
-
-  width: 20%;
-  height: 20%;
-
-  border-radius: 50%;
-
-  background:
-    rgba(25,31,40,.42);
-
-  box-shadow:
-    0 1px 5px rgba(0,0,0,.25);
-
-  animation:
-    dotIn .15s ease;
+@keyframes checkPulse{
+  from{filter:brightness(1)}
+  to{filter:brightness(1.16)}
 }
 
-@keyframes dotIn {
-  from {
-    opacity: 0;
-    transform: scale(.4);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+.coord{
+  position:absolute;
+  font-size:10px;
+  font-weight:800;
+  opacity:.55;
+  pointer-events:none;
+  z-index:5;
 }
 
-.capture::after {
-  content: "";
-
-  position: absolute;
-
-  width: 76%;
-  height: 76%;
-
-  border-radius: 50%;
-
-  border:
-    4px solid
-    rgba(255,255,255,.58);
-
-  box-shadow:
-    inset 0 0 0 999px
-    rgba(190,45,55,.10);
-
-  animation:
-    capturePulse .7s ease infinite alternate;
+.rank{
+  top:4px;
+  left:5px;
 }
 
-@keyframes capturePulse {
-  from {
-    opacity: .65;
-  }
-
-  to {
-    opacity: 1;
-  }
+.file{
+  right:5px;
+  bottom:4px;
 }
 
-/* =========================================================
-   CHECK
-========================================================= */
+.light .coord{color:#647186}
+.dark .coord{color:#e8edf5}
 
-.in-check {
-  background:
-    radial-gradient(
-      circle,
-      rgba(255,67,67,.65),
-      rgba(190,40,50,.35)
-    ) !important;
-
-  box-shadow:
-    inset 0 0 35px
-    rgba(255,50,50,.45);
-}
-
-/* =========================================================
-   PIECES
-========================================================= */
-
-.piece {
-  position: relative;
-
-  z-index: 5;
-
-  font-family:
-    "Arial Unicode MS",
-    "DejaVu Sans",
-    sans-serif;
-
-  font-size:
-    clamp(34px, 7vw, 78px);
-
-  line-height: 1;
-
-  transform-origin: center;
-
+.piece{
+  position:relative;
+  z-index:4;
+  font-family:"Times New Roman",Georgia,serif;
+  font-size:clamp(38px,5.8vw,72px);
+  line-height:1;
+  transform:translateZ(0);
   transition:
-    transform .12s cubic-bezier(.2,.8,.2,1);
-
-  pointer-events: none;
+    transform .16s cubic-bezier(.2,.9,.2,1),
+    filter .16s ease;
+  filter:drop-shadow(0 5px 4px rgba(0,0,0,.25));
+  pointer-events:none;
 }
 
-.square:hover .piece {
-  transform: translateY(-2px) scale(1.035);
+.square:hover .piece{
+  transform:translateY(-3px) scale(1.045);
 }
 
-/* White */
-
-.white-piece {
-  color: #ffffff;
-
+.white-piece{
+  color:#fff;
   text-shadow:
-    0 2px 0 #c7ced8,
-    0 5px 8px rgba(0,0,0,.42),
-    0 0 2px #4a5260;
+    0 2px 0 #c8d0dc,
+    0 5px 8px rgba(0,0,0,.35);
 }
 
-/* Black */
-
-.black-piece {
-  color: #161b24;
-
+.black-piece{
+  color:#1c2028;
   text-shadow:
-    0 2px 0 #303845,
-    0 5px 8px rgba(0,0,0,.55),
-    0 0 2px rgba(255,255,255,.35);
+    0 1px 0 #515a69,
+    0 5px 8px rgba(0,0,0,.42);
 }
 
-/* =========================================================
-   SIDE PANEL
-========================================================= */
-
-.panel {
-  min-width: 0;
-
-  border:
-    1px solid rgba(255,255,255,.075);
-
-  border-radius: 22px;
-
-  padding: 18px;
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(25,33,47,.9),
-      rgba(13,18,28,.88)
-    );
-
-  box-shadow:
-    0 25px 65px rgba(0,0,0,.4);
-
-  backdrop-filter: blur(20px);
-
-  animation:
-    panelEnter .7s .08s both
-    cubic-bezier(.2,.8,.2,1);
+.move-dot{
+  width:19%;
+  aspect-ratio:1;
+  border-radius:50%;
+  position:absolute;
+  background:rgba(50,40,30,.30);
+  z-index:2;
+  pointer-events:none;
 }
 
-@keyframes panelEnter {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
+.capture-ring{
+  position:absolute;
+  width:74%;
+  height:74%;
+  border-radius:50%;
+  border:5px solid rgba(50,40,30,.30);
+  z-index:2;
+  pointer-events:none;
+}
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
+.ripple{
+  position:absolute;
+  width:15px;
+  height:15px;
+  border-radius:50%;
+  background:rgba(255,255,255,.6);
+  transform:scale(0);
+  animation:ripple .55s ease-out forwards;
+  pointer-events:none;
+  z-index:8;
+}
+
+@keyframes ripple{
+  to{
+    transform:scale(8);
+    opacity:0;
   }
 }
 
-/* =========================================================
-   STATUS
-========================================================= */
-
-.status-card {
-  display: flex;
-
-  align-items: center;
-
-  gap: 12px;
-
-  padding: 14px;
-
-  border-radius: 15px;
-
-  background:
-    rgba(255,255,255,.045);
-
-  border:
-    1px solid rgba(255,255,255,.055);
-
-  margin-bottom: 14px;
+.side{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
 }
 
-.status-icon {
-  width: 35px;
-  height: 35px;
-
-  flex: 0 0 auto;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 10px;
-
-  background:
-    rgba(255,255,255,.07);
-
-  font-size: 17px;
-}
-
-.status-main {
-  font-size: 14px;
-
-  font-weight: 700;
-}
-
-.status-sub {
-  color: #7f8b9f;
-
-  font-size: 11px;
-
-  margin-top: 3px;
-}
-
-/* =========================================================
-   EVALUATION
-========================================================= */
-
-.eval-header {
-  display: flex;
-
-  justify-content: space-between;
-
-  align-items: center;
-
-  margin:
-    18px
-    2px
-    7px;
-}
-
-.eval-title {
-  color: #7f8b9f;
-
-  font-size: 11px;
-
-  text-transform: uppercase;
-
-  letter-spacing: 1px;
-}
-
-.eval-value {
-  font-size: 12px;
-
-  font-weight: 800;
-
-  color: #dce5f3;
-}
-
-.eval-container {
-  height: 15px;
-
-  border-radius: 99px;
-
-  overflow: hidden;
-
-  background: #090c11;
-
-  border:
-    1px solid rgba(255,255,255,.08);
-
+.card{
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:var(--panel);
+  backdrop-filter:blur(22px);
   box-shadow:
-    inset 0 2px 5px rgba(0,0,0,.5);
+    0 20px 55px rgba(0,0,0,.22),
+    inset 0 1px rgba(255,255,255,.055);
+  overflow:hidden;
 }
 
-.eval-fill {
-  height: 100%;
+.status{
+  padding:18px;
+}
 
-  width: 50%;
+.status-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
 
-  background:
-    linear-gradient(
-      90deg,
-      #5e6b7d,
-      #f4f6f9
-    );
+.status-label{
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+  color:var(--muted);
+  font-weight:800;
+}
 
+.status-text{
+  font-size:18px;
+  font-weight:800;
+  margin-top:6px;
+}
+
+.thinking-text{
+  color:#8d81ff;
+}
+
+.eval-wrap{
+  margin-top:17px;
+  height:13px;
+  border-radius:999px;
+  overflow:hidden;
+  background:#111520;
+  border:1px solid rgba(255,255,255,.07);
+  position:relative;
+}
+
+.eval-fill{
+  height:100%;
+  width:50%;
+  background:linear-gradient(90deg,#cbd5e1,#fff);
+  transition:width .65s cubic-bezier(.2,.8,.2,1);
+}
+
+.eval-number{
+  margin-top:7px;
+  font-size:11px;
+  color:var(--muted);
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+}
+
+.clocks{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  padding:0 18px 18px;
+}
+
+.clock{
+  padding:13px;
+  border-radius:15px;
+  background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.06);
+}
+
+.clock-name{
+  color:var(--muted);
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  font-weight:800;
+}
+
+.clock-time{
+  font-size:25px;
+  margin-top:4px;
+  font-weight:800;
+  font-variant-numeric:tabular-nums;
+}
+
+.clock.active{
+  border-color:rgba(139,124,255,.45);
+  box-shadow:0 0 25px rgba(139,124,255,.10);
+}
+
+.moves{
+  max-height:350px;
+  min-height:250px;
+  overflow:auto;
+  padding:12px;
+}
+
+.moves::-webkit-scrollbar{
+  width:5px;
+}
+
+.moves::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,.12);
+  border-radius:99px;
+}
+
+.move-row{
+  display:grid;
+  grid-template-columns:35px 1fr 1fr;
+  gap:5px;
+  padding:8px 7px;
+  border-radius:10px;
+  font-size:13px;
+  animation:moveIn .25s ease both;
+}
+
+@keyframes moveIn{
+  from{
+    opacity:0;
+    transform:translateY(7px);
+  }
+  to{
+    opacity:1;
+    transform:none;
+  }
+}
+
+.move-row.latest{
+  background:rgba(139,124,255,.12);
+}
+
+.move-number{
+  color:var(--muted);
+}
+
+.move-white,.move-black{
+  font-weight:700;
+}
+
+.controls{
+  padding:15px;
+  display:grid;
+  gap:9px;
+}
+
+select,.btn{
+  width:100%;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.09);
+  background:rgba(255,255,255,.055);
+  padding:12px 13px;
+  color:var(--text);
+  outline:none;
+}
+
+select{
+  cursor:pointer;
+}
+
+.btn{
+  cursor:pointer;
+  font-weight:800;
   transition:
-    width .45s cubic-bezier(.2,.8,.2,1);
-}
-
-/* =========================================================
-   CONTROLS
-========================================================= */
-
-.controls {
-  display: grid;
-
-  grid-template-columns:
-    1fr 1fr;
-
-  gap: 9px;
-
-  margin-top: 17px;
-}
-
-.control {
-  padding: 12px;
-
-  border-radius: 13px;
-
-  border:
-    1px solid rgba(255,255,255,.07);
-
-  background:
-    rgba(255,255,255,.045);
-
-  color: #e8edf5;
-
-  cursor: pointer;
-
-  font-size: 12px;
-
-  font-weight: 700;
-
-  transition:
-    background .15s ease,
     transform .15s ease,
+    background .15s ease,
     border-color .15s ease;
 }
 
-.control:hover {
-  background:
-    rgba(255,255,255,.08);
-
-  border-color:
-    rgba(255,255,255,.13);
-
-  transform: translateY(-1px);
+.btn:hover{
+  transform:translateY(-2px);
+  background:rgba(255,255,255,.09);
 }
 
-.control.primary {
-  background:
-    linear-gradient(
-      135deg,
-      #4d7dff,
-      #765cff
-    );
-
-  border-color:
-    rgba(255,255,255,.12);
-
-  box-shadow:
-    0 8px 25px
-    rgba(80,100,255,.2);
+.btn:active{
+  transform:translateY(0) scale(.98);
 }
 
-.control:active {
-  transform: translateY(0);
+.btn.primary{
+  background:linear-gradient(135deg,#7668ed,#5c91ff);
+  border-color:transparent;
+  box-shadow:0 10px 28px rgba(100,105,255,.24);
 }
 
-/* =========================================================
-   SELECT
-========================================================= */
-
-.settings {
-  margin-top: 16px;
-
-  padding-top: 15px;
-
-  border-top:
-    1px solid
-    rgba(255,255,255,.06);
+.btn-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
 }
 
-.setting-row {
-  display: flex;
-
-  justify-content: space-between;
-
-  align-items: center;
-
-  margin-bottom: 10px;
+.engine-info{
+  display:flex;
+  justify-content:space-between;
+  color:var(--muted);
+  font-size:11px;
+  padding:0 3px;
 }
 
-.setting-label {
-  color: #8d99ac;
-
-  font-size: 12px;
+.promotion{
+  position:fixed;
+  inset:0;
+  z-index:100;
+  display:none;
+  place-items:center;
+  background:rgba(2,4,10,.70);
+  backdrop-filter:blur(12px);
 }
 
-select {
-  color: #edf2f9;
-
-  background:
-    #161d29;
-
-  border:
-    1px solid
-    rgba(255,255,255,.09);
-
-  border-radius: 9px;
-
-  padding:
-    7px
-    9px;
-
-  outline: none;
-
-  font-weight: 700;
+.promotion.show{
+  display:grid;
 }
 
-/* =========================================================
-   MOVES
-========================================================= */
-
-.moves-title {
-  display: flex;
-
-  justify-content: space-between;
-
-  align-items: center;
-
-  margin-top: 19px;
-
-  margin-bottom: 9px;
+.promotion-box{
+  width:min(420px,90vw);
+  padding:24px;
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:25px;
+  background:rgba(17,20,31,.94);
+  box-shadow:0 30px 100px rgba(0,0,0,.55);
+  text-align:center;
+  animation:modalIn .25s cubic-bezier(.2,.9,.2,1);
 }
 
-.moves-title h2 {
-  margin: 0;
-
-  font-size: 15px;
+@keyframes modalIn{
+  from{opacity:0;transform:scale(.92) translateY(15px)}
+  to{opacity:1;transform:none}
 }
 
-.move-count {
-  color: #68758a;
-
-  font-size: 11px;
+.promotion-title{
+  font-size:20px;
+  font-weight:800;
+  margin-bottom:17px;
 }
 
-.moves {
-  height: 280px;
-
-  overflow-y: auto;
-
-  border-radius: 14px;
-
-  background:
-    rgba(0,0,0,.17);
-
-  border:
-    1px solid rgba(255,255,255,.045);
-
-  padding: 7px;
-
-  scrollbar-width: thin;
+.promotion-options{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:9px;
 }
 
-.moves::-webkit-scrollbar {
-  width: 5px;
+.promo{
+  font-size:45px;
+  padding:13px 4px;
+  border-radius:15px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.08);
+  cursor:pointer;
+  transition:.15s ease;
 }
 
-.moves::-webkit-scrollbar-thumb {
-  background: #3a4556;
-
-  border-radius: 99px;
+.promo:hover{
+  transform:translateY(-4px);
+  background:rgba(139,124,255,.16);
 }
 
-.move-row {
-  display: grid;
-
-  grid-template-columns:
-    38px 1fr 1fr;
-
-  padding:
-    9px
-    7px;
-
-  border-radius: 9px;
-
-  font-size: 12px;
-
-  transition:
-    background .15s ease;
+.gameover{
+  position:fixed;
+  inset:0;
+  z-index:90;
+  display:none;
+  place-items:center;
+  background:rgba(2,4,10,.58);
+  backdrop-filter:blur(8px);
 }
 
-.move-row:hover {
-  background:
-    rgba(255,255,255,.045);
+.gameover.show{
+  display:grid;
 }
 
-.move-number {
-  color: #647188;
-
-  font-weight: 700;
+.gameover-box{
+  text-align:center;
+  padding:35px 45px;
+  border-radius:28px;
+  border:1px solid rgba(255,255,255,.13);
+  background:rgba(15,18,29,.94);
+  box-shadow:0 30px 100px rgba(0,0,0,.55);
+  animation:modalIn .3s ease;
 }
 
-.move-white,
-.move-black {
-  color: #dce4f0;
-
-  font-weight: 600;
+.gameover-title{
+  font-size:32px;
+  font-weight:900;
 }
 
-.empty-moves {
-  height: 100%;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  color: #566174;
-
-  font-size: 12px;
+.gameover-sub{
+  color:var(--muted);
+  margin:7px 0 22px;
 }
 
-/* =========================================================
-   CLOCKS
-========================================================= */
-
-.clocks {
-  display: grid;
-
-  grid-template-columns:
-    1fr 1fr;
-
-  gap: 9px;
-
-  margin-top: 14px;
-}
-
-.clock {
-  padding: 11px 13px;
-
-  border-radius: 12px;
-
-  background:
-    rgba(255,255,255,.04);
-
-  border:
-    1px solid rgba(255,255,255,.055);
-}
-
-.clock-label {
-  color: #68758a;
-
-  font-size: 9px;
-
-  text-transform: uppercase;
-
-  letter-spacing: 1px;
-}
-
-.clock-time {
-  margin-top: 3px;
-
-  font-size: 18px;
-
-  font-weight: 800;
-
-  letter-spacing: 1px;
-}
-
-.clock.active {
-  border-color:
-    rgba(91,137,255,.45);
-
-  box-shadow:
-    inset 0 0 20px
-    rgba(80,120,255,.07);
-}
-
-/* =========================================================
-   THINKING
-========================================================= */
-
-.thinking {
-  display: none;
-
-  align-items: center;
-
-  gap: 6px;
-
-  color: #8290a6;
-
-  font-size: 10px;
-
-  margin-top: 12px;
-}
-
-.thinking.show {
-  display: flex;
-}
-
-.thinking-dot {
-  width: 5px;
-  height: 5px;
-
-  border-radius: 50%;
-
-  background: #7d9cff;
-
-  animation:
-    think 1s infinite ease-in-out;
-}
-
-.thinking-dot:nth-child(2) {
-  animation-delay: .15s;
-}
-
-.thinking-dot:nth-child(3) {
-  animation-delay: .3s;
-}
-
-@keyframes think {
-  0%, 80%, 100% {
-    opacity: .25;
-    transform: translateY(0);
+@media(max-width:1000px){
+  :root{
+    --board-size:min(90vw,720px);
   }
 
-  40% {
-    opacity: 1;
-    transform: translateY(-3px);
+  .main{
+    grid-template-columns:1fr;
+  }
+
+  .side{
+    width:min(720px,90vw);
+    margin:auto;
   }
 }
 
-/* =========================================================
-   GAME OVER
-========================================================= */
-
-.game-over {
-  position: absolute;
-
-  inset: 9px;
-
-  display: none;
-
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 17px;
-
-  background:
-    rgba(5,8,13,.73);
-
-  backdrop-filter:
-    blur(8px);
-
-  z-index: 30;
-}
-
-.game-over.show {
-  display: flex;
-}
-
-.game-over-card {
-  width: min(320px, 80%);
-
-  padding: 27px;
-
-  text-align: center;
-
-  border-radius: 20px;
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(30,39,55,.96),
-      rgba(13,18,27,.97)
-    );
-
-  border:
-    1px solid
-    rgba(255,255,255,.1);
-
-  box-shadow:
-    0 25px 70px
-    rgba(0,0,0,.6);
-
-  animation:
-    pop .3s ease;
-}
-
-@keyframes pop {
-  from {
-    opacity: 0;
-    transform: scale(.9);
+@media(max-width:560px){
+  .app{
+    width:96vw;
+    padding-top:10px;
   }
 
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.game-over-icon {
-  font-size: 42px;
-
-  margin-bottom: 8px;
-}
-
-.game-over-title {
-  font-size: 23px;
-
-  font-weight: 800;
-}
-
-.game-over-sub {
-  color: #8995a8;
-
-  font-size: 12px;
-
-  margin-top: 6px;
-}
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-
-@media (max-width: 1000px) {
-
-  .main {
-    grid-template-columns: 1fr;
+  .topbar{
+    height:60px;
+    border-radius:17px;
   }
 
-  .panel {
-    max-width: 850px;
-
-    width: 100%;
-
-    margin: auto;
-  }
-}
-
-@media (max-width: 600px) {
-
-  .app {
-    padding:
-      12px
-      12px
-      30px;
+  .subtitle{
+    display:none;
   }
 
-  .topbar {
-    padding: 12px;
+  .logo{
+    width:36px;
+    height:36px;
   }
 
-  .brand-name {
-    font-size: 15px;
+  .board-shell{
+    padding:7px;
+    border-radius:20px;
   }
 
-  .engine-pill {
-    display: none;
+  .board{
+    border-radius:14px;
   }
 
-  .board-shell {
-    padding: 6px;
-
-    border-radius: 18px;
+  .piece{
+    font-size:11vw;
   }
 
-  .board {
-    border-radius: 12px;
-  }
-
-  .piece {
-    font-size: 11vw;
-  }
-
-  .coordinate {
-    font-size: 8px;
+  .main{
+    gap:15px;
   }
 }
 </style>
@@ -1204,1873 +694,1033 @@ select {
 
 <div class="app">
 
-  <!-- =====================================================
-       TOP BAR
-  ====================================================== -->
-
   <header class="topbar">
-
     <div class="brand">
-
-      <div class="brand-icon">
-        ♞
-      </div>
-
+      <div class="logo">♞</div>
       <div>
-        <div class="brand-name">
-          STOCKFISH
-        </div>
-
-        <div class="brand-subtitle">
-          Premium Chess
-        </div>
+        <div class="title">Stockfish Chess</div>
+        <div class="subtitle">Premium browser chess</div>
       </div>
-
     </div>
 
-
-    <div class="engine-pill">
-
-      <span
-        id="engineDot"
-        class="engine-dot">
-      </span>
-
-      <span id="engineText">
-        Connecting to engine...
-      </span>
-
+    <div class="engine-pill" id="enginePill">
+      <span class="engine-dot"></span>
+      <span id="engineStatus">Starting engine</span>
     </div>
-
   </header>
-
-
-  <!-- =====================================================
-       MAIN
-  ====================================================== -->
 
   <main class="main">
 
-    <!-- BOARD -->
-
-    <section class="board-section">
-
+    <section class="board-area">
       <div class="board-shell">
-
-        <div
-          id="board"
-          class="board">
-        </div>
-
-
-        <!-- GAME OVER -->
-
-        <div
-          id="gameOver"
-          class="game-over">
-
-          <div class="game-over-card">
-
-            <div
-              id="gameOverIcon"
-              class="game-over-icon">
-              🏆
-            </div>
-
-            <div
-              id="gameOverTitle"
-              class="game-over-title">
-              Game Over
-            </div>
-
-            <div
-              id="gameOverSub"
-              class="game-over-sub">
-              Well played.
-            </div>
-
-            <button
-              class="control primary"
-              style="width:100%; margin-top:18px;"
-              onclick="newGame()">
-              Play Again
-            </button>
-
-          </div>
-
-        </div>
-
+        <div class="board" id="board"></div>
       </div>
-
     </section>
 
+    <aside class="side">
 
-    <!-- SIDE PANEL -->
-
-    <aside class="panel">
-
-      <!-- STATUS -->
-
-      <div class="status-card">
-
-        <div
-          id="statusIcon"
-          class="status-icon">
-          ♙
+      <section class="card status">
+        <div class="status-top">
+          <div>
+            <div class="status-label">Game status</div>
+            <div class="status-text" id="statusText">Your move</div>
+          </div>
         </div>
 
-        <div>
+        <div class="eval-wrap">
+          <div class="eval-fill" id="evalFill"></div>
+        </div>
 
-          <div
-            id="statusMain"
-            class="status-main">
-            Starting Stockfish...
+        <div class="eval-number" id="evalNumber">0.00</div>
+      </section>
+
+      <section class="card">
+        <div class="clocks">
+          <div class="clock" id="whiteClockBox">
+            <div class="clock-name">White</div>
+            <div class="clock-time" id="whiteClock">10:00</div>
           </div>
 
-          <div
-            id="statusSub"
-            class="status-sub">
-            Initializing chess engine
+          <div class="clock" id="blackClockBox">
+            <div class="clock-name">Black</div>
+            <div class="clock-time" id="blackClock">10:00</div>
           </div>
+        </div>
+      </section>
 
+      <section class="card">
+        <div class="moves" id="moves"></div>
+      </section>
+
+      <section class="card controls">
+
+        <select id="difficulty">
+          <option value="8">Beginner — Depth 8</option>
+          <option value="12" selected>Intermediate — Depth 12</option>
+          <option value="16">Advanced — Depth 16</option>
+          <option value="20">Expert — Depth 20</option>
+        </select>
+
+        <div class="btn-row">
+          <button class="btn primary" id="newGame">New Game</button>
+          <button class="btn" id="undo">Undo</button>
         </div>
 
-      </div>
-
-
-      <!-- EVALUATION -->
-
-      <div class="eval-header">
-
-        <span class="eval-title">
-          Engine Evaluation
-        </span>
-
-        <span
-          id="evalValue"
-          class="eval-value">
-          0.00
-        </span>
-
-      </div>
-
-      <div class="eval-container">
-
-        <div
-          id="evalFill"
-          class="eval-fill">
+        <div class="engine-info">
+          <span id="depthText">Depth 0</span>
+          <span id="turnText">White to move</span>
         </div>
 
-      </div>
-
-
-      <!-- CLOCKS -->
-
-      <div class="clocks">
-
-        <div
-          id="whiteClock"
-          class="clock active">
-
-          <div class="clock-label">
-            You · White
-          </div>
-
-          <div
-            id="whiteTime"
-            class="clock-time">
-            10:00
-          </div>
-
-        </div>
-
-
-        <div
-          id="blackClock"
-          class="clock">
-
-          <div class="clock-label">
-            Engine · Black
-          </div>
-
-          <div
-            id="blackTime"
-            class="clock-time">
-            10:00
-          </div>
-
-        </div>
-
-      </div>
-
-
-      <!-- THINKING -->
-
-      <div
-        id="thinking"
-        class="thinking">
-
-        <span>
-          Stockfish is thinking
-        </span>
-
-        <span class="thinking-dot"></span>
-        <span class="thinking-dot"></span>
-        <span class="thinking-dot"></span>
-
-      </div>
-
-
-      <!-- BUTTONS -->
-
-      <div class="controls">
-
-        <button
-          class="control primary"
-          onclick="newGame()">
-          ↻ New Game
-        </button>
-
-        <button
-          class="control"
-          onclick="undoMove()">
-          ↶ Undo
-        </button>
-
-      </div>
-
-
-      <!-- SETTINGS -->
-
-      <div class="settings">
-
-        <div class="setting-row">
-
-          <span class="setting-label">
-            Difficulty
-          </span>
-
-          <select id="difficulty">
-
-            <option value="8">
-              Beginner
-            </option>
-
-            <option value="12" selected>
-              Intermediate
-            </option>
-
-            <option value="16">
-              Advanced
-            </option>
-
-            <option value="20">
-              Expert
-            </option>
-
-          </select>
-
-        </div>
-
-      </div>
-
-
-      <!-- MOVES -->
-
-      <div class="moves-title">
-
-        <h2>
-          Move History
-        </h2>
-
-        <span
-          id="moveCount"
-          class="move-count">
-          0 moves
-        </span>
-
-      </div>
-
-
-      <div
-        id="moves"
-        class="moves">
-
-        <div class="empty-moves">
-          Your game starts here
-        </div>
-
-      </div>
+      </section>
 
     </aside>
 
   </main>
-
 </div>
 
+<div class="promotion" id="promotion">
+  <div class="promotion-box">
+    <div class="promotion-title">Choose your promotion</div>
+    <div class="promotion-options">
+      <button class="promo" data-piece="q">♕</button>
+      <button class="promo" data-piece="r">♖</button>
+      <button class="promo" data-piece="b">♗</button>
+      <button class="promo" data-piece="n">♘</button>
+    </div>
+  </div>
+</div>
+
+<div class="gameover" id="gameover">
+  <div class="gameover-box">
+    <div class="gameover-title" id="gameoverTitle">Checkmate</div>
+    <div class="gameover-sub" id="gameoverSub"></div>
+    <button class="btn primary" id="gameoverNew">Play Again</button>
+  </div>
+</div>
 
 <script>
+/* =========================
+   GAME
+========================= */
 
-/* =========================================================
-   ELEMENTS
-========================================================= */
+const game = new Chess();
 
-const boardElement =
-  document.getElementById("board");
+const board = document.getElementById("board");
+const movesEl = document.getElementById("moves");
+const statusText = document.getElementById("statusText");
+const evalFill = document.getElementById("evalFill");
+const evalNumber = document.getElementById("evalNumber");
+const engineStatus = document.getElementById("engineStatus");
+const enginePill = document.getElementById("enginePill");
+const depthText = document.getElementById("depthText");
+const turnText = document.getElementById("turnText");
 
-const statusMain =
-  document.getElementById("statusMain");
+const whiteClockEl = document.getElementById("whiteClock");
+const blackClockEl = document.getElementById("blackClock");
+const whiteClockBox = document.getElementById("whiteClockBox");
+const blackClockBox = document.getElementById("blackClockBox");
 
-const statusSub =
-  document.getElementById("statusSub");
+const promotion = document.getElementById("promotion");
+const gameover = document.getElementById("gameover");
+const gameoverTitle = document.getElementById("gameoverTitle");
+const gameoverSub = document.getElementById("gameoverSub");
 
-const statusIcon =
-  document.getElementById("statusIcon");
+let selected = null;
+let lastMove = null;
+let pendingPromotion = null;
 
-const movesElement =
-  document.getElementById("moves");
+let engine = null;
+let engineReady = false;
+let engineThinking = false;
+let gameId = 0;
 
-const moveCount =
-  document.getElementById("moveCount");
-
-const evalFill =
-  document.getElementById("evalFill");
-
-const evalValue =
-  document.getElementById("evalValue");
-
-const engineDot =
-  document.getElementById("engineDot");
-
-const engineText =
-  document.getElementById("engineText");
-
-const thinkingElement =
-  document.getElementById("thinking");
-
-const difficulty =
-  document.getElementById("difficulty");
-
-const whiteTime =
-  document.getElementById("whiteTime");
-
-const blackTime =
-  document.getElementById("blackTime");
-
-const whiteClock =
-  document.getElementById("whiteClock");
-
-const blackClock =
-  document.getElementById("blackClock");
-
-const gameOver =
-  document.getElementById("gameOver");
-
-const gameOverIcon =
-  document.getElementById("gameOverIcon");
-
-const gameOverTitle =
-  document.getElementById("gameOverTitle");
-
-const gameOverSub =
-  document.getElementById("gameOverSub");
-
-
-/* =========================================================
-   CHESS
-========================================================= */
-
-let game =
-  new Chess();
-
-let engine =
-  null;
-
-let engineReady =
-  false;
-
-let thinking =
-  false;
-
-let selectedSquare =
-  null;
-
-let lastMove =
-  null;
-
-let whiteSeconds =
-  600;
-
-let blackSeconds =
-  600;
-
-let clockInterval =
-  null;
-
-
-/* =========================================================
-   PIECES
-========================================================= */
-
-const pieces = {
-
-  wK: "♔",
-  wQ: "♕",
-  wR: "♖",
-  wB: "♗",
-  wN: "♘",
-  wP: "♙",
-
-  bK: "♚",
-  bQ: "♛",
-  bR: "♜",
-  bB: "♝",
-  bN: "♞",
-  bP: "♟"
-
+let clocks = {
+  w: 600,
+  b: 600
 };
 
+let clockTimer = null;
 
-/* =========================================================
-   SOUND
-========================================================= */
+const pieceSymbols = {
+  wp:"♙",
+  wn:"♘",
+  wb:"♗",
+  wr:"♖",
+  wq:"♕",
+  wk:"♔",
+  bp:"♟",
+  bn:"♞",
+  bb:"♝",
+  br:"♜",
+  bq:"♛",
+  bk:"♚"
+};
 
-let audioContext = null;
+/* =========================
+   AUDIO
+========================= */
 
-function playSound(type) {
+let audioCtx = null;
 
-  try {
+function sound(type){
+  try{
+    if(!audioCtx)
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
-    if (!audioContext) {
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
 
-      audioContext =
-        new (
-          window.AudioContext ||
-          window.webkitAudioContext
-        )();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
 
+    const now = audioCtx.currentTime;
+
+    if(type === "capture"){
+      osc.frequency.setValueAtTime(130,now);
+      osc.frequency.exponentialRampToValueAtTime(70,now+.12);
+      gain.gain.setValueAtTime(.07,now);
+      gain.gain.exponentialRampToValueAtTime(.001,now+.13);
+    }else if(type === "check"){
+      osc.frequency.setValueAtTime(650,now);
+      osc.frequency.exponentialRampToValueAtTime(900,now+.16);
+      gain.gain.setValueAtTime(.045,now);
+      gain.gain.exponentialRampToValueAtTime(.001,now+.18);
+    }else{
+      osc.frequency.setValueAtTime(330,now);
+      osc.frequency.exponentialRampToValueAtTime(250,now+.07);
+      gain.gain.setValueAtTime(.035,now);
+      gain.gain.exponentialRampToValueAtTime(.001,now+.08);
     }
 
-    const oscillator =
-      audioContext.createOscillator();
-
-    const gain =
-      audioContext.createGain();
-
-    oscillator.connect(gain);
-
-    gain.connect(
-      audioContext.destination
-    );
-
-
-    let frequency = 420;
-
-    if (type === "capture") {
-      frequency = 260;
-    }
-
-    if (type === "check") {
-      frequency = 620;
-    }
-
-
-    oscillator.frequency.value =
-      frequency;
-
-    oscillator.type =
-      "sine";
-
-
-    gain.gain.setValueAtTime(
-      .0001,
-      audioContext.currentTime
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-      .045,
-      audioContext.currentTime + .01
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-      .0001,
-      audioContext.currentTime + .12
-    );
-
-
-    oscillator.start();
-
-    oscillator.stop(
-      audioContext.currentTime + .13
-    );
-
-  } catch (e) {}
-
+    osc.start(now);
+    osc.stop(now+.2);
+  }catch(e){}
 }
 
+/* =========================
+   BOARD
+========================= */
 
-/* =========================================================
-   DRAW BOARD
-========================================================= */
+function renderBoard(){
 
-function drawBoard() {
+  board.innerHTML = "";
 
-  boardElement.innerHTML = "";
+  const position = game.board();
 
-  const board =
-    game.board();
+  for(let r=0;r<8;r++){
+    for(let c=0;c<8;c++){
 
+      const squareName =
+        String.fromCharCode(97+c) + (8-r);
 
-  for (
-    let row = 0;
-    row < 8;
-    row++
-  ) {
+      const sq = document.createElement("div");
 
-    for (
-      let col = 0;
-      col < 8;
-      col++
-    ) {
+      sq.className =
+        "square " + (((r+c)%2===0) ? "light" : "dark");
 
-      const square =
-        document.createElement("div");
+      sq.dataset.square = squareName;
 
-
-      const file =
-        String.fromCharCode(
-          97 + col
-        );
-
-      const rank =
-        8 - row;
-
-      const name =
-        file + rank;
-
-
-      square.className =
-        "square " +
-        (
-          (row + col) % 2 === 0
-            ? "light"
-            : "dark"
-        );
-
-
-      square.dataset.square =
-        name;
-
-
-      /* Last move */
-
-      if (
-        lastMove &&
-        (
-          name === lastMove.from ||
-          name === lastMove.to
-        )
-      ) {
-
-        square.classList.add(
-          "last-move"
-        );
-
+      if(lastMove &&
+        (lastMove.from === squareName ||
+         lastMove.to === squareName)){
+        sq.classList.add("last");
       }
 
-
-      /* Selected */
-
-      if (
-        name === selectedSquare
-      ) {
-
-        square.classList.add(
-          "selected"
-        );
-
+      if(selected === squareName){
+        sq.classList.add("selected");
       }
 
+      const piece = position[r][c];
 
-      /* Check */
+      if(piece){
 
-      if (
-        game.in_check()
-      ) {
+        const p = document.createElement("div");
 
-        const piece =
-          board[row][col];
-
-
-        if (
-          piece &&
-          piece.type === "k" &&
-          piece.color === game.turn()
-        ) {
-
-          square.classList.add(
-            "in-check"
-          );
-
-        }
-
-      }
-
-
-      /* Piece */
-
-      const piece =
-        board[row][col];
-
-
-      if (piece) {
-
-        const span =
-          document.createElement(
-            "span"
-          );
-
-
-        span.className =
+        p.className =
           "piece " +
-          (
-            piece.color === "w"
-              ? "white-piece"
-              : "black-piece"
-          );
+          (piece.color === "w" ? "white-piece" : "black-piece");
 
+        p.textContent =
+          pieceSymbols[piece.color + piece.type];
 
-        span.textContent =
-          pieces[
-            piece.color +
-            piece.type.toUpperCase()
-          ];
-
-
-        square.appendChild(
-          span
-        );
-
+        sq.appendChild(p);
       }
 
+      const rank = document.createElement("span");
+      rank.className = "coord rank";
+      rank.textContent = c === 0 ? (8-r) : "";
 
-      /* Coordinates */
+      const file = document.createElement("span");
+      file.className = "coord file";
+      file.textContent = r === 7 ? String.fromCharCode(97+c) : "";
 
-      if (row === 7) {
+      sq.appendChild(rank);
+      sq.appendChild(file);
 
-        const coord =
-          document.createElement(
-            "span"
-          );
+      sq.addEventListener("click",()=>handleSquare(squareName));
 
-        coord.className =
-          "coordinate file-coordinate";
-
-        coord.textContent =
-          file;
-
-        square.appendChild(
-          coord
-        );
-
-      }
-
-
-      if (col === 0) {
-
-        const coord =
-          document.createElement(
-            "span"
-          );
-
-        coord.className =
-          "coordinate rank-coordinate";
-
-        coord.textContent =
-          rank;
-
-        square.appendChild(
-          coord
-        );
-
-      }
-
-
-      square.onclick =
-        () => clickSquare(name);
-
-
-      boardElement.appendChild(
-        square
-      );
-
+      board.appendChild(sq);
     }
-
   }
 
-
-  if (selectedSquare) {
-
-    highlightMoves(
-      selectedSquare
-    );
-
+  if(selected){
+    showLegalMoves(selected);
   }
 
+  markKingCheck();
 }
 
+function showLegalMoves(square){
 
-/* =========================================================
-   LEGAL MOVES
-========================================================= */
+  const moves = game.moves({
+    square,
+    verbose:true
+  });
 
-function highlightMoves(square) {
+  moves.forEach(move=>{
 
-  const moves =
-    game.moves({
-      square: square,
-      verbose: true
-    });
+    const el =
+      board.querySelector(`[data-square="${move.to}"]`);
 
+    if(!el) return;
 
-  moves.forEach(
-    move => {
-
-      const target =
-        document.querySelector(
-          `[data-square="${move.to}"]`
-        );
-
-
-      if (!target) {
-        return;
-      }
-
-
-      if (move.captured) {
-
-        target.classList.add(
-          "capture"
-        );
-
-      } else {
-
-        target.classList.add(
-          "possible"
-        );
-
-      }
-
+    if(move.captured){
+      const ring = document.createElement("div");
+      ring.className = "capture-ring";
+      el.appendChild(ring);
+    }else{
+      const dot = document.createElement("div");
+      dot.className = "move-dot";
+      el.appendChild(dot);
     }
-  );
-
+  });
 }
 
+function markKingCheck(){
 
-/* =========================================================
-   CLICK
-========================================================= */
+  if(!game.in_check()) return;
 
-function clickSquare(square) {
+  const color = game.turn();
 
-  if (
-    !engineReady ||
-    thinking ||
-    game.game_over()
-  ) {
+  const boardData = game.board();
 
-    return;
+  for(let r=0;r<8;r++){
+    for(let c=0;c<8;c++){
 
+      const p = boardData[r][c];
+
+      if(p && p.type === "k" && p.color === color){
+
+        const sq =
+          String.fromCharCode(97+c)+(8-r);
+
+        const el =
+          board.querySelector(`[data-square="${sq}"]`);
+
+        if(el) el.classList.add("check");
+      }
+    }
   }
+}
 
+function createRipple(square){
 
-  /* Only allow White */
+  const el =
+    board.querySelector(`[data-square="${square}"]`);
 
-  if (
-    game.turn() !== "w"
-  ) {
+  if(!el) return;
 
-    return;
+  const ripple = document.createElement("div");
+  ripple.className = "ripple";
 
-  }
+  el.appendChild(ripple);
 
+  setTimeout(()=>ripple.remove(),600);
+}
 
-  const piece =
-    game.get(square);
+/* =========================
+   MOVING
+========================= */
 
+function handleSquare(square){
 
-  /* Select */
+  if(engineThinking || game.game_over()) return;
 
-  if (!selectedSquare) {
+  if(game.turn() !== "w") return;
 
-    if (
-      !piece ||
-      piece.color !== "w"
-    ) {
+  const piece = game.get(square);
+
+  if(!selected){
+
+    if(piece && piece.color === game.turn()){
+
+      selected = square;
+      renderBoard();
 
       return;
+    }
+  }
 
+  if(selected){
+
+    const possible =
+      game.moves({
+        square:selected,
+        verbose:true
+      });
+
+    const move = possible.find(m=>m.to === square);
+
+    if(!move){
+
+      if(piece && piece.color === game.turn()){
+
+        selected = square;
+        renderBoard();
+
+      }else{
+
+        selected = null;
+        renderBoard();
+      }
+
+      return;
     }
 
+    if(move.promotion){
 
-    selectedSquare =
-      square;
+      pendingPromotion = {
+        from:selected,
+        to:square
+      };
 
-    drawBoard();
+      promotion.classList.add("show");
+      return;
+    }
 
-    return;
-
-  }
-
-
-  /* Reselect */
-
-  if (
-    piece &&
-    piece.color === "w"
-  ) {
-
-    selectedSquare =
-      square;
-
-    drawBoard();
-
-    return;
-
-  }
-
-
-  /* Try move */
-
-  const move =
-    game.move({
-
-      from:
-        selectedSquare,
-
-      to:
-        square,
-
-      promotion:
-        "q"
-
+    makeMove({
+      from:selected,
+      to:square
     });
-
-
-  if (!move) {
-
-    return;
-
   }
+}
 
+function makeMove(move){
 
+  const movingColor = game.turn();
+
+  const result = game.move(move);
+
+  if(!result) return;
+
+  selected = null;
   lastMove = {
-    from: move.from,
-    to: move.to
+    from:result.from,
+    to:result.to
   };
 
+  createRipple(result.to);
 
-  selectedSquare =
-    null;
-
-
-  if (move.captured) {
-
-    playSound("capture");
-
-  } else {
-
-    playSound("move");
-
+  if(result.captured){
+    sound("capture");
+  }else{
+    sound("move");
   }
 
-
-  if (game.in_check()) {
-
-    playSound("check");
-
+  if(game.in_check()){
+    sound("check");
   }
 
+  renderBoard();
+  renderMoves();
+  updateStatus();
+  updateClocks();
 
-  updateEverything();
+  if(game.game_over()){
 
-  checkGameOver();
-
-
-  if (
-    !game.game_over()
-  ) {
-
-    thinking =
-      true;
-
-    setThinking(true);
-
-    statusMain.textContent =
-      "Stockfish is thinking...";
-
-    statusSub.textContent =
-      "Calculating the best move";
-
-
-    engine.postMessage(
-      "position fen " +
-      game.fen()
-    );
-
-
-    const depth =
-      Number(
-        difficulty.value
-      );
-
-
-    engine.postMessage(
-      "go depth " + depth
-    );
-
+    endGame();
+    return;
   }
 
+  if(movingColor === "w"){
+
+    requestEngine();
+
+  }
 }
 
+/* =========================
+   PROMOTION
+========================= */
 
-/* =========================================================
+document.querySelectorAll(".promo").forEach(button=>{
+
+  button.addEventListener("click",()=>{
+
+    const piece = button.dataset.piece;
+
+    promotion.classList.remove("show");
+
+    if(!pendingPromotion) return;
+
+    makeMove({
+      from:pendingPromotion.from,
+      to:pendingPromotion.to,
+      promotion:piece
+    });
+
+    pendingPromotion = null;
+  });
+
+});
+
+/* =========================
+   MOVE HISTORY
+========================= */
+
+function renderMoves(){
+
+  movesEl.innerHTML = "";
+
+  const history = game.history();
+
+  if(history.length === 0){
+
+    const empty = document.createElement("div");
+
+    empty.style.color = "var(--muted)";
+    empty.style.textAlign = "center";
+    empty.style.padding = "35px 10px";
+    empty.style.fontSize = "12px";
+
+    empty.textContent = "Your game begins here";
+
+    movesEl.appendChild(empty);
+
+    return;
+  }
+
+  for(let i=0;i<history.length;i+=2){
+
+    const row = document.createElement("div");
+
+    row.className = "move-row";
+
+    if(i >= history.length-2)
+      row.classList.add("latest");
+
+    const num = document.createElement("div");
+    num.className = "move-number";
+    num.textContent = (i/2)+1;
+
+    const white = document.createElement("div");
+    white.className = "move-white";
+    white.textContent = history[i] || "";
+
+    const black = document.createElement("div");
+    black.className = "move-black";
+    black.textContent = history[i+1] || "";
+
+    row.append(num,white,black);
+
+    movesEl.appendChild(row);
+  }
+
+  movesEl.scrollTop = movesEl.scrollHeight;
+}
+
+/* =========================
+   STATUS
+========================= */
+
+function updateStatus(){
+
+  turnText.textContent =
+    game.turn() === "w"
+      ? "White to move"
+      : "Black to move";
+
+  if(game.game_over()) return;
+
+  if(engineThinking){
+
+    statusText.textContent = "Stockfish is thinking…";
+    statusText.classList.add("thinking-text");
+
+  }else if(game.in_check()){
+
+    statusText.textContent =
+      game.turn() === "w"
+        ? "Check — your king is attacked!"
+        : "Check!";
+
+    statusText.classList.remove("thinking-text");
+
+  }else{
+
+    statusText.textContent =
+      game.turn() === "w"
+        ? "Your move"
+        : "Stockfish's move";
+
+    statusText.classList.remove("thinking-text");
+  }
+}
+
+/* =========================
    ENGINE
-========================================================= */
+========================= */
 
-function startEngine() {
+function startEngine(){
 
-  try {
+  try{
 
-    engine =
-      new Worker(
-        "./stockfish-18-lite-single.js"
-      );
+    engine = new Worker("./stockfish-18-lite-single.js");
 
+    engine.onmessage = handleEngineMessage;
 
-    engine.onmessage =
-      function(event) {
+    engine.onerror = function(){
 
-        const message =
-          String(event.data);
+      engineReady = false;
+      engineThinking = false;
 
+      engineStatus.textContent = "Engine error";
+      enginePill.classList.remove("thinking");
 
-        if (
-          message === "uciok"
-        ) {
+      statusText.textContent =
+        "Stockfish failed to load";
 
-          engineReady =
-            true;
+    };
 
+    engine.postMessage("uci");
 
-          engineDot.classList.add(
-            "ready"
-          );
+  }catch(e){
 
-
-          engineText.textContent =
-            "Stockfish 18 · Online";
-
-
-          statusMain.textContent =
-            "Your turn";
-
-          statusSub.textContent =
-            "White to move";
-
-
-          engine.postMessage(
-            "isready"
-          );
-
-
-          return;
-
-        }
-
-
-        /* Evaluation */
-
-        if (
-          message.startsWith("info")
-        ) {
-
-          parseEvaluation(
-            message
-          );
-
-        }
-
-
-        /* Best move */
-
-        if (
-          message.startsWith(
-            "bestmove"
-          )
-        ) {
-
-          makeEngineMove(
-            message
-          );
-
-        }
-
-      };
-
-
-    engine.onerror =
-      function() {
-
-        engineReady =
-          false;
-
-
-        engineDot.classList.remove(
-          "ready"
-        );
-
-
-        engineText.textContent =
-          "Engine error";
-
-
-        statusMain.textContent =
-          "Engine error";
-
-        statusSub.textContent =
-          "Stockfish could not start";
-
-      };
-
-
-    engine.postMessage(
-      "uci"
-    );
-
-  } catch (error) {
-
-    statusMain.textContent =
-      "Engine error";
-
-    statusSub.textContent =
-      "Could not create worker";
-
+    engineStatus.textContent = "Engine unavailable";
   }
-
 }
 
+function handleEngineMessage(event){
 
-/* =========================================================
-   ENGINE MOVE
-========================================================= */
+  const line = String(event.data);
 
-function makeEngineMove(message) {
+  if(line === "uciok"){
 
-  const parts =
-    message.split(" ");
+    engine.postMessage("isready");
+    return;
+  }
 
-  const bestMove =
-    parts[1];
+  if(line === "readyok"){
 
+    engineReady = true;
 
-  if (
-    !bestMove ||
-    bestMove === "(none)"
-  ) {
-
-    thinking =
-      false;
-
-    setThinking(false);
+    engineStatus.textContent = "Stockfish ready";
 
     updateStatus();
 
     return;
-
   }
 
+  if(line.startsWith("info")){
 
-  const from =
-    bestMove.substring(
-      0,
-      2
-    );
+    parseEvaluation(line);
 
-  const to =
-    bestMove.substring(
-      2,
-      4
-    );
+    const depth =
+      line.match(/\bdepth\s+(\d+)/);
 
+    if(depth){
+      depthText.textContent =
+        "Depth " + depth[1];
+    }
 
-  let promotion =
-    "q";
-
-
-  if (
-    bestMove.length >= 5
-  ) {
-
-    promotion =
-      bestMove.substring(
-        4,
-        5
-      );
-
+    return;
   }
 
+  if(line.startsWith("bestmove")){
 
-  const move =
-    game.move({
+    if(!engineThinking) return;
 
-      from: from,
+    const move =
+      line.match(/^bestmove\s+([a-h][1-8][a-h][1-8][qrbn]?)/);
 
-      to: to,
+    if(!move){
 
-      promotion: promotion
+      engineThinking = false;
+      enginePill.classList.remove("thinking");
+      updateStatus();
+      return;
+    }
 
-    });
+    const moveString = move[1];
 
+    engineThinking = false;
+    enginePill.classList.remove("thinking");
 
-  if (move) {
+    const idAtRequest = currentEngineGameId;
 
-    lastMove = {
-      from: move.from,
-      to: move.to
+    if(idAtRequest !== gameId){
+      updateStatus();
+      return;
+    }
+
+    const obj = {
+      from:moveString.substring(0,2),
+      to:moveString.substring(2,4)
     };
 
+    if(moveString.length > 4)
+      obj.promotion = moveString[4];
 
-    if (move.captured) {
-
-      playSound(
-        "capture"
-      );
-
-    } else {
-
-      playSound(
-        "move"
-      );
-
-    }
-
-
-    if (game.in_check()) {
-
-      playSound(
-        "check"
-      );
-
-    }
-
+    makeEngineMove(obj);
   }
-
-
-  thinking =
-    false;
-
-  setThinking(false);
-
-  updateEverything();
-
-  checkGameOver();
-
 }
 
+let currentEngineGameId = 0;
 
-/* =========================================================
-   EVALUATION
-========================================================= */
+function requestEngine(){
 
-function parseEvaluation(message) {
+  if(!engineReady || game.game_over()) return;
 
-  const match =
-    message.match(
-      /\bscore cp (-?\d+)/
-    );
+  engineThinking = true;
+  currentEngineGameId = gameId;
 
-
-  if (!match) {
-    return;
-  }
-
-
-  const cp =
-    Number(match[1]);
-
-
-  const score =
-    Math.max(
-      -1000,
-      Math.min(
-        1000,
-        cp
-      )
-    );
-
-
-  const percent =
-    50 +
-    score /
-    20;
-
-
-  evalFill.style.width =
-    Math.max(
-      5,
-      Math.min(
-        95,
-        percent
-      )
-    ) + "%";
-
-
-  const value =
-    cp / 100;
-
-
-  evalValue.textContent =
-    (
-      value >= 0
-        ? "+"
-        : ""
-    ) +
-    value.toFixed(2);
-
-}
-
-
-/* =========================================================
-   STATUS
-========================================================= */
-
-function updateStatus() {
-
-  if (
-    game.game_over()
-  ) {
-
-    return;
-
-  }
-
-
-  if (
-    game.in_check()
-  ) {
-
-    statusIcon.textContent =
-      "⚠️";
-
-    statusMain.textContent =
-      "Check!";
-
-    statusSub.textContent =
-      game.turn() === "w"
-        ? "Your king is under attack"
-        : "Stockfish is in check";
-
-    return;
-
-  }
-
-
-  if (
-    game.turn() === "w"
-  ) {
-
-    statusIcon.textContent =
-      "♙";
-
-    statusMain.textContent =
-      "Your turn";
-
-    statusSub.textContent =
-      "White to move";
-
-  } else {
-
-    statusIcon.textContent =
-      "♟";
-
-    statusMain.textContent =
-      "Stockfish's turn";
-
-    statusSub.textContent =
-      "Black to move";
-
-  }
-
-}
-
-
-/* =========================================================
-   EVERYTHING
-========================================================= */
-
-function updateEverything() {
-
-  drawBoard();
-
-  updateMoves();
+  enginePill.classList.add("thinking");
+  engineStatus.textContent = "Thinking…";
 
   updateStatus();
 
+  const depth =
+    parseInt(document.getElementById("difficulty").value,10);
+
+  engine.postMessage("stop");
+
+  engine.postMessage("position fen " + game.fen());
+
+  engine.postMessage("go depth " + depth);
+}
+
+function makeEngineMove(move){
+
+  if(game.game_over()) return;
+
+  if(game.turn() !== "b") return;
+
+  const result = game.move(move);
+
+  if(!result){
+    updateStatus();
+    return;
+  }
+
+  lastMove = {
+    from:result.from,
+    to:result.to
+  };
+
+  createRipple(result.to);
+
+  if(result.captured)
+    sound("capture");
+  else
+    sound("move");
+
+  if(game.in_check())
+    sound("check");
+
+  renderBoard();
+  renderMoves();
+  updateStatus();
   updateClocks();
 
+  if(game.game_over()){
+    endGame();
+  }
 }
 
+/* =========================
+   EVALUATION
+========================= */
 
-/* =========================================================
-   MOVES
-========================================================= */
+function parseEvaluation(line){
 
-function updateMoves() {
+  const cpMatch =
+    line.match(/score cp (-?\d+)/);
 
-  const history =
-    game.history();
+  const mateMatch =
+    line.match(/score mate (-?\d+)/);
 
+  let score = 0;
 
-  moveCount.textContent =
-    history.length +
-    (
-      history.length === 1
-        ? " move"
-        : " moves"
-    );
+  if(mateMatch){
 
+    const mate = parseInt(mateMatch[1]);
 
-  if (!history.length) {
+    score = mate > 0 ? 9 : -9;
 
-    movesElement.innerHTML = `
-      <div class="empty-moves">
-        Your game starts here
-      </div>
-    `;
+    evalNumber.textContent =
+      mate > 0
+        ? "Mate +" + mate
+        : "Mate " + mate;
 
-    return;
+  }else if(cpMatch){
 
+    let cp =
+      parseInt(cpMatch[1],10) / 100;
+
+    cp = Math.max(-10,Math.min(10,cp));
+
+    score = cp;
+
+    evalNumber.textContent =
+      (cp >= 0 ? "+" : "") + cp.toFixed(2);
   }
 
-
-  movesElement.innerHTML =
-    "";
-
-
-  for (
-    let i = 0;
-    i < history.length;
-    i += 2
-  ) {
-
-    const row =
-      document.createElement(
-        "div"
-      );
-
-
-    row.className =
-      "move-row";
-
-
-    const number =
-      document.createElement(
-        "span"
-      );
-
-    number.className =
-      "move-number";
-
-    number.textContent =
-      (i / 2 + 1) + ".";
-
-
-    const white =
-      document.createElement(
-        "span"
-      );
-
-    white.className =
-      "move-white";
-
-    white.textContent =
-      history[i] || "";
-
-
-    const black =
-      document.createElement(
-        "span"
-      );
-
-    black.className =
-      "move-black";
-
-    black.textContent =
-      history[i + 1] || "";
-
-
-    row.appendChild(
-      number
-    );
-
-    row.appendChild(
-      white
-    );
-
-    row.appendChild(
-      black
-    );
-
-
-    movesElement.appendChild(
-      row
-    );
-
-  }
-
-
-  movesElement.scrollTop =
-    movesElement.scrollHeight;
-
-}
-
-
-/* =========================================================
-   GAME OVER
-========================================================= */
-
-function checkGameOver() {
-
-  if (
-    !game.game_over()
-  ) {
-
-    return;
-
-  }
-
-
-  stopClock();
-
-
-  let title =
-    "Game Over";
-
-  let subtitle =
-    "Well played.";
-
-  let icon =
-    "🏁";
-
-
-  if (
-    game.in_checkmate()
-  ) {
-
-    icon =
-      "🏆";
-
-
-    if (
-      game.turn() === "b"
-    ) {
-
-      title =
-        "Checkmate — You Win!";
-
-      subtitle =
-        "A brilliant finish.";
-
-    } else {
-
-      title =
-        "Checkmate";
-
-      subtitle =
-        "Stockfish wins this round.";
-
-    }
-
-  } else if (
-    game.in_draw()
-  ) {
-
-    icon =
-      "🤝";
-
-    title =
-      "Draw";
-
-    subtitle =
-      "Neither side could win.";
-
-  }
-
-
-  gameOverIcon.textContent =
-    icon;
-
-  gameOverTitle.textContent =
-    title;
-
-  gameOverSub.textContent =
-    subtitle;
-
-
-  gameOver.classList.add(
-    "show"
-  );
-
-}
-
-
-/* =========================================================
-   THINKING
-========================================================= */
-
-function setThinking(show) {
-
-  if (show) {
-
-    thinkingElement.classList.add(
-      "show"
-    );
-
-  } else {
-
-    thinkingElement.classList.remove(
-      "show"
-    );
-
-  }
-
-}
-
-
-/* =========================================================
-   NEW GAME
-========================================================= */
-
-function newGame() {
-
-  game.reset();
-
-
-  selectedSquare =
-    null;
-
-  lastMove =
-    null;
-
-  thinking =
-    false;
-
-
-  setThinking(
-    false
-  );
-
-
-  gameOver.classList.remove(
-    "show"
-  );
-
-
-  whiteSeconds =
-    600;
-
-  blackSeconds =
-    600;
-
+  const percentage =
+    50 + (score / 10) * 50;
 
   evalFill.style.width =
-    "50%";
-
-  evalValue.textContent =
-    "0.00";
-
-
-  updateEverything();
-
-
-  if (engineReady) {
-
-    statusIcon.textContent =
-      "♙";
-
-    statusMain.textContent =
-      "Your turn";
-
-    statusSub.textContent =
-      "White to move";
-
-  }
-
-
-  startClock();
-
+    Math.max(4,Math.min(96,percentage)) + "%";
 }
 
-
-/* =========================================================
+/* =========================
    UNDO
-========================================================= */
+========================= */
 
-function undoMove() {
+document.getElementById("undo").addEventListener("click",()=>{
 
-  if (
-    thinking
-  ) {
+  if(engineThinking){
 
-    return;
-
-  }
-
-
-  const history =
-    game.history();
-
-
-  if (
-    history.length === 0
-  ) {
-
-    return;
+    engine.postMessage("stop");
+    engineThinking = false;
 
   }
 
-
-  /* Undo engine move */
-
-  if (
-    history.length >= 2
-  ) {
-
-    game.undo();
-
-  }
-
-
-  /* Undo player's move */
+  if(game.history().length === 0) return;
 
   game.undo();
 
-
-  const remaining =
-    game.history();
-
-
-  if (
-    remaining.length === 0
-  ) {
-
-    lastMove =
-      null;
-
+  if(game.turn() === "b" && game.history().length > 0){
+    game.undo();
   }
 
+  gameId++;
 
-  selectedSquare =
-    null;
+  selected = null;
+  lastMove = null;
 
+  renderBoard();
+  renderMoves();
+  updateStatus();
 
-  updateEverything();
+});
 
-  startClock();
+/* =========================
+   NEW GAME
+========================= */
 
-}
+function newGame(){
 
+  gameId++;
 
-/* =========================================================
-   CLOCK
-========================================================= */
+  if(engine){
 
-function startClock() {
-
-  stopClock();
-
-
-  clockInterval =
-    setInterval(
-      () => {
-
-        if (
-          thinking
-        ) {
-
-          blackSeconds--;
-
-        } else {
-
-          whiteSeconds--;
-
-        }
-
-
-        updateClocks();
-
-
-        if (
-          whiteSeconds <= 0
-        ) {
-
-          endOnTime(
-            "You ran out of time."
-          );
-
-        }
-
-
-        if (
-          blackSeconds <= 0
-        ) {
-
-          endOnTime(
-            "Stockfish ran out of time."
-          );
-
-        }
-
-      },
-      1000
-    );
-
-}
-
-
-function stopClock() {
-
-  if (
-    clockInterval
-  ) {
-
-    clearInterval(
-      clockInterval
-    );
-
-    clockInterval =
-      null;
-
+    try{
+      engine.postMessage("stop");
+      engine.postMessage("ucinewgame");
+      engine.postMessage("isready");
+    }catch(e){}
   }
 
+  game.reset();
+
+  selected = null;
+  lastMove = null;
+  pendingPromotion = null;
+
+  engineThinking = false;
+
+  clocks.w = 600;
+  clocks.b = 600;
+
+  promotion.classList.remove("show");
+  gameover.classList.remove("show");
+
+  evalFill.style.width = "50%";
+  evalNumber.textContent = "0.00";
+  depthText.textContent = "Depth 0";
+
+  enginePill.classList.remove("thinking");
+  engineStatus.textContent =
+    engineReady ? "Stockfish ready" : "Starting engine";
+
+  renderBoard();
+  renderMoves();
+  updateStatus();
+  updateClocks();
 }
 
+document.getElementById("newGame")
+  .addEventListener("click",newGame);
 
-function endOnTime(reason) {
+document.getElementById("gameoverNew")
+  .addEventListener("click",newGame);
 
-  stopClock();
+/* =========================
+   GAME OVER
+========================= */
 
-  thinking =
-    false;
+function endGame(){
 
-  setThinking(false);
+  engineThinking = false;
+  enginePill.classList.remove("thinking");
 
+  let title = "Game Over";
+  let sub = "";
 
-  gameOverIcon.textContent =
-    "⏱️";
+  if(game.is_checkmate()){
 
-  gameOverTitle.textContent =
-    reason.includes("You")
-      ? "Time's Up — Stockfish Wins"
-      : "Time's Up — You Win";
+    title = "Checkmate";
 
-  gameOverSub.textContent =
-    "The clock decided the game.";
+    sub =
+      game.turn() === "w"
+        ? "Stockfish wins the game."
+        : "You defeated Stockfish!";
 
-  gameOver.classList.add(
-    "show"
-  );
+  }else if(game.is_stalemate()){
 
+    title = "Stalemate";
+    sub = "The game ends in a draw.";
+
+  }else if(game.is_threefold_repetition()){
+
+    title = "Threefold Repetition";
+    sub = "The game ends in a draw.";
+
+  }else if(game.is_insufficient_material()){
+
+    title = "Draw";
+    sub = "There isn't enough material to checkmate.";
+
+  }else if(game.is_draw()){
+
+    title = "Draw";
+    sub = "The game ends in a draw.";
+  }
+
+  gameoverTitle.textContent = title;
+  gameoverSub.textContent = sub;
+
+  gameover.classList.add("show");
+
+  updateStatus();
 }
 
+/* =========================
+   CLOCKS
+========================= */
 
-function formatTime(seconds) {
+function formatTime(seconds){
 
-  seconds =
-    Math.max(
-      0,
-      seconds
-    );
+  seconds = Math.max(0,seconds);
 
+  const min =
+    Math.floor(seconds/60);
 
-  const minutes =
-    Math.floor(
-      seconds / 60
-    );
-
-
-  const secs =
+  const sec =
     seconds % 60;
 
-
   return (
-    String(minutes)
-      .padStart(2, "0")
-    +
-    ":"
-    +
-    String(secs)
-      .padStart(2, "0")
+    String(min).padStart(2,"0") +
+    ":" +
+    String(sec).padStart(2,"0")
   );
-
 }
 
+function updateClocks(){
 
-function updateClocks() {
+  whiteClockEl.textContent =
+    formatTime(clocks.w);
 
-  whiteTime.textContent =
-    formatTime(
-      whiteSeconds
-    );
+  blackClockEl.textContent =
+    formatTime(clocks.b);
 
-  blackTime.textContent =
-    formatTime(
-      blackSeconds
-    );
+  whiteClockBox.classList.toggle(
+    "active",
+    game.turn() === "w" && !game.game_over()
+  );
 
+  blackClockBox.classList.toggle(
+    "active",
+    game.turn() === "b" && !game.game_over()
+  );
+}
 
-  if (
-    game.turn() === "w" &&
-    !thinking
-  ) {
+clockTimer = setInterval(()=>{
 
-    whiteClock.classList.add(
-      "active"
-    );
+  if(game.game_over()) return;
 
-    blackClock.classList.remove(
-      "active"
-    );
+  const side = game.turn();
 
-  } else {
+  clocks[side]--;
 
-    whiteClock.classList.remove(
-      "active"
-    );
+  updateClocks();
 
-    blackClock.classList.add(
-      "active"
-    );
+  if(clocks[side] <= 0){
+
+    gameoverTitle.textContent =
+      side === "w"
+        ? "Time Out"
+        : "Stockfish Time Out";
+
+    gameoverSub.textContent =
+      side === "w"
+        ? "Stockfish wins on time."
+        : "You win on time!";
+
+    gameover.classList.add("show");
+
+    if(engine){
+      try{
+        engine.postMessage("stop");
+      }catch(e){}
+    }
+
+    engineThinking = false;
+    enginePill.classList.remove("thinking");
 
   }
 
-}
+},1000);
 
+/* =========================
+   DIFFICULTY
+========================= */
 
-/* =========================================================
+document.getElementById("difficulty")
+  .addEventListener("change",()=>{
+
+    if(engineThinking){
+
+      try{
+        engine.postMessage("stop");
+      }catch(e){}
+
+      engineThinking = false;
+      enginePill.classList.remove("thinking");
+    }
+
+    updateStatus();
+  });
+
+/* =========================
    START
-========================================================= */
+========================= */
 
-drawBoard();
-
-updateMoves();
-
+renderBoard();
+renderMoves();
+updateStatus();
 updateClocks();
-
 startEngine();
-
-startClock();
 
 </script>
 
