@@ -2,690 +2,1118 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Stockfish Chess — V2</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Stockfish Chess</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
 <style>
 *{
-  box-sizing:border-box;
-  -webkit-tap-highlight-color:transparent;
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
 }
 
 :root{
-  --bg:#070910;
-  --panel:rgba(18,22,34,.72);
-  --panel2:rgba(255,255,255,.055);
-  --line:rgba(255,255,255,.10);
-  --text:#f5f7ff;
-  --muted:#8e96aa;
-  --accent:#8b7cff;
-  --accent2:#57d9ff;
+    --bg:#070910;
+    --panel:rgba(17,21,32,.82);
+    --panel-border:rgba(255,255,255,.09);
 
-  --light:#dfe7f2;
-  --dark:#66748b;
+    --text:#f5f7ff;
+    --muted:#8f98ab;
 
-  --board-size:min(72vh, min(72vw, 760px));
+    --purple:#8577ff;
+    --blue:#55d8ff;
+
+    --light:#e6ecf4;
+    --dark:#65748b;
+
+    --board-size:min(70vh, 70vw, 720px);
 }
 
-html,body{
-  margin:0;
-  min-height:100%;
-  background:var(--bg);
-  color:var(--text);
-  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+html{
+    min-height:100%;
+    background:var(--bg);
 }
 
 body{
-  overflow-x:hidden;
-  background:
-    radial-gradient(circle at 15% 10%,rgba(105,88,255,.18),transparent 28%),
-    radial-gradient(circle at 90% 85%,rgba(35,197,255,.12),transparent 30%),
-    linear-gradient(145deg,#060810,#0a0d16 55%,#070910);
+    min-height:100vh;
+    color:var(--text);
+
+    font-family:
+        Inter,
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+
+    background:
+        radial-gradient(
+            circle at 15% 10%,
+            rgba(106,88,255,.18),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 90% 90%,
+            rgba(55,205,255,.11),
+            transparent 28%
+        ),
+        linear-gradient(
+            145deg,
+            #05070d,
+            #0a0d16 50%,
+            #060810
+        );
+
+    overflow-x:hidden;
 }
 
-body:before{
-  content:"";
-  position:fixed;
-  inset:-30%;
-  pointer-events:none;
-  background:
-    radial-gradient(circle,rgba(139,124,255,.08) 0 1px,transparent 1px);
-  background-size:42px 42px;
-  transform:rotate(12deg);
-  opacity:.4;
+body::before{
+    content:"";
+    position:fixed;
+    inset:-50%;
+    pointer-events:none;
+
+    background-image:
+        radial-gradient(
+            rgba(255,255,255,.08) 1px,
+            transparent 1px
+        );
+
+    background-size:42px 42px;
+    transform:rotate(12deg);
+    opacity:.18;
 }
 
-button,select{
-  font:inherit;
+button,
+select{
+    font:inherit;
 }
 
-button{
-  color:inherit;
-}
+/* =========================
+   APP
+========================= */
 
 .app{
-  width:min(1500px,96vw);
-  margin:auto;
-  min-height:100vh;
-  padding:22px 0 35px;
-  position:relative;
+    width:min(1500px,96vw);
+    min-height:100vh;
+    margin:auto;
+    padding:20px 0 35px;
+    position:relative;
+    z-index:1;
 }
 
+/* =========================
+   TOP BAR
+========================= */
+
 .topbar{
-  height:70px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 18px;
-  margin-bottom:22px;
-  border:1px solid var(--line);
-  border-radius:22px;
-  background:rgba(15,18,29,.72);
-  backdrop-filter:blur(22px);
-  box-shadow:
-    0 20px 60px rgba(0,0,0,.25),
-    inset 0 1px rgba(255,255,255,.06);
+    height:68px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 17px;
+
+    border-radius:21px;
+    border:1px solid var(--panel-border);
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(255,255,255,.055),
+            rgba(255,255,255,.018)
+        );
+
+    backdrop-filter:blur(20px);
+
+    box-shadow:
+        0 20px 55px rgba(0,0,0,.28),
+        inset 0 1px rgba(255,255,255,.07);
 }
 
 .brand{
-  display:flex;
-  align-items:center;
-  gap:13px;
+    display:flex;
+    align-items:center;
+    gap:12px;
 }
 
 .logo{
-  width:42px;
-  height:42px;
-  border-radius:13px;
-  display:grid;
-  place-items:center;
-  font-size:23px;
-  background:linear-gradient(135deg,#9d91ff,#4bd7ff);
-  box-shadow:0 8px 25px rgba(102,125,255,.35);
+    width:42px;
+    height:42px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:13px;
+
+    font-family:Georgia,serif;
+    font-size:25px;
+
+    color:white;
+
+    background:
+        linear-gradient(
+            135deg,
+            #9d91ff,
+            #52d8ff
+        );
+
+    box-shadow:
+        0 8px 28px rgba(106,125,255,.35);
 }
 
 .title{
-  font-weight:800;
-  letter-spacing:-.5px;
+    font-size:16px;
+    font-weight:850;
+    letter-spacing:-.3px;
 }
 
 .subtitle{
-  color:var(--muted);
-  font-size:12px;
-  margin-top:2px;
+    color:var(--muted);
+    font-size:11px;
+    margin-top:2px;
 }
 
 .engine-pill{
-  display:flex;
-  align-items:center;
-  gap:9px;
-  padding:9px 13px;
-  border:1px solid var(--line);
-  border-radius:999px;
-  background:rgba(255,255,255,.045);
-  color:#cbd1df;
-  font-size:12px;
-  font-weight:700;
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    padding:9px 13px;
+
+    border-radius:999px;
+    border:1px solid rgba(255,255,255,.09);
+
+    background:rgba(255,255,255,.035);
+
+    color:#cbd2df;
+
+    font-size:11px;
+    font-weight:750;
+
+    transition:.2s ease;
 }
 
 .engine-dot{
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:#4cff9b;
-  box-shadow:0 0 14px #4cff9b;
+    width:8px;
+    height:8px;
+    border-radius:50%;
+
+    background:#4cff9b;
+
+    box-shadow:
+        0 0 14px rgba(76,255,155,.8);
 }
 
 .engine-pill.thinking .engine-dot{
-  animation:pulse .75s infinite alternate;
+    animation:thinkingPulse .65s infinite alternate;
 }
 
-@keyframes pulse{
-  from{transform:scale(.7);opacity:.45}
-  to{transform:scale(1.25);opacity:1}
+@keyframes thinkingPulse{
+    from{
+        transform:scale(.7);
+        opacity:.45;
+    }
+
+    to{
+        transform:scale(1.3);
+        opacity:1;
+    }
 }
+
+/* =========================
+   MAIN
+========================= */
 
 .main{
-  display:grid;
-  grid-template-columns:minmax(500px,1fr) 350px;
-  gap:25px;
-  align-items:start;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) 350px;
+
+    gap:25px;
+
+    align-items:start;
+
+    margin-top:22px;
 }
 
+/* =========================
+   BOARD
+========================= */
+
 .board-area{
-  display:flex;
-  justify-content:center;
+    width:100%;
+
+    display:flex;
+    justify-content:center;
+
+    min-width:0;
 }
 
 .board-shell{
-  width:var(--board-size);
-  height:var(--board-size);
-  padding:11px;
-  border-radius:28px;
-  position:relative;
+    width:var(--board-size);
+    height:var(--board-size);
 
-  background:
-    linear-gradient(145deg,
-      rgba(255,255,255,.16),
-      rgba(255,255,255,.035) 35%,
-      rgba(0,0,0,.3));
+    max-width:100%;
 
-  border:1px solid rgba(255,255,255,.12);
+    padding:10px;
 
-  box-shadow:
-    0 35px 90px rgba(0,0,0,.48),
-    0 0 80px rgba(100,100,255,.10),
-    inset 0 1px rgba(255,255,255,.12);
+    border-radius:27px;
+
+    border:1px solid rgba(255,255,255,.12);
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.14),
+            rgba(255,255,255,.025) 40%,
+            rgba(0,0,0,.25)
+        );
+
+    box-shadow:
+        0 35px 90px rgba(0,0,0,.48),
+        0 0 70px rgba(100,100,255,.08),
+        inset 0 1px rgba(255,255,255,.12);
+
+    min-width:0;
+    min-height:0;
 }
+
+/*
+   IMPORTANT:
+   minmax(0,1fr) prevents chess pieces
+   from making the board columns wider.
+*/
 
 .board{
-  width:100%;
-  height:100%;
-  position:relative;
-  display:grid;
-  grid-template-columns:repeat(8,1fr);
-  grid-template-rows:repeat(8,1fr);
-  overflow:hidden;
-  border-radius:18px;
-  isolation:isolate;
+    width:100%;
+    height:100%;
+
+    display:grid;
+
+    grid-template-columns:
+        repeat(8,minmax(0,1fr));
+
+    grid-template-rows:
+        repeat(8,minmax(0,1fr));
+
+    min-width:0;
+    min-height:0;
+
+    overflow:hidden;
+
+    border-radius:17px;
+
+    position:relative;
+
+    isolation:isolate;
 }
 
+/* =========================
+   SQUARES
+========================= */
+
 .square{
-  position:relative;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
-  user-select:none;
-  transition:
-    filter .16s ease,
-    box-shadow .16s ease;
+    position:relative;
+
+    min-width:0;
+    min-height:0;
+
+    width:100%;
+    height:100%;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    overflow:hidden;
+
+    cursor:pointer;
+    user-select:none;
+
+    transition:
+        filter .14s ease,
+        box-shadow .16s ease;
 }
 
 .square.light{
-  background:
-    linear-gradient(145deg,#edf2f8,#d6dfeb);
+    background:
+        linear-gradient(
+            145deg,
+            #eef3f9,
+            #d6e0ec
+        );
 }
 
 .square.dark{
-  background:
-    linear-gradient(145deg,#718097,#59687e);
+    background:
+        linear-gradient(
+            145deg,
+            #74839a,
+            #5b6a80
+        );
 }
 
 .square:hover{
-  filter:brightness(1.08);
-}
-
-.square.last{
-  box-shadow:inset 0 0 0 999px rgba(255,210,78,.18);
+    filter:brightness(1.06);
 }
 
 .square.selected{
-  box-shadow:
-    inset 0 0 0 999px rgba(123,108,255,.30),
-    inset 0 0 30px rgba(123,108,255,.5);
+    box-shadow:
+        inset 0 0 0 999px rgba(130,116,255,.28),
+        inset 0 0 35px rgba(130,116,255,.5);
+}
+
+.square.last{
+    box-shadow:
+        inset 0 0 0 999px rgba(255,205,70,.18);
 }
 
 .square.check{
-  box-shadow:
-    inset 0 0 0 999px rgba(255,57,82,.28),
-    inset 0 0 38px rgba(255,44,70,.75);
-  animation:checkPulse .9s infinite alternate;
+    box-shadow:
+        inset 0 0 0 999px rgba(255,45,70,.27),
+        inset 0 0 35px rgba(255,45,70,.7);
+
+    animation:checkGlow .8s infinite alternate;
 }
 
-@keyframes checkPulse{
-  from{filter:brightness(1)}
-  to{filter:brightness(1.16)}
+@keyframes checkGlow{
+    from{
+        filter:brightness(1);
+    }
+
+    to{
+        filter:brightness(1.16);
+    }
 }
 
-.coord{
-  position:absolute;
-  font-size:10px;
-  font-weight:800;
-  opacity:.55;
-  pointer-events:none;
-  z-index:5;
-}
-
-.rank{
-  top:4px;
-  left:5px;
-}
-
-.file{
-  right:5px;
-  bottom:4px;
-}
-
-.light .coord{color:#647186}
-.dark .coord{color:#e8edf5}
+/* =========================
+   PIECES
+========================= */
 
 .piece{
-  position:relative;
-  z-index:4;
-  font-family:"Times New Roman",Georgia,serif;
-  font-size:clamp(38px,5.8vw,72px);
-  line-height:1;
-  transform:translateZ(0);
-  transition:
-    transform .16s cubic-bezier(.2,.9,.2,1),
-    filter .16s ease;
-  filter:drop-shadow(0 5px 4px rgba(0,0,0,.25));
-  pointer-events:none;
+    position:relative;
+
+    z-index:4;
+
+    display:block;
+
+    font-family:
+        "Times New Roman",
+        Georgia,
+        serif;
+
+    /*
+       Responsive without allowing
+       the piece to enlarge its grid cell.
+    */
+    font-size:
+        clamp(29px, 5vw, 64px);
+
+    line-height:1;
+
+    pointer-events:none;
+
+    transform:translateZ(0);
+
+    transition:
+        transform .14s cubic-bezier(.2,.9,.2,1),
+        filter .14s ease;
+
+    will-change:transform;
+
+    filter:
+        drop-shadow(0 5px 4px rgba(0,0,0,.28));
 }
 
 .square:hover .piece{
-  transform:translateY(-3px) scale(1.045);
+    transform:
+        translateY(-2px)
+        scale(1.035);
 }
 
 .white-piece{
-  color:#fff;
-  text-shadow:
-    0 2px 0 #c8d0dc,
-    0 5px 8px rgba(0,0,0,.35);
+    color:#ffffff;
+
+    text-shadow:
+        0 2px 0 #cbd3df,
+        0 5px 9px rgba(0,0,0,.38);
 }
 
 .black-piece{
-  color:#1c2028;
-  text-shadow:
-    0 1px 0 #515a69,
-    0 5px 8px rgba(0,0,0,.42);
+    color:#20252e;
+
+    text-shadow:
+        0 1px 0 #596272,
+        0 5px 9px rgba(0,0,0,.48);
 }
 
+/* =========================
+   COORDINATES
+========================= */
+
+.coord{
+    position:absolute;
+
+    z-index:6;
+
+    pointer-events:none;
+
+    font-size:9px;
+    font-weight:850;
+
+    opacity:.58;
+}
+
+.rank{
+    top:4px;
+    left:5px;
+}
+
+.file{
+    right:5px;
+    bottom:4px;
+}
+
+.light .coord{
+    color:#5d697c;
+}
+
+.dark .coord{
+    color:#edf2f8;
+}
+
+/* =========================
+   LEGAL MOVE DOTS
+========================= */
+
 .move-dot{
-  width:19%;
-  aspect-ratio:1;
-  border-radius:50%;
-  position:absolute;
-  background:rgba(50,40,30,.30);
-  z-index:2;
-  pointer-events:none;
+    position:absolute;
+
+    z-index:2;
+
+    width:20%;
+    aspect-ratio:1;
+
+    border-radius:50%;
+
+    background:rgba(45,37,30,.30);
+
+    pointer-events:none;
 }
 
 .capture-ring{
-  position:absolute;
-  width:74%;
-  height:74%;
-  border-radius:50%;
-  border:5px solid rgba(50,40,30,.30);
-  z-index:2;
-  pointer-events:none;
+    position:absolute;
+
+    z-index:2;
+
+    width:72%;
+    height:72%;
+
+    border-radius:50%;
+
+    border:
+        5px solid rgba(45,37,30,.28);
+
+    pointer-events:none;
 }
+
+/* =========================
+   RIPPLE
+========================= */
 
 .ripple{
-  position:absolute;
-  width:15px;
-  height:15px;
-  border-radius:50%;
-  background:rgba(255,255,255,.6);
-  transform:scale(0);
-  animation:ripple .55s ease-out forwards;
-  pointer-events:none;
-  z-index:8;
+    position:absolute;
+
+    z-index:10;
+
+    width:13px;
+    height:13px;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.65);
+
+    pointer-events:none;
+
+    animation:
+        rippleAnimation .55s ease-out forwards;
 }
 
-@keyframes ripple{
-  to{
-    transform:scale(8);
-    opacity:0;
-  }
+@keyframes rippleAnimation{
+    from{
+        transform:scale(0);
+        opacity:.8;
+    }
+
+    to{
+        transform:scale(8);
+        opacity:0;
+    }
 }
+
+/* =========================
+   SIDE PANEL
+========================= */
 
 .side{
-  display:flex;
-  flex-direction:column;
-  gap:14px;
+    display:flex;
+    flex-direction:column;
+
+    gap:14px;
+
+    min-width:0;
 }
 
 .card{
-  border:1px solid var(--line);
-  border-radius:22px;
-  background:var(--panel);
-  backdrop-filter:blur(22px);
-  box-shadow:
-    0 20px 55px rgba(0,0,0,.22),
-    inset 0 1px rgba(255,255,255,.055);
-  overflow:hidden;
+    border:1px solid var(--panel-border);
+
+    border-radius:21px;
+
+    background:var(--panel);
+
+    backdrop-filter:blur(20px);
+
+    box-shadow:
+        0 20px 55px rgba(0,0,0,.22),
+        inset 0 1px rgba(255,255,255,.05);
+
+    overflow:hidden;
 }
+
+/* =========================
+   STATUS
+========================= */
 
 .status{
-  padding:18px;
-}
-
-.status-top{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+    padding:18px;
 }
 
 .status-label{
-  font-size:11px;
-  text-transform:uppercase;
-  letter-spacing:1.5px;
-  color:var(--muted);
-  font-weight:800;
+    color:var(--muted);
+
+    font-size:10px;
+
+    font-weight:850;
+
+    text-transform:uppercase;
+
+    letter-spacing:1.5px;
 }
 
 .status-text{
-  font-size:18px;
-  font-weight:800;
-  margin-top:6px;
+    margin-top:6px;
+
+    font-size:18px;
+
+    font-weight:850;
+
+    letter-spacing:-.3px;
 }
 
-.thinking-text{
-  color:#8d81ff;
+.status-text.thinking{
+    color:#9488ff;
 }
+
+/* =========================
+   EVALUATION
+========================= */
 
 .eval-wrap{
-  margin-top:17px;
-  height:13px;
-  border-radius:999px;
-  overflow:hidden;
-  background:#111520;
-  border:1px solid rgba(255,255,255,.07);
-  position:relative;
+    height:13px;
+
+    margin-top:17px;
+
+    border-radius:999px;
+
+    overflow:hidden;
+
+    background:#10141d;
+
+    border:1px solid rgba(255,255,255,.06);
 }
 
 .eval-fill{
-  height:100%;
-  width:50%;
-  background:linear-gradient(90deg,#cbd5e1,#fff);
-  transition:width .65s cubic-bezier(.2,.8,.2,1);
+    height:100%;
+
+    width:50%;
+
+    background:
+        linear-gradient(
+            90deg,
+            #cbd4df,
+            #ffffff
+        );
+
+    transition:
+        width .5s cubic-bezier(.2,.8,.2,1);
 }
 
 .eval-number{
-  margin-top:7px;
-  font-size:11px;
-  color:var(--muted);
-  text-align:right;
-  font-variant-numeric:tabular-nums;
+    margin-top:7px;
+
+    text-align:right;
+
+    color:var(--muted);
+
+    font-size:10px;
+
+    font-variant-numeric:tabular-nums;
 }
 
+/* =========================
+   CLOCKS
+========================= */
+
 .clocks{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  padding:0 18px 18px;
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:10px;
+
+    padding:14px;
 }
 
 .clock{
-  padding:13px;
-  border-radius:15px;
-  background:rgba(255,255,255,.045);
-  border:1px solid rgba(255,255,255,.06);
-}
+    padding:13px;
 
-.clock-name{
-  color:var(--muted);
-  font-size:10px;
-  text-transform:uppercase;
-  letter-spacing:1px;
-  font-weight:800;
-}
+    border-radius:15px;
 
-.clock-time{
-  font-size:25px;
-  margin-top:4px;
-  font-weight:800;
-  font-variant-numeric:tabular-nums;
+    background:rgba(255,255,255,.035);
+
+    border:
+        1px solid rgba(255,255,255,.065);
+
+    transition:.2s ease;
 }
 
 .clock.active{
-  border-color:rgba(139,124,255,.45);
-  box-shadow:0 0 25px rgba(139,124,255,.10);
+    border-color:
+        rgba(133,119,255,.5);
+
+    box-shadow:
+        0 0 25px rgba(133,119,255,.09);
 }
 
+.clock-name{
+    color:var(--muted);
+
+    font-size:9px;
+
+    font-weight:850;
+
+    text-transform:uppercase;
+
+    letter-spacing:1.2px;
+}
+
+.clock-time{
+    margin-top:4px;
+
+    font-size:24px;
+
+    font-weight:850;
+
+    font-variant-numeric:tabular-nums;
+}
+
+/* =========================
+   MOVE LIST
+========================= */
+
 .moves{
-  max-height:350px;
-  min-height:250px;
-  overflow:auto;
-  padding:12px;
+    height:300px;
+
+    overflow-y:auto;
+
+    padding:10px;
 }
 
 .moves::-webkit-scrollbar{
-  width:5px;
+    width:5px;
 }
 
 .moves::-webkit-scrollbar-thumb{
-  background:rgba(255,255,255,.12);
-  border-radius:99px;
+    background:rgba(255,255,255,.12);
+    border-radius:99px;
+}
+
+.empty-moves{
+    height:100%;
+
+    display:grid;
+    place-items:center;
+
+    color:var(--muted);
+
+    font-size:11px;
 }
 
 .move-row{
-  display:grid;
-  grid-template-columns:35px 1fr 1fr;
-  gap:5px;
-  padding:8px 7px;
-  border-radius:10px;
-  font-size:13px;
-  animation:moveIn .25s ease both;
-}
+    display:grid;
 
-@keyframes moveIn{
-  from{
-    opacity:0;
-    transform:translateY(7px);
-  }
-  to{
-    opacity:1;
-    transform:none;
-  }
+    grid-template-columns:32px 1fr 1fr;
+
+    gap:5px;
+
+    padding:8px 7px;
+
+    border-radius:9px;
+
+    font-size:12px;
+
+    animation:
+        moveAppear .2s ease both;
 }
 
 .move-row.latest{
-  background:rgba(139,124,255,.12);
+    background:
+        rgba(133,119,255,.13);
 }
 
 .move-number{
-  color:var(--muted);
+    color:var(--muted);
 }
 
-.move-white,.move-black{
-  font-weight:700;
+.move-white,
+.move-black{
+    font-weight:750;
 }
+
+@keyframes moveAppear{
+    from{
+        opacity:0;
+        transform:translateY(5px);
+    }
+
+    to{
+        opacity:1;
+        transform:none;
+    }
+}
+
+/* =========================
+   CONTROLS
+========================= */
 
 .controls{
-  padding:15px;
-  display:grid;
-  gap:9px;
-}
+    padding:14px;
 
-select,.btn{
-  width:100%;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.09);
-  background:rgba(255,255,255,.055);
-  padding:12px 13px;
-  color:var(--text);
-  outline:none;
+    display:grid;
+
+    gap:9px;
 }
 
 select{
-  cursor:pointer;
+    width:100%;
+
+    padding:12px;
+
+    border-radius:13px;
+
+    border:
+        1px solid rgba(255,255,255,.09);
+
+    outline:none;
+
+    color:var(--text);
+
+    background:#171b27;
+
+    cursor:pointer;
+}
+
+select option{
+    background:#171b27;
+    color:white;
+}
+
+.button-row{
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:9px;
 }
 
 .btn{
-  cursor:pointer;
-  font-weight:800;
-  transition:
-    transform .15s ease,
-    background .15s ease,
-    border-color .15s ease;
+    border:1px solid rgba(255,255,255,.09);
+
+    border-radius:13px;
+
+    padding:12px;
+
+    background:
+        rgba(255,255,255,.045);
+
+    color:var(--text);
+
+    cursor:pointer;
+
+    font-weight:800;
+
+    transition:
+        transform .14s ease,
+        background .14s ease,
+        box-shadow .14s ease;
 }
 
 .btn:hover{
-  transform:translateY(-2px);
-  background:rgba(255,255,255,.09);
+    transform:translateY(-2px);
+
+    background:
+        rgba(255,255,255,.085);
 }
 
 .btn:active{
-  transform:translateY(0) scale(.98);
+    transform:scale(.98);
 }
 
 .btn.primary{
-  background:linear-gradient(135deg,#7668ed,#5c91ff);
-  border-color:transparent;
-  box-shadow:0 10px 28px rgba(100,105,255,.24);
-}
+    border-color:transparent;
 
-.btn-row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:9px;
+    background:
+        linear-gradient(
+            135deg,
+            #7769ef,
+            #5c93ff
+        );
+
+    box-shadow:
+        0 10px 25px rgba(100,105,255,.22);
 }
 
 .engine-info{
-  display:flex;
-  justify-content:space-between;
-  color:var(--muted);
-  font-size:11px;
-  padding:0 3px;
+    display:flex;
+
+    justify-content:space-between;
+
+    color:var(--muted);
+
+    font-size:10px;
+
+    padding:2px 3px;
 }
 
-.promotion{
-  position:fixed;
-  inset:0;
-  z-index:100;
-  display:none;
-  place-items:center;
-  background:rgba(2,4,10,.70);
-  backdrop-filter:blur(12px);
+/* =========================
+   PROMOTION
+========================= */
+
+.overlay{
+    position:fixed;
+
+    inset:0;
+
+    z-index:100;
+
+    display:none;
+
+    place-items:center;
+
+    padding:20px;
+
+    background:
+        rgba(2,4,10,.72);
+
+    backdrop-filter:blur(10px);
 }
 
-.promotion.show{
-  display:grid;
+.overlay.show{
+    display:grid;
 }
 
-.promotion-box{
-  width:min(420px,90vw);
-  padding:24px;
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:25px;
-  background:rgba(17,20,31,.94);
-  box-shadow:0 30px 100px rgba(0,0,0,.55);
-  text-align:center;
-  animation:modalIn .25s cubic-bezier(.2,.9,.2,1);
+.modal{
+    width:min(400px,90vw);
+
+    padding:25px;
+
+    border-radius:24px;
+
+    border:
+        1px solid rgba(255,255,255,.12);
+
+    background:
+        rgba(16,20,31,.96);
+
+    box-shadow:
+        0 30px 100px rgba(0,0,0,.55);
+
+    animation:
+        modalAppear .25s cubic-bezier(.2,.9,.2,1);
 }
 
-@keyframes modalIn{
-  from{opacity:0;transform:scale(.92) translateY(15px)}
-  to{opacity:1;transform:none}
-}
+.modal-title{
+    text-align:center;
 
-.promotion-title{
-  font-size:20px;
-  font-weight:800;
-  margin-bottom:17px;
+    font-size:19px;
+
+    font-weight:850;
+
+    margin-bottom:17px;
 }
 
 .promotion-options{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:9px;
+    display:grid;
+
+    grid-template-columns:
+        repeat(4,1fr);
+
+    gap:9px;
 }
 
-.promo{
-  font-size:45px;
-  padding:13px 4px;
-  border-radius:15px;
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.08);
-  cursor:pointer;
-  transition:.15s ease;
+.promotion-button{
+    padding:13px 4px;
+
+    border-radius:14px;
+
+    border:
+        1px solid rgba(255,255,255,.08);
+
+    background:
+        rgba(255,255,255,.05);
+
+    color:white;
+
+    font-family:Georgia,serif;
+
+    font-size:43px;
+
+    cursor:pointer;
+
+    transition:.15s ease;
 }
 
-.promo:hover{
-  transform:translateY(-4px);
-  background:rgba(139,124,255,.16);
+.promotion-button:hover{
+    transform:translateY(-4px);
+
+    background:
+        rgba(133,119,255,.17);
 }
 
-.gameover{
-  position:fixed;
-  inset:0;
-  z-index:90;
-  display:none;
-  place-items:center;
-  background:rgba(2,4,10,.58);
-  backdrop-filter:blur(8px);
+@keyframes modalAppear{
+    from{
+        opacity:0;
+        transform:
+            translateY(12px)
+            scale(.94);
+    }
+
+    to{
+        opacity:1;
+        transform:none;
+    }
 }
 
-.gameover.show{
-  display:grid;
-}
+/* =========================
+   GAME OVER
+========================= */
 
 .gameover-box{
-  text-align:center;
-  padding:35px 45px;
-  border-radius:28px;
-  border:1px solid rgba(255,255,255,.13);
-  background:rgba(15,18,29,.94);
-  box-shadow:0 30px 100px rgba(0,0,0,.55);
-  animation:modalIn .3s ease;
+    width:min(430px,90vw);
+
+    padding:34px;
+
+    border-radius:25px;
+
+    border:
+        1px solid rgba(255,255,255,.12);
+
+    background:
+        rgba(16,20,31,.96);
+
+    box-shadow:
+        0 30px 100px rgba(0,0,0,.55);
+
+    text-align:center;
+
+    animation:
+        modalAppear .25s ease;
 }
 
 .gameover-title{
-  font-size:32px;
-  font-weight:900;
+    font-size:30px;
+
+    font-weight:900;
 }
 
 .gameover-sub{
-  color:var(--muted);
-  margin:7px 0 22px;
+    color:var(--muted);
+
+    margin:
+        7px 0 22px;
 }
 
-@media(max-width:1000px){
-  :root{
-    --board-size:min(90vw,720px);
-  }
+/* =========================
+   RESPONSIVE
+========================= */
 
-  .main{
-    grid-template-columns:1fr;
-  }
+@media(max-width:1050px){
 
-  .side{
-    width:min(720px,90vw);
-    margin:auto;
-  }
+    :root{
+        --board-size:min(88vw,720px);
+    }
+
+    .main{
+        grid-template-columns:1fr;
+    }
+
+    .side{
+        width:min(720px,88vw);
+        margin:auto;
+    }
 }
 
-@media(max-width:560px){
-  .app{
-    width:96vw;
-    padding-top:10px;
-  }
+@media(max-width:600px){
 
-  .topbar{
-    height:60px;
-    border-radius:17px;
-  }
+    :root{
+        --board-size:92vw;
+    }
 
-  .subtitle{
-    display:none;
-  }
+    .app{
+        width:96vw;
+        padding-top:10px;
+    }
 
-  .logo{
-    width:36px;
-    height:36px;
-  }
+    .topbar{
+        height:60px;
+        border-radius:17px;
+    }
 
-  .board-shell{
-    padding:7px;
-    border-radius:20px;
-  }
+    .logo{
+        width:36px;
+        height:36px;
+    }
 
-  .board{
-    border-radius:14px;
-  }
+    .subtitle{
+        display:none;
+    }
 
-  .piece{
-    font-size:11vw;
-  }
+    .engine-pill{
+        padding:8px 10px;
+    }
 
-  .main{
-    gap:15px;
-  }
+    .board-shell{
+        padding:7px;
+        border-radius:20px;
+    }
+
+    .board{
+        border-radius:13px;
+    }
+
+    .piece{
+        font-size:
+            clamp(25px,8vw,50px);
+    }
+
+    .moves{
+        height:250px;
+    }
 }
 </style>
 </head>
@@ -694,1032 +1122,2144 @@ select{
 
 <div class="app">
 
-  <header class="topbar">
-    <div class="brand">
-      <div class="logo">♞</div>
-      <div>
-        <div class="title">Stockfish Chess</div>
-        <div class="subtitle">Premium browser chess</div>
-      </div>
-    </div>
+    <!-- TOP BAR -->
+    <header class="topbar">
 
-    <div class="engine-pill" id="enginePill">
-      <span class="engine-dot"></span>
-      <span id="engineStatus">Starting engine</span>
-    </div>
-  </header>
+        <div class="brand">
 
-  <main class="main">
+            <div class="logo">♞</div>
 
-    <section class="board-area">
-      <div class="board-shell">
-        <div class="board" id="board"></div>
-      </div>
-    </section>
+            <div>
+                <div class="title">
+                    Stockfish Chess
+                </div>
 
-    <aside class="side">
+                <div class="subtitle">
+                    Premium browser chess
+                </div>
+            </div>
 
-      <section class="card status">
-        <div class="status-top">
-          <div>
-            <div class="status-label">Game status</div>
-            <div class="status-text" id="statusText">Your move</div>
-          </div>
         </div>
 
-        <div class="eval-wrap">
-          <div class="eval-fill" id="evalFill"></div>
+        <div class="engine-pill" id="enginePill">
+
+            <span class="engine-dot"></span>
+
+            <span id="engineStatus">
+                Starting engine
+            </span>
+
         </div>
 
-        <div class="eval-number" id="evalNumber">0.00</div>
-      </section>
+    </header>
 
-      <section class="card">
-        <div class="clocks">
-          <div class="clock" id="whiteClockBox">
-            <div class="clock-name">White</div>
-            <div class="clock-time" id="whiteClock">10:00</div>
-          </div>
 
-          <div class="clock" id="blackClockBox">
-            <div class="clock-name">Black</div>
-            <div class="clock-time" id="blackClock">10:00</div>
-          </div>
-        </div>
-      </section>
+    <!-- MAIN -->
+    <main class="main">
 
-      <section class="card">
-        <div class="moves" id="moves"></div>
-      </section>
+        <!-- BOARD -->
+        <section class="board-area">
 
-      <section class="card controls">
+            <div class="board-shell">
 
-        <select id="difficulty">
-          <option value="8">Beginner — Depth 8</option>
-          <option value="12" selected>Intermediate — Depth 12</option>
-          <option value="16">Advanced — Depth 16</option>
-          <option value="20">Expert — Depth 20</option>
-        </select>
+                <div
+                    class="board"
+                    id="board"
+                ></div>
 
-        <div class="btn-row">
-          <button class="btn primary" id="newGame">New Game</button>
-          <button class="btn" id="undo">Undo</button>
-        </div>
+            </div>
 
-        <div class="engine-info">
-          <span id="depthText">Depth 0</span>
-          <span id="turnText">White to move</span>
-        </div>
+        </section>
 
-      </section>
 
-    </aside>
+        <!-- SIDE -->
+        <aside class="side">
 
-  </main>
+            <!-- STATUS -->
+            <section class="card status">
+
+                <div class="status-label">
+                    Game status
+                </div>
+
+                <div
+                    class="status-text"
+                    id="statusText"
+                >
+                    Starting…
+                </div>
+
+                <div class="eval-wrap">
+
+                    <div
+                        class="eval-fill"
+                        id="evalFill"
+                    ></div>
+
+                </div>
+
+                <div
+                    class="eval-number"
+                    id="evalNumber"
+                >
+                    0.00
+                </div>
+
+            </section>
+
+
+            <!-- CLOCKS -->
+            <section class="card">
+
+                <div class="clocks">
+
+                    <div
+                        class="clock"
+                        id="whiteClockBox"
+                    >
+
+                        <div class="clock-name">
+                            White
+                        </div>
+
+                        <div
+                            class="clock-time"
+                            id="whiteClock"
+                        >
+                            10:00
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="clock"
+                        id="blackClockBox"
+                    >
+
+                        <div class="clock-name">
+                            Black
+                        </div>
+
+                        <div
+                            class="clock-time"
+                            id="blackClock"
+                        >
+                            10:00
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- MOVES -->
+            <section class="card">
+
+                <div
+                    class="moves"
+                    id="moves"
+                ></div>
+
+            </section>
+
+
+            <!-- CONTROLS -->
+            <section class="card controls">
+
+                <select id="difficulty">
+
+                    <option value="8">
+                        Beginner — Depth 8
+                    </option>
+
+                    <option value="12" selected>
+                        Intermediate — Depth 12
+                    </option>
+
+                    <option value="16">
+                        Advanced — Depth 16
+                    </option>
+
+                    <option value="20">
+                        Expert — Depth 20
+                    </option>
+
+                </select>
+
+
+                <div class="button-row">
+
+                    <button
+                        class="btn primary"
+                        id="newGame"
+                    >
+                        New Game
+                    </button>
+
+                    <button
+                        class="btn"
+                        id="undo"
+                    >
+                        Undo
+                    </button>
+
+                </div>
+
+
+                <div class="engine-info">
+
+                    <span id="depthText">
+                        Depth 0
+                    </span>
+
+                    <span id="turnText">
+                        White to move
+                    </span>
+
+                </div>
+
+            </section>
+
+        </aside>
+
+    </main>
+
 </div>
 
-<div class="promotion" id="promotion">
-  <div class="promotion-box">
-    <div class="promotion-title">Choose your promotion</div>
-    <div class="promotion-options">
-      <button class="promo" data-piece="q">♕</button>
-      <button class="promo" data-piece="r">♖</button>
-      <button class="promo" data-piece="b">♗</button>
-      <button class="promo" data-piece="n">♘</button>
+
+<!-- PROMOTION -->
+<div
+    class="overlay"
+    id="promotionOverlay"
+>
+
+    <div class="modal">
+
+        <div class="modal-title">
+            Choose your promotion
+        </div>
+
+        <div class="promotion-options">
+
+            <button
+                class="promotion-button"
+                data-piece="q"
+            >
+                ♕
+            </button>
+
+            <button
+                class="promotion-button"
+                data-piece="r"
+            >
+                ♖
+            </button>
+
+            <button
+                class="promotion-button"
+                data-piece="b"
+            >
+                ♗
+            </button>
+
+            <button
+                class="promotion-button"
+                data-piece="n"
+            >
+                ♘
+            </button>
+
+        </div>
+
     </div>
-  </div>
+
 </div>
 
-<div class="gameover" id="gameover">
-  <div class="gameover-box">
-    <div class="gameover-title" id="gameoverTitle">Checkmate</div>
-    <div class="gameover-sub" id="gameoverSub"></div>
-    <button class="btn primary" id="gameoverNew">Play Again</button>
-  </div>
+
+<!-- GAME OVER -->
+<div
+    class="overlay"
+    id="gameoverOverlay"
+>
+
+    <div class="gameover-box">
+
+        <div
+            class="gameover-title"
+            id="gameoverTitle"
+        >
+            Game Over
+        </div>
+
+        <div
+            class="gameover-sub"
+            id="gameoverSub"
+        ></div>
+
+        <button
+            class="btn primary"
+            id="playAgain"
+        >
+            Play Again
+        </button>
+
+    </div>
+
 </div>
+
 
 <script>
-/* =========================
-   GAME
-========================= */
+
+/* =========================================================
+   CHESS
+========================================================= */
 
 const game = new Chess();
 
-const board = document.getElementById("board");
-const movesEl = document.getElementById("moves");
-const statusText = document.getElementById("statusText");
-const evalFill = document.getElementById("evalFill");
-const evalNumber = document.getElementById("evalNumber");
-const engineStatus = document.getElementById("engineStatus");
-const enginePill = document.getElementById("enginePill");
-const depthText = document.getElementById("depthText");
-const turnText = document.getElementById("turnText");
 
-const whiteClockEl = document.getElementById("whiteClock");
-const blackClockEl = document.getElementById("blackClock");
-const whiteClockBox = document.getElementById("whiteClockBox");
-const blackClockBox = document.getElementById("blackClockBox");
+/* =========================================================
+   ELEMENTS
+========================================================= */
 
-const promotion = document.getElementById("promotion");
-const gameover = document.getElementById("gameover");
-const gameoverTitle = document.getElementById("gameoverTitle");
-const gameoverSub = document.getElementById("gameoverSub");
+const board =
+    document.getElementById("board");
 
-let selected = null;
+const movesElement =
+    document.getElementById("moves");
+
+const statusElement =
+    document.getElementById("statusText");
+
+const engineStatus =
+    document.getElementById("engineStatus");
+
+const enginePill =
+    document.getElementById("enginePill");
+
+const evalFill =
+    document.getElementById("evalFill");
+
+const evalNumber =
+    document.getElementById("evalNumber");
+
+const depthText =
+    document.getElementById("depthText");
+
+const turnText =
+    document.getElementById("turnText");
+
+const whiteClock =
+    document.getElementById("whiteClock");
+
+const blackClock =
+    document.getElementById("blackClock");
+
+const whiteClockBox =
+    document.getElementById("whiteClockBox");
+
+const blackClockBox =
+    document.getElementById("blackClockBox");
+
+const difficulty =
+    document.getElementById("difficulty");
+
+const promotionOverlay =
+    document.getElementById("promotionOverlay");
+
+const gameoverOverlay =
+    document.getElementById("gameoverOverlay");
+
+const gameoverTitle =
+    document.getElementById("gameoverTitle");
+
+const gameoverSub =
+    document.getElementById("gameoverSub");
+
+
+/* =========================================================
+   PIECES
+========================================================= */
+
+const pieces = {
+
+    wp:"♙",
+    wn:"♘",
+    wb:"♗",
+    wr:"♖",
+    wq:"♕",
+    wk:"♔",
+
+    bp:"♟",
+    bn:"♞",
+    bb:"♝",
+    br:"♜",
+    bq:"♛",
+    bk:"♚"
+
+};
+
+
+/* =========================================================
+   STATE
+========================================================= */
+
+let selectedSquare = null;
+
 let lastMove = null;
-let pendingPromotion = null;
+
+let promotionMove = null;
 
 let engine = null;
+
 let engineReady = false;
+
 let engineThinking = false;
-let gameId = 0;
+
+let gameVersion = 0;
+
+let engineRequestVersion = 0;
+
+let gameEnded = false;
 
 let clocks = {
-  w: 600,
-  b: 600
+    w:600,
+    b:600
 };
 
-let clockTimer = null;
 
-const pieceSymbols = {
-  wp:"♙",
-  wn:"♘",
-  wb:"♗",
-  wr:"♖",
-  wq:"♕",
-  wk:"♔",
-  bp:"♟",
-  bn:"♞",
-  bb:"♝",
-  br:"♜",
-  bq:"♛",
-  bk:"♚"
-};
-
-/* =========================
+/* =========================================================
    AUDIO
-========================= */
+========================================================= */
 
-let audioCtx = null;
+let audioContext = null;
 
-function sound(type){
-  try{
-    if(!audioCtx)
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+function playSound(type){
 
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
+    try{
 
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
+        if(!audioContext){
 
-    const now = audioCtx.currentTime;
+            audioContext =
+                new (
+                    window.AudioContext ||
+                    window.webkitAudioContext
+                )();
 
-    if(type === "capture"){
-      osc.frequency.setValueAtTime(130,now);
-      osc.frequency.exponentialRampToValueAtTime(70,now+.12);
-      gain.gain.setValueAtTime(.07,now);
-      gain.gain.exponentialRampToValueAtTime(.001,now+.13);
-    }else if(type === "check"){
-      osc.frequency.setValueAtTime(650,now);
-      osc.frequency.exponentialRampToValueAtTime(900,now+.16);
-      gain.gain.setValueAtTime(.045,now);
-      gain.gain.exponentialRampToValueAtTime(.001,now+.18);
-    }else{
-      osc.frequency.setValueAtTime(330,now);
-      osc.frequency.exponentialRampToValueAtTime(250,now+.07);
-      gain.gain.setValueAtTime(.035,now);
-      gain.gain.exponentialRampToValueAtTime(.001,now+.08);
+        }
+
+        const oscillator =
+            audioContext.createOscillator();
+
+        const gain =
+            audioContext.createGain();
+
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
+
+        const now =
+            audioContext.currentTime;
+
+        if(type === "capture"){
+
+            oscillator.frequency.setValueAtTime(
+                150,
+                now
+            );
+
+            oscillator.frequency.exponentialRampToValueAtTime(
+                75,
+                now + .12
+            );
+
+            gain.gain.setValueAtTime(
+                .055,
+                now
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                .001,
+                now + .13
+            );
+
+        }else if(type === "check"){
+
+            oscillator.frequency.setValueAtTime(
+                620,
+                now
+            );
+
+            oscillator.frequency.exponentialRampToValueAtTime(
+                850,
+                now + .15
+            );
+
+            gain.gain.setValueAtTime(
+                .04,
+                now
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                .001,
+                now + .17
+            );
+
+        }else{
+
+            oscillator.frequency.setValueAtTime(
+                330,
+                now
+            );
+
+            oscillator.frequency.exponentialRampToValueAtTime(
+                250,
+                now + .07
+            );
+
+            gain.gain.setValueAtTime(
+                .028,
+                now
+            );
+
+            gain.gain.exponentialRampToValueAtTime(
+                .001,
+                now + .08
+            );
+
+        }
+
+        oscillator.start(now);
+        oscillator.stop(now + .2);
+
+    }catch(error){
+
+        /* Audio is optional. */
     }
-
-    osc.start(now);
-    osc.stop(now+.2);
-  }catch(e){}
 }
 
-/* =========================
-   BOARD
-========================= */
+
+/* =========================================================
+   BOARD RENDER
+========================================================= */
 
 function renderBoard(){
 
-  board.innerHTML = "";
+    board.innerHTML = "";
 
-  const position = game.board();
+    const position =
+        game.board();
 
-  for(let r=0;r<8;r++){
-    for(let c=0;c<8;c++){
+    for(let row = 0; row < 8; row++){
 
-      const squareName =
-        String.fromCharCode(97+c) + (8-r);
+        for(let col = 0; col < 8; col++){
 
-      const sq = document.createElement("div");
+            const squareName =
+                String.fromCharCode(97 + col)
+                +
+                (8 - row);
 
-      sq.className =
-        "square " + (((r+c)%2===0) ? "light" : "dark");
+            const square =
+                document.createElement("div");
 
-      sq.dataset.square = squareName;
+            square.className =
+                "square "
+                +
+                (
+                    (row + col) % 2 === 0
+                    ? "light"
+                    : "dark"
+                );
 
-      if(lastMove &&
-        (lastMove.from === squareName ||
-         lastMove.to === squareName)){
-        sq.classList.add("last");
-      }
+            square.dataset.square =
+                squareName;
 
-      if(selected === squareName){
-        sq.classList.add("selected");
-      }
 
-      const piece = position[r][c];
+            /* Last move */
 
-      if(piece){
+            if(
+                lastMove &&
+                (
+                    lastMove.from === squareName ||
+                    lastMove.to === squareName
+                )
+            ){
 
-        const p = document.createElement("div");
+                square.classList.add("last");
 
-        p.className =
-          "piece " +
-          (piece.color === "w" ? "white-piece" : "black-piece");
+            }
 
-        p.textContent =
-          pieceSymbols[piece.color + piece.type];
 
-        sq.appendChild(p);
-      }
+            /* Selected square */
 
-      const rank = document.createElement("span");
-      rank.className = "coord rank";
-      rank.textContent = c === 0 ? (8-r) : "";
+            if(
+                selectedSquare === squareName
+            ){
 
-      const file = document.createElement("span");
-      file.className = "coord file";
-      file.textContent = r === 7 ? String.fromCharCode(97+c) : "";
+                square.classList.add("selected");
 
-      sq.appendChild(rank);
-      sq.appendChild(file);
+            }
 
-      sq.addEventListener("click",()=>handleSquare(squareName));
 
-      board.appendChild(sq);
+            /* Piece */
+
+            const piece =
+                position[row][col];
+
+            if(piece){
+
+                const pieceElement =
+                    document.createElement("div");
+
+                pieceElement.className =
+                    "piece "
+                    +
+                    (
+                        piece.color === "w"
+                        ? "white-piece"
+                        : "black-piece"
+                    );
+
+                pieceElement.textContent =
+                    pieces[
+                        piece.color + piece.type
+                    ];
+
+                square.appendChild(
+                    pieceElement
+                );
+
+            }
+
+
+            /* Coordinates */
+
+            const rank =
+                document.createElement("span");
+
+            rank.className =
+                "coord rank";
+
+            rank.textContent =
+                col === 0
+                ? (8 - row)
+                : "";
+
+            square.appendChild(rank);
+
+
+            const file =
+                document.createElement("span");
+
+            file.className =
+                "coord file";
+
+            file.textContent =
+                row === 7
+                ? String.fromCharCode(97 + col)
+                : "";
+
+            square.appendChild(file);
+
+
+            square.addEventListener(
+                "click",
+                () => handleSquareClick(squareName)
+            );
+
+
+            board.appendChild(square);
+        }
     }
-  }
 
-  if(selected){
-    showLegalMoves(selected);
-  }
 
-  markKingCheck();
+    if(selectedSquare){
+
+        showLegalMoves(
+            selectedSquare
+        );
+
+    }
+
+
+    highlightKingInCheck();
 }
+
+
+/* =========================================================
+   LEGAL MOVES
+========================================================= */
 
 function showLegalMoves(square){
 
-  const moves = game.moves({
-    square,
-    verbose:true
-  });
+    const moves =
+        game.moves({
+            square:square,
+            verbose:true
+        });
 
-  moves.forEach(move=>{
+    for(const move of moves){
 
-    const el =
-      board.querySelector(`[data-square="${move.to}"]`);
+        const target =
+            board.querySelector(
+                `[data-square="${move.to}"]`
+            );
 
-    if(!el) return;
+        if(!target) continue;
 
-    if(move.captured){
-      const ring = document.createElement("div");
-      ring.className = "capture-ring";
-      el.appendChild(ring);
-    }else{
-      const dot = document.createElement("div");
-      dot.className = "move-dot";
-      el.appendChild(dot);
+
+        if(move.captured){
+
+            const ring =
+                document.createElement("div");
+
+            ring.className =
+                "capture-ring";
+
+            target.appendChild(ring);
+
+        }else{
+
+            const dot =
+                document.createElement("div");
+
+            dot.className =
+                "move-dot";
+
+            target.appendChild(dot);
+
+        }
     }
-  });
 }
 
-function markKingCheck(){
 
-  if(!game.in_check()) return;
+/* =========================================================
+   CHECK HIGHLIGHT
+========================================================= */
 
-  const color = game.turn();
+function highlightKingInCheck(){
 
-  const boardData = game.board();
+    if(!game.in_check()) return;
 
-  for(let r=0;r<8;r++){
-    for(let c=0;c<8;c++){
+    const side =
+        game.turn();
 
-      const p = boardData[r][c];
+    const position =
+        game.board();
 
-      if(p && p.type === "k" && p.color === color){
+    for(let row = 0; row < 8; row++){
 
-        const sq =
-          String.fromCharCode(97+c)+(8-r);
+        for(let col = 0; col < 8; col++){
 
-        const el =
-          board.querySelector(`[data-square="${sq}"]`);
+            const piece =
+                position[row][col];
 
-        if(el) el.classList.add("check");
-      }
+            if(
+                piece &&
+                piece.type === "k" &&
+                piece.color === side
+            ){
+
+                const squareName =
+                    String.fromCharCode(97 + col)
+                    +
+                    (8 - row);
+
+                const element =
+                    board.querySelector(
+                        `[data-square="${squareName}"]`
+                    );
+
+                if(element){
+
+                    element.classList.add(
+                        "check"
+                    );
+
+                }
+            }
+        }
     }
-  }
 }
 
-function createRipple(square){
 
-  const el =
-    board.querySelector(`[data-square="${square}"]`);
+/* =========================================================
+   RIPPLE
+========================================================= */
 
-  if(!el) return;
+function ripple(squareName){
 
-  const ripple = document.createElement("div");
-  ripple.className = "ripple";
+    const square =
+        board.querySelector(
+            `[data-square="${squareName}"]`
+        );
 
-  el.appendChild(ripple);
+    if(!square) return;
 
-  setTimeout(()=>ripple.remove(),600);
+    const effect =
+        document.createElement("div");
+
+    effect.className =
+        "ripple";
+
+    effect.style.left =
+        "50%";
+
+    effect.style.top =
+        "50%";
+
+    effect.style.transform =
+        "translate(-50%,-50%)";
+
+    square.appendChild(effect);
+
+    setTimeout(
+        () => effect.remove(),
+        600
+    );
 }
 
-/* =========================
-   MOVING
-========================= */
 
-function handleSquare(square){
+/* =========================================================
+   PLAYER INPUT
+========================================================= */
 
-  if(engineThinking || game.game_over()) return;
+function handleSquareClick(squareName){
 
-  if(game.turn() !== "w") return;
+    if(gameEnded) return;
 
-  const piece = game.get(square);
+    if(engineThinking) return;
 
-  if(!selected){
+    if(!engineReady) return;
 
-    if(piece && piece.color === game.turn()){
+    /* Player is White */
 
-      selected = square;
-      renderBoard();
+    if(game.turn() !== "w") return;
 
-      return;
+
+    const clickedPiece =
+        game.get(squareName);
+
+
+    /* Nothing selected */
+
+    if(!selectedSquare){
+
+        if(
+            clickedPiece &&
+            clickedPiece.color === "w"
+        ){
+
+            selectedSquare =
+                squareName;
+
+            renderBoard();
+
+        }
+
+        return;
     }
-  }
 
-  if(selected){
 
-    const possible =
-      game.moves({
-        square:selected,
-        verbose:true
-      });
+    /* Select another own piece */
 
-    const move = possible.find(m=>m.to === square);
+    if(
+        clickedPiece &&
+        clickedPiece.color === "w"
+    ){
 
-    if(!move){
+        selectedSquare =
+            squareName;
 
-      if(piece && piece.color === game.turn()){
-
-        selected = square;
         renderBoard();
 
-      }else{
+        return;
+    }
 
-        selected = null;
+
+    /* Check legal destination */
+
+    const legalMoves =
+        game.moves({
+            square:selectedSquare,
+            verbose:true
+        });
+
+    const chosenMove =
+        legalMoves.find(
+            move =>
+                move.to === squareName
+        );
+
+
+    if(!chosenMove){
+
+        selectedSquare = null;
+
         renderBoard();
-      }
 
-      return;
+        return;
     }
 
-    if(move.promotion){
 
-      pendingPromotion = {
-        from:selected,
-        to:square
-      };
+    /* Promotion */
 
-      promotion.classList.add("show");
-      return;
+    if(chosenMove.promotion){
+
+        promotionMove = {
+            from:selectedSquare,
+            to:squareName
+        };
+
+        promotionOverlay.classList.add(
+            "show"
+        );
+
+        return;
     }
 
-    makeMove({
-      from:selected,
-      to:square
+
+    makePlayerMove({
+        from:selectedSquare,
+        to:squareName
     });
-  }
 }
 
-function makeMove(move){
 
-  const movingColor = game.turn();
+/* =========================================================
+   PLAYER MOVE
+========================================================= */
 
-  const result = game.move(move);
+function makePlayerMove(move){
 
-  if(!result) return;
+    if(gameEnded) return;
 
-  selected = null;
-  lastMove = {
-    from:result.from,
-    to:result.to
-  };
+    const result =
+        game.move(move);
 
-  createRipple(result.to);
+    if(!result) return;
 
-  if(result.captured){
-    sound("capture");
-  }else{
-    sound("move");
-  }
 
-  if(game.in_check()){
-    sound("check");
-  }
+    selectedSquare = null;
 
-  renderBoard();
-  renderMoves();
-  updateStatus();
-  updateClocks();
+    lastMove = {
+        from:result.from,
+        to:result.to
+    };
 
-  if(game.game_over()){
 
-    endGame();
-    return;
-  }
+    if(result.captured){
 
-  if(movingColor === "w"){
+        playSound("capture");
+
+    }else{
+
+        playSound("move");
+
+    }
+
+
+    if(game.in_check()){
+
+        playSound("check");
+
+    }
+
+
+    ripple(result.to);
+
+    renderBoard();
+    renderMoves();
+    updateEvaluation(0);
+    updateInterface();
+
+
+    if(checkGameOver()){
+
+        return;
+    }
+
 
     requestEngine();
-
-  }
 }
 
-/* =========================
+
+/* =========================================================
    PROMOTION
-========================= */
+========================================================= */
 
-document.querySelectorAll(".promo").forEach(button=>{
+document
+.querySelectorAll(".promotion-button")
+.forEach(button => {
 
-  button.addEventListener("click",()=>{
+    button.addEventListener(
+        "click",
+        () => {
 
-    const piece = button.dataset.piece;
+            if(!promotionMove) return;
 
-    promotion.classList.remove("show");
+            const promotion =
+                button.dataset.piece;
 
-    if(!pendingPromotion) return;
+            promotionOverlay.classList.remove(
+                "show"
+            );
 
-    makeMove({
-      from:pendingPromotion.from,
-      to:pendingPromotion.to,
-      promotion:piece
-    });
+            makePlayerMove({
 
-    pendingPromotion = null;
-  });
+                from:promotionMove.from,
+
+                to:promotionMove.to,
+
+                promotion:promotion
+
+            });
+
+            promotionMove = null;
+
+        }
+    );
 
 });
 
-/* =========================
+
+/* =========================================================
    MOVE HISTORY
-========================= */
+========================================================= */
 
 function renderMoves(){
 
-  movesEl.innerHTML = "";
+    movesElement.innerHTML = "";
 
-  const history = game.history();
+    const history =
+        game.history();
 
-  if(history.length === 0){
+    if(history.length === 0){
 
-    const empty = document.createElement("div");
+        const empty =
+            document.createElement("div");
 
-    empty.style.color = "var(--muted)";
-    empty.style.textAlign = "center";
-    empty.style.padding = "35px 10px";
-    empty.style.fontSize = "12px";
+        empty.className =
+            "empty-moves";
 
-    empty.textContent = "Your game begins here";
+        empty.textContent =
+            "Your game begins here";
 
-    movesEl.appendChild(empty);
+        movesElement.appendChild(empty);
 
-    return;
-  }
+        return;
+    }
 
-  for(let i=0;i<history.length;i+=2){
 
-    const row = document.createElement("div");
+    for(
+        let i = 0;
+        i < history.length;
+        i += 2
+    ){
 
-    row.className = "move-row";
+        const row =
+            document.createElement("div");
 
-    if(i >= history.length-2)
-      row.classList.add("latest");
+        row.className =
+            "move-row";
 
-    const num = document.createElement("div");
-    num.className = "move-number";
-    num.textContent = (i/2)+1;
 
-    const white = document.createElement("div");
-    white.className = "move-white";
-    white.textContent = history[i] || "";
+        if(
+            i >= history.length - 2
+        ){
 
-    const black = document.createElement("div");
-    black.className = "move-black";
-    black.textContent = history[i+1] || "";
+            row.classList.add(
+                "latest"
+            );
 
-    row.append(num,white,black);
+        }
 
-    movesEl.appendChild(row);
-  }
 
-  movesEl.scrollTop = movesEl.scrollHeight;
+        const number =
+            document.createElement("div");
+
+        number.className =
+            "move-number";
+
+        number.textContent =
+            (i / 2) + 1;
+
+
+        const white =
+            document.createElement("div");
+
+        white.className =
+            "move-white";
+
+        white.textContent =
+            history[i] || "";
+
+
+        const black =
+            document.createElement("div");
+
+        black.className =
+            "move-black";
+
+        black.textContent =
+            history[i + 1] || "";
+
+
+        row.appendChild(number);
+        row.appendChild(white);
+        row.appendChild(black);
+
+        movesElement.appendChild(row);
+    }
+
+
+    movesElement.scrollTop =
+        movesElement.scrollHeight;
 }
 
-/* =========================
+
+/* =========================================================
    STATUS
-========================= */
+========================================================= */
 
-function updateStatus(){
+function updateInterface(){
 
-  turnText.textContent =
-    game.turn() === "w"
-      ? "White to move"
-      : "Black to move";
+    turnText.textContent =
+        game.turn() === "w"
+        ? "White to move"
+        : "Black to move";
 
-  if(game.game_over()) return;
 
-  if(engineThinking){
+    whiteClockBox.classList.toggle(
+        "active",
+        game.turn() === "w" &&
+        !gameEnded
+    );
 
-    statusText.textContent = "Stockfish is thinking…";
-    statusText.classList.add("thinking-text");
+    blackClockBox.classList.toggle(
+        "active",
+        game.turn() === "b" &&
+        !gameEnded
+    );
 
-  }else if(game.in_check()){
 
-    statusText.textContent =
-      game.turn() === "w"
-        ? "Check — your king is attacked!"
-        : "Check!";
+    if(gameEnded) return;
 
-    statusText.classList.remove("thinking-text");
-
-  }else{
-
-    statusText.textContent =
-      game.turn() === "w"
-        ? "Your move"
-        : "Stockfish's move";
-
-    statusText.classList.remove("thinking-text");
-  }
-}
-
-/* =========================
-   ENGINE
-========================= */
-
-function startEngine(){
-
-  try{
-
-    engine = new Worker("./stockfish-18-lite-single.js");
-
-    engine.onmessage = handleEngineMessage;
-
-    engine.onerror = function(){
-
-      engineReady = false;
-      engineThinking = false;
-
-      engineStatus.textContent = "Engine error";
-      enginePill.classList.remove("thinking");
-
-      statusText.textContent =
-        "Stockfish failed to load";
-
-    };
-
-    engine.postMessage("uci");
-
-  }catch(e){
-
-    engineStatus.textContent = "Engine unavailable";
-  }
-}
-
-function handleEngineMessage(event){
-
-  const line = String(event.data);
-
-  if(line === "uciok"){
-
-    engine.postMessage("isready");
-    return;
-  }
-
-  if(line === "readyok"){
-
-    engineReady = true;
-
-    engineStatus.textContent = "Stockfish ready";
-
-    updateStatus();
-
-    return;
-  }
-
-  if(line.startsWith("info")){
-
-    parseEvaluation(line);
-
-    const depth =
-      line.match(/\bdepth\s+(\d+)/);
-
-    if(depth){
-      depthText.textContent =
-        "Depth " + depth[1];
-    }
-
-    return;
-  }
-
-  if(line.startsWith("bestmove")){
-
-    if(!engineThinking) return;
-
-    const move =
-      line.match(/^bestmove\s+([a-h][1-8][a-h][1-8][qrbn]?)/);
-
-    if(!move){
-
-      engineThinking = false;
-      enginePill.classList.remove("thinking");
-      updateStatus();
-      return;
-    }
-
-    const moveString = move[1];
-
-    engineThinking = false;
-    enginePill.classList.remove("thinking");
-
-    const idAtRequest = currentEngineGameId;
-
-    if(idAtRequest !== gameId){
-      updateStatus();
-      return;
-    }
-
-    const obj = {
-      from:moveString.substring(0,2),
-      to:moveString.substring(2,4)
-    };
-
-    if(moveString.length > 4)
-      obj.promotion = moveString[4];
-
-    makeEngineMove(obj);
-  }
-}
-
-let currentEngineGameId = 0;
-
-function requestEngine(){
-
-  if(!engineReady || game.game_over()) return;
-
-  engineThinking = true;
-  currentEngineGameId = gameId;
-
-  enginePill.classList.add("thinking");
-  engineStatus.textContent = "Thinking…";
-
-  updateStatus();
-
-  const depth =
-    parseInt(document.getElementById("difficulty").value,10);
-
-  engine.postMessage("stop");
-
-  engine.postMessage("position fen " + game.fen());
-
-  engine.postMessage("go depth " + depth);
-}
-
-function makeEngineMove(move){
-
-  if(game.game_over()) return;
-
-  if(game.turn() !== "b") return;
-
-  const result = game.move(move);
-
-  if(!result){
-    updateStatus();
-    return;
-  }
-
-  lastMove = {
-    from:result.from,
-    to:result.to
-  };
-
-  createRipple(result.to);
-
-  if(result.captured)
-    sound("capture");
-  else
-    sound("move");
-
-  if(game.in_check())
-    sound("check");
-
-  renderBoard();
-  renderMoves();
-  updateStatus();
-  updateClocks();
-
-  if(game.game_over()){
-    endGame();
-  }
-}
-
-/* =========================
-   EVALUATION
-========================= */
-
-function parseEvaluation(line){
-
-  const cpMatch =
-    line.match(/score cp (-?\d+)/);
-
-  const mateMatch =
-    line.match(/score mate (-?\d+)/);
-
-  let score = 0;
-
-  if(mateMatch){
-
-    const mate = parseInt(mateMatch[1]);
-
-    score = mate > 0 ? 9 : -9;
-
-    evalNumber.textContent =
-      mate > 0
-        ? "Mate +" + mate
-        : "Mate " + mate;
-
-  }else if(cpMatch){
-
-    let cp =
-      parseInt(cpMatch[1],10) / 100;
-
-    cp = Math.max(-10,Math.min(10,cp));
-
-    score = cp;
-
-    evalNumber.textContent =
-      (cp >= 0 ? "+" : "") + cp.toFixed(2);
-  }
-
-  const percentage =
-    50 + (score / 10) * 50;
-
-  evalFill.style.width =
-    Math.max(4,Math.min(96,percentage)) + "%";
-}
-
-/* =========================
-   UNDO
-========================= */
-
-document.getElementById("undo").addEventListener("click",()=>{
-
-  if(engineThinking){
-
-    engine.postMessage("stop");
-    engineThinking = false;
-
-  }
-
-  if(game.history().length === 0) return;
-
-  game.undo();
-
-  if(game.turn() === "b" && game.history().length > 0){
-    game.undo();
-  }
-
-  gameId++;
-
-  selected = null;
-  lastMove = null;
-
-  renderBoard();
-  renderMoves();
-  updateStatus();
-
-});
-
-/* =========================
-   NEW GAME
-========================= */
-
-function newGame(){
-
-  gameId++;
-
-  if(engine){
-
-    try{
-      engine.postMessage("stop");
-      engine.postMessage("ucinewgame");
-      engine.postMessage("isready");
-    }catch(e){}
-  }
-
-  game.reset();
-
-  selected = null;
-  lastMove = null;
-  pendingPromotion = null;
-
-  engineThinking = false;
-
-  clocks.w = 600;
-  clocks.b = 600;
-
-  promotion.classList.remove("show");
-  gameover.classList.remove("show");
-
-  evalFill.style.width = "50%";
-  evalNumber.textContent = "0.00";
-  depthText.textContent = "Depth 0";
-
-  enginePill.classList.remove("thinking");
-  engineStatus.textContent =
-    engineReady ? "Stockfish ready" : "Starting engine";
-
-  renderBoard();
-  renderMoves();
-  updateStatus();
-  updateClocks();
-}
-
-document.getElementById("newGame")
-  .addEventListener("click",newGame);
-
-document.getElementById("gameoverNew")
-  .addEventListener("click",newGame);
-
-/* =========================
-   GAME OVER
-========================= */
-
-function endGame(){
-
-  engineThinking = false;
-  enginePill.classList.remove("thinking");
-
-  let title = "Game Over";
-  let sub = "";
-
-  if(game.is_checkmate()){
-
-    title = "Checkmate";
-
-    sub =
-      game.turn() === "w"
-        ? "Stockfish wins the game."
-        : "You defeated Stockfish!";
-
-  }else if(game.is_stalemate()){
-
-    title = "Stalemate";
-    sub = "The game ends in a draw.";
-
-  }else if(game.is_threefold_repetition()){
-
-    title = "Threefold Repetition";
-    sub = "The game ends in a draw.";
-
-  }else if(game.is_insufficient_material()){
-
-    title = "Draw";
-    sub = "There isn't enough material to checkmate.";
-
-  }else if(game.is_draw()){
-
-    title = "Draw";
-    sub = "The game ends in a draw.";
-  }
-
-  gameoverTitle.textContent = title;
-  gameoverSub.textContent = sub;
-
-  gameover.classList.add("show");
-
-  updateStatus();
-}
-
-/* =========================
-   CLOCKS
-========================= */
-
-function formatTime(seconds){
-
-  seconds = Math.max(0,seconds);
-
-  const min =
-    Math.floor(seconds/60);
-
-  const sec =
-    seconds % 60;
-
-  return (
-    String(min).padStart(2,"0") +
-    ":" +
-    String(sec).padStart(2,"0")
-  );
-}
-
-function updateClocks(){
-
-  whiteClockEl.textContent =
-    formatTime(clocks.w);
-
-  blackClockEl.textContent =
-    formatTime(clocks.b);
-
-  whiteClockBox.classList.toggle(
-    "active",
-    game.turn() === "w" && !game.game_over()
-  );
-
-  blackClockBox.classList.toggle(
-    "active",
-    game.turn() === "b" && !game.game_over()
-  );
-}
-
-clockTimer = setInterval(()=>{
-
-  if(game.game_over()) return;
-
-  const side = game.turn();
-
-  clocks[side]--;
-
-  updateClocks();
-
-  if(clocks[side] <= 0){
-
-    gameoverTitle.textContent =
-      side === "w"
-        ? "Time Out"
-        : "Stockfish Time Out";
-
-    gameoverSub.textContent =
-      side === "w"
-        ? "Stockfish wins on time."
-        : "You win on time!";
-
-    gameover.classList.add("show");
-
-    if(engine){
-      try{
-        engine.postMessage("stop");
-      }catch(e){}
-    }
-
-    engineThinking = false;
-    enginePill.classList.remove("thinking");
-
-  }
-
-},1000);
-
-/* =========================
-   DIFFICULTY
-========================= */
-
-document.getElementById("difficulty")
-  .addEventListener("change",()=>{
 
     if(engineThinking){
 
-      try{
-        engine.postMessage("stop");
-      }catch(e){}
+        statusElement.textContent =
+            "Stockfish is thinking…";
 
-      engineThinking = false;
-      enginePill.classList.remove("thinking");
+        statusElement.classList.add(
+            "thinking"
+        );
+
+    }else if(game.in_check()){
+
+        statusElement.textContent =
+            game.turn() === "w"
+            ? "Check — your king is attacked!"
+            : "Check!";
+
+        statusElement.classList.remove(
+            "thinking"
+        );
+
+    }else{
+
+        statusElement.textContent =
+            game.turn() === "w"
+            ? "Your move"
+            : "Stockfish's move";
+
+        statusElement.classList.remove(
+            "thinking"
+        );
+    }
+}
+
+
+/* =========================================================
+   ENGINE
+========================================================= */
+
+function startEngine(){
+
+    try{
+
+        engine =
+            new Worker(
+                "./stockfish-18-lite-single.js"
+            );
+
+
+        engine.onmessage =
+            handleEngineMessage;
+
+
+        engine.onerror =
+            function(){
+
+                engineReady = false;
+
+                engineThinking = false;
+
+                enginePill.classList.remove(
+                    "thinking"
+                );
+
+                engineStatus.textContent =
+                    "Engine error";
+
+                statusElement.textContent =
+                    "Stockfish could not start";
+
+            };
+
+
+        engine.postMessage("uci");
+
+    }catch(error){
+
+        engineStatus.textContent =
+            "Engine unavailable";
+
+    }
+}
+
+
+/* =========================================================
+   ENGINE MESSAGES
+========================================================= */
+
+function handleEngineMessage(event){
+
+    const line =
+        String(event.data);
+
+
+    if(line === "uciok"){
+
+        engine.postMessage(
+            "isready"
+        );
+
+        return;
     }
 
-    updateStatus();
-  });
 
-/* =========================
-   START
-========================= */
+    if(line === "readyok"){
+
+        engineReady = true;
+
+        engineStatus.textContent =
+            "Stockfish ready";
+
+        updateInterface();
+
+        return;
+    }
+
+
+    if(line.startsWith("info")){
+
+        parseEngineEvaluation(line);
+
+        const depthMatch =
+            line.match(
+                /\bdepth\s+(\d+)/
+            );
+
+        if(depthMatch){
+
+            depthText.textContent =
+                "Depth " +
+                depthMatch[1];
+
+        }
+
+        return;
+    }
+
+
+    if(line.startsWith("bestmove")){
+
+        if(!engineThinking){
+
+            return;
+        }
+
+
+        const requestedVersion =
+            engineRequestVersion;
+
+
+        engineThinking = false;
+
+        enginePill.classList.remove(
+            "thinking"
+        );
+
+        engineStatus.textContent =
+            "Stockfish ready";
+
+
+        if(
+            requestedVersion !== gameVersion
+        ){
+
+            updateInterface();
+
+            return;
+        }
+
+
+        const match =
+            line.match(
+                /^bestmove\s+([a-h][1-8][a-h][1-8][qrbn]?)/
+            );
+
+
+        if(!match){
+
+            updateInterface();
+
+            return;
+        }
+
+
+        const moveString =
+            match[1];
+
+
+        const move = {
+
+            from:
+                moveString.substring(0,2),
+
+            to:
+                moveString.substring(2,4)
+
+        };
+
+
+        if(moveString.length > 4){
+
+            move.promotion =
+                moveString.substring(4,5);
+
+        }
+
+
+        makeEngineMove(move);
+
+    }
+}
+
+
+/* =========================================================
+   ENGINE MOVE
+========================================================= */
+
+function requestEngine(){
+
+    if(!engineReady) return;
+
+    if(gameEnded) return;
+
+    if(game.turn() !== "b") return;
+
+
+    engineThinking = true;
+
+    engineRequestVersion =
+        gameVersion;
+
+
+    enginePill.classList.add(
+        "thinking"
+    );
+
+    engineStatus.textContent =
+        "Thinking…";
+
+    updateInterface();
+
+
+    const depth =
+        parseInt(
+            difficulty.value,
+            10
+        );
+
+
+    try{
+
+        engine.postMessage(
+            "stop"
+        );
+
+        engine.postMessage(
+            "position fen " +
+            game.fen()
+        );
+
+        engine.postMessage(
+            "go depth " +
+            depth
+        );
+
+    }catch(error){
+
+        engineThinking = false;
+
+        enginePill.classList.remove(
+            "thinking"
+        );
+
+        engineStatus.textContent =
+            "Stockfish ready";
+
+        updateInterface();
+    }
+}
+
+
+/* =========================================================
+   MAKE ENGINE MOVE
+========================================================= */
+
+function makeEngineMove(move){
+
+    if(gameEnded) return;
+
+    if(game.turn() !== "b") return;
+
+
+    const result =
+        game.move(move);
+
+
+    if(!result){
+
+        updateInterface();
+
+        return;
+    }
+
+
+    lastMove = {
+
+        from:result.from,
+
+        to:result.to
+
+    };
+
+
+    if(result.captured){
+
+        playSound("capture");
+
+    }else{
+
+        playSound("move");
+
+    }
+
+
+    if(game.in_check()){
+
+        playSound("check");
+
+    }
+
+
+    ripple(result.to);
+
+    renderBoard();
+    renderMoves();
+    updateInterface();
+
+
+    checkGameOver();
+}
+
+
+/* =========================================================
+   ENGINE EVALUATION
+========================================================= */
+
+function parseEngineEvaluation(line){
+
+    const mate =
+        line.match(
+            /score mate (-?\d+)/
+        );
+
+    const cp =
+        line.match(
+            /score cp (-?\d+)/
+        );
+
+
+    /*
+       Stockfish is called when BLACK is to move.
+
+       UCI scores are from the side-to-move
+       perspective, so invert them to display
+       White's perspective.
+    */
+
+    if(mate){
+
+        const mateNumber =
+            parseInt(
+                mate[1],
+                10
+            );
+
+
+        const whiteMate =
+            -mateNumber;
+
+
+        if(whiteMate > 0){
+
+            evalNumber.textContent =
+                "M+" +
+                whiteMate;
+
+        }else{
+
+            evalNumber.textContent =
+                "M" +
+                whiteMate;
+
+        }
+
+
+        evalFill.style.width =
+            whiteMate > 0
+            ? "96%"
+            : "4%";
+
+
+        return;
+    }
+
+
+    if(cp){
+
+        const blackScore =
+            parseInt(
+                cp[1],
+                10
+            ) / 100;
+
+
+        const whiteScore =
+            -blackScore;
+
+
+        const limited =
+            Math.max(
+                -10,
+                Math.min(
+                    10,
+                    whiteScore
+                )
+            );
+
+
+        evalNumber.textContent =
+            (
+                limited >= 0
+                ? "+"
+                : ""
+            )
+            +
+            limited.toFixed(2);
+
+
+        /*
+           Smooth logistic-style evaluation bar.
+        */
+
+        const percent =
+            50 +
+            (
+                limited / 10
+            ) * 50;
+
+
+        evalFill.style.width =
+            Math.max(
+                4,
+                Math.min(
+                    96,
+                    percent
+                )
+            ) + "%";
+    }
+}
+
+
+function updateEvaluation(value){
+
+    if(value === 0){
+
+        evalFill.style.width =
+            "50%";
+
+        evalNumber.textContent =
+            "0.00";
+
+    }
+}
+
+
+/* =========================================================
+   GAME OVER
+========================================================= */
+
+function checkGameOver(){
+
+    if(game.is_checkmate()){
+
+        gameEnded = true;
+
+        if(game.turn() === "w"){
+
+            showGameOver(
+                "Checkmate",
+                "Stockfish wins the game."
+            );
+
+        }else{
+
+            showGameOver(
+                "Checkmate",
+                "You defeated Stockfish!"
+            );
+
+        }
+
+        return true;
+    }
+
+
+    if(game.is_stalemate()){
+
+        gameEnded = true;
+
+        showGameOver(
+            "Stalemate",
+            "The game ends in a draw."
+        );
+
+        return true;
+    }
+
+
+    if(game.is_threefold_repetition()){
+
+        gameEnded = true;
+
+        showGameOver(
+            "Draw",
+            "Threefold repetition."
+        );
+
+        return true;
+    }
+
+
+    if(game.is_insufficient_material()){
+
+        gameEnded = true;
+
+        showGameOver(
+            "Draw",
+            "There isn't enough material to checkmate."
+        );
+
+        return true;
+    }
+
+
+    if(game.is_draw()){
+
+        gameEnded = true;
+
+        showGameOver(
+            "Draw",
+            "The game ends in a draw."
+        );
+
+        return true;
+    }
+
+
+    return false;
+}
+
+
+function showGameOver(
+    title,
+    subtitle
+){
+
+    if(engine){
+
+        try{
+
+            engine.postMessage(
+                "stop"
+            );
+
+        }catch(error){}
+
+    }
+
+
+    engineThinking = false;
+
+    enginePill.classList.remove(
+        "thinking"
+    );
+
+
+    gameoverTitle.textContent =
+        title;
+
+    gameoverSub.textContent =
+        subtitle;
+
+
+    gameoverOverlay.classList.add(
+        "show"
+    );
+
+
+    updateInterface();
+}
+
+
+/* =========================================================
+   CLOCK
+========================================================= */
+
+function formatTime(seconds){
+
+    seconds =
+        Math.max(
+            0,
+            seconds
+        );
+
+
+    const minutes =
+        Math.floor(
+            seconds / 60
+        );
+
+    const remaining =
+        seconds % 60;
+
+
+    return (
+        String(minutes)
+        .padStart(2,"0")
+        +
+        ":"
+        +
+        String(remaining)
+        .padStart(2,"0")
+    );
+}
+
+
+function updateClocks(){
+
+    whiteClock.textContent =
+        formatTime(
+            clocks.w
+        );
+
+    blackClock.textContent =
+        formatTime(
+            clocks.b
+        );
+
+
+    whiteClockBox.classList.toggle(
+        "active",
+        game.turn() === "w" &&
+        !gameEnded
+    );
+
+    blackClockBox.classList.toggle(
+        "active",
+        game.turn() === "b" &&
+        !gameEnded
+    );
+}
+
+
+setInterval(
+    () => {
+
+        if(gameEnded) return;
+
+        /*
+           Don't start the clock until
+           the engine has loaded.
+        */
+
+        if(!engineReady) return;
+
+
+        const side =
+            game.turn();
+
+
+        clocks[side] =
+            Math.max(
+                0,
+                clocks[side] - 1
+            );
+
+
+        updateClocks();
+
+
+        if(clocks[side] <= 0){
+
+            gameEnded = true;
+
+            if(engine){
+
+                try{
+
+                    engine.postMessage(
+                        "stop"
+                    );
+
+                }catch(error){}
+
+            }
+
+
+            engineThinking = false;
+
+            enginePill.classList.remove(
+                "thinking"
+            );
+
+
+            if(side === "w"){
+
+                showGameOver(
+                    "Time Out",
+                    "Stockfish wins on time."
+                );
+
+            }else{
+
+                showGameOver(
+                    "Time Out",
+                    "You win on time!"
+                );
+
+            }
+        }
+
+    },
+    1000
+);
+
+
+/* =========================================================
+   NEW GAME
+========================================================= */
+
+function newGame(){
+
+    gameVersion++;
+
+    engineRequestVersion =
+        gameVersion;
+
+
+    if(engine){
+
+        try{
+
+            engine.postMessage(
+                "stop"
+            );
+
+            engine.postMessage(
+                "ucinewgame"
+            );
+
+            engine.postMessage(
+                "isready"
+            );
+
+        }catch(error){}
+
+    }
+
+
+    game.reset();
+
+
+    selectedSquare = null;
+
+    lastMove = null;
+
+    promotionMove = null;
+
+    engineThinking = false;
+
+    gameEnded = false;
+
+
+    clocks.w = 600;
+    clocks.b = 600;
+
+
+    promotionOverlay.classList.remove(
+        "show"
+    );
+
+    gameoverOverlay.classList.remove(
+        "show"
+    );
+
+
+    evalFill.style.width =
+        "50%";
+
+    evalNumber.textContent =
+        "0.00";
+
+    depthText.textContent =
+        "Depth 0";
+
+
+    enginePill.classList.remove(
+        "thinking"
+    );
+
+
+    engineStatus.textContent =
+        engineReady
+        ? "Stockfish ready"
+        : "Starting engine";
+
+
+    renderBoard();
+    renderMoves();
+    updateInterface();
+    updateClocks();
+}
+
+
+/* =========================================================
+   UNDO
+========================================================= */
+
+document
+.getElementById("undo")
+.addEventListener(
+    "click",
+    () => {
+
+        if(game.history().length === 0)
+            return;
+
+
+        if(engine){
+
+            try{
+
+                engine.postMessage(
+                    "stop"
+                );
+
+            }catch(error){}
+
+        }
+
+
+        engineThinking = false;
+
+        enginePill.classList.remove(
+            "thinking"
+        );
+
+
+        gameVersion++;
+
+
+        /*
+           If it is White's turn,
+           Stockfish just moved.
+
+           Undo Black + White.
+
+           If it is Black's turn,
+           the player just moved.
+
+           Undo only White.
+        */
+
+        if(
+            game.turn() === "w"
+        ){
+
+            if(game.history().length >= 1)
+                game.undo();
+
+            if(game.history().length >= 1)
+                game.undo();
+
+        }else{
+
+            game.undo();
+
+        }
+
+
+        gameEnded = false;
+
+        selectedSquare = null;
+
+
+        /*
+           Restore last move highlight.
+        */
+
+        const history =
+            game.history({
+                verbose:true
+            });
+
+
+        if(history.length > 0){
+
+            const last =
+                history[
+                    history.length - 1
+                ];
+
+            lastMove = {
+
+                from:last.from,
+
+                to:last.to
+
+            };
+
+        }else{
+
+            lastMove = null;
+
+        }
+
+
+        gameoverOverlay.classList.remove(
+            "show"
+        );
+
+        promotionOverlay.classList.remove(
+            "show"
+        );
+
+
+        renderBoard();
+        renderMoves();
+        updateInterface();
+
+    }
+);
+
+
+/* =========================================================
+   NEW GAME BUTTONS
+========================================================= */
+
+document
+.getElementById("newGame")
+.addEventListener(
+    "click",
+    newGame
+);
+
+
+document
+.getElementById("playAgain")
+.addEventListener(
+    "click",
+    newGame
+);
+
+
+/* =========================================================
+   DIFFICULTY
+========================================================= */
+
+difficulty.addEventListener(
+    "change",
+    () => {
+
+        /*
+           If Stockfish is currently thinking,
+           stop the current search.
+
+           The next move will use the
+           newly selected depth.
+        */
+
+        if(engineThinking){
+
+            try{
+
+                engine.postMessage(
+                    "stop"
+                );
+
+            }catch(error){}
+
+            engineThinking = false;
+
+            enginePill.classList.remove(
+                "thinking"
+            );
+
+            updateInterface();
+        }
+    }
+);
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
 
 renderBoard();
+
 renderMoves();
-updateStatus();
+
+updateInterface();
+
 updateClocks();
+
 startEngine();
 
 </script>
