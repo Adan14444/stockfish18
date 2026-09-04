@@ -2,868 +2,2107 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Nova Chess V3</title>
+
+<meta
+  name="viewport"
+  content="width=device-width,
+           initial-scale=1.0,
+           maximum-scale=1.0,
+           user-scalable=no"
+>
+
+<title>Nova Chess</title>
+
+<!--
+============================================================
+NOVA CHESS
+============================================================
+
+FILES REQUIRED:
+
+    index.html
+    stockfish-18-asm.js
+
+Both files MUST be in the same folder.
+
+This version uses the ASM-JS Stockfish worker directly.
+
+============================================================
+-->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
 <style>
-*{box-sizing:border-box}
 
-:root{
-  --bg:#070a12;
-  --panel:#0e1422;
-  --panel2:#111a2b;
-  --line:#25314a;
-  --text:#f5f7ff;
-  --muted:#8793aa;
-  --accent:#7957ff;
-  --accent2:#a98cff;
-  --good:#45df91;
-  --warn:#f4c95d;
-  --bad:#ff6878;
+/* =========================================================
+   ROOT
+   ========================================================= */
+
+:root {
+
+  --bg: #070a10;
+  --bg2: #0b1019;
+
+  --panel: rgba(18, 24, 35, .92);
+  --panel2: rgba(24, 31, 45, .95);
+
+  --line: rgba(255,255,255,.09);
+
+  --text: #f5f7fb;
+  --muted: #8f9aab;
+
+  --accent: #65a8ff;
+  --accent2: #8b6cff;
+
+  --good: #49d98a;
+  --bad: #ff6262;
+  --warning: #ffc85a;
+
+  --light-square: #dce5ee;
+  --dark-square: #536d89;
+
+  --board-size:
+    min(
+      590px,
+      calc(100vh - 160px),
+      calc(100vw - 350px)
+    );
 }
 
-html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  overflow:hidden;
+
+/* =========================================================
+   RESET
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+
+  margin: 0;
+
+  width: 100%;
+  min-height: 100%;
+
   background:
-    radial-gradient(circle at 50% -20%,#202044 0,#0b0e18 42%,#070a12 75%);
-  color:var(--text);
-  font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    radial-gradient(
+      circle at 15% 10%,
+      rgba(77,130,255,.14),
+      transparent 30%
+    ),
+
+    radial-gradient(
+      circle at 85% 85%,
+      rgba(130,75,255,.11),
+      transparent 32%
+    ),
+
+    var(--bg);
+
+  color: var(--text);
+
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
 }
 
-button,select{
-  font:inherit;
+body {
+  overflow-x: hidden;
 }
 
-button{
-  cursor:pointer;
+
+/* =========================================================
+   APP
+   ========================================================= */
+
+.app {
+
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
 }
 
-.app{
-  width:100vw;
-  height:100vh;
-  padding:12px 16px;
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
+.topbar {
+
+  height: 58px;
+  flex: 0 0 58px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 18px;
+
+  border-bottom:
+    1px solid var(--line);
+
+  background:
+    rgba(7,10,16,.84);
+
+  backdrop-filter:
+    blur(18px);
+
+  position: relative;
+  z-index: 20;
 }
 
-/* HEADER */
 
-.header{
-  height:50px;
-  flex:none;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
+.logo {
+
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  font-size: 19px;
+  font-weight: 800;
+
+  letter-spacing: -.5px;
 }
 
-.logo-area{
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
 
-.logo{
-  width:39px;
-  height:39px;
-  border-radius:12px;
-  display:grid;
-  place-items:center;
-  font-size:22px;
-  background:linear-gradient(135deg,#8c63ff,#4f46e5);
-  box-shadow:0 8px 25px #0009;
-}
+.logo-icon {
 
-.logo-text h1{
-  margin:0;
-  font-size:20px;
-  line-height:1;
-  letter-spacing:-.6px;
-}
+  width: 34px;
+  height: 34px;
 
-.logo-text span{
-  color:var(--muted);
-  font-size:10px;
-}
+  display: grid;
+  place-items: center;
 
-.status{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  padding:8px 12px;
-  border:1px solid var(--line);
-  border-radius:999px;
-  background:#0e1422dd;
-  color:#b6c0d3;
-  font-size:11px;
-}
+  border-radius: 10px;
 
-.status-dot{
-  width:8px;
-  height:8px;
-  border-radius:50%;
-  background:#68748a;
-}
+  background:
+    linear-gradient(
+      135deg,
+      var(--accent),
+      var(--accent2)
+    );
 
-.status-dot.ready{
-  background:var(--good);
-  box-shadow:0 0 10px #45df91;
-}
-
-.status-dot.thinking{
-  background:var(--warn);
-  box-shadow:0 0 10px #f4c95d;
-}
-
-.status-dot.error{
-  background:var(--bad);
-  box-shadow:0 0 10px #ff6878;
-}
-
-/* MAIN */
-
-.main{
-  min-height:0;
-  flex:1;
-  display:grid;
-  grid-template-columns:minmax(0,1fr) 315px;
-  gap:14px;
-}
-
-.board-zone{
-  min-width:0;
-  min-height:0;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
-
-.board-shell{
-  width:min(
-    590px,
-    calc(100vh - 128px),
-    calc(100vw - 385px)
-  );
-  aspect-ratio:1;
-  padding:7px;
-  border-radius:17px;
-  background:#151c2c;
-  border:1px solid #2a3650;
   box-shadow:
-    0 30px 80px #000b,
-    0 0 0 1px #0005;
+    0 0 24px rgba(100,160,255,.22);
+
+  font-size: 20px;
 }
 
-.board{
-  width:100%;
-  height:100%;
-  display:grid;
-  grid-template-columns:repeat(8,1fr);
-  grid-template-rows:repeat(8,1fr);
-  border-radius:11px;
-  overflow:hidden;
+
+.version {
+
+  color: var(--muted);
+
+  font-size: 10px;
+  font-weight: 700;
+
+  letter-spacing: .8px;
+
+  margin-left: 3px;
 }
 
-.square{
-  position:relative;
-  display:grid;
-  place-items:center;
-  user-select:none;
-  cursor:pointer;
+
+/* =========================================================
+   ENGINE PILL
+   ========================================================= */
+
+.engine-pill {
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 7px 11px;
+
+  border:
+    1px solid var(--line);
+
+  border-radius: 999px;
+
+  background:
+    rgba(255,255,255,.035);
+
+  font-size: 12px;
+  font-weight: 700;
+
+  color: var(--muted);
 }
 
-.square.light{
-  background:#e6ebf3;
-}
 
-.square.dark{
-  background:#66738b;
-}
+.engine-dot {
 
-.square.last{
-  box-shadow:inset 0 0 0 999px #f5d76e38;
-}
+  width: 8px;
+  height: 8px;
 
-.square.selected{
-  box-shadow:inset 0 0 0 4px #9d82ff;
-}
+  border-radius: 50%;
 
-.square.check{
+  background: var(--warning);
+
   box-shadow:
-    inset 0 0 0 999px #ff475544,
-    inset 0 0 0 4px #ff6977;
+    0 0 10px rgba(255,200,90,.5);
 }
 
-.square.legal::after{
-  content:"";
-  position:absolute;
-  width:20%;
-  aspect-ratio:1;
-  border-radius:50%;
-  background:#11182799;
+
+.engine-pill.ready {
+
+  color: var(--good);
+
+  border-color:
+    rgba(73,217,138,.22);
 }
 
-.square.capture::after{
-  content:"";
-  position:absolute;
-  inset:8%;
-  border:4px solid #11182788;
-  border-radius:50%;
+
+.engine-pill.ready .engine-dot {
+
+  background: var(--good);
+
+  box-shadow:
+    0 0 12px rgba(73,217,138,.65);
 }
 
-.piece{
-  position:relative;
-  z-index:2;
-  font-family:"Arial Unicode MS","Noto Sans Symbols 2",serif;
-  font-size:clamp(30px,6vw,63px);
-  line-height:1;
-  pointer-events:none;
-  transform:translateY(-1px);
+
+.engine-pill.thinking {
+
+  color: var(--accent);
+
+  border-color:
+    rgba(101,168,255,.25);
 }
 
-.white-piece{
-  color:#fff;
-  text-shadow:0 3px 2px #0008,0 0 1px #000;
+
+.engine-pill.thinking .engine-dot {
+
+  background: var(--accent);
+
+  animation:
+    pulse 1s infinite;
 }
 
-.black-piece{
-  color:#171c27;
-  text-shadow:0 2px 1px #fff7,0 0 2px #000;
+
+.engine-pill.error {
+
+  color: var(--bad);
+
+  border-color:
+    rgba(255,98,98,.3);
 }
 
-.coord{
-  position:absolute;
-  z-index:3;
-  font-size:9px;
-  font-weight:800;
-  opacity:.62;
-  pointer-events:none;
+
+.engine-pill.error .engine-dot {
+
+  background: var(--bad);
+
+  box-shadow:
+    0 0 12px rgba(255,98,98,.6);
 }
 
-.coord.rank{
-  top:3px;
-  left:4px;
-}
 
-.coord.file{
-  right:4px;
-  bottom:3px;
-}
+@keyframes pulse {
 
-/* SIDE */
-
-.side{
-  min-height:0;
-  max-height:min(590px,calc(100vh - 128px));
-  display:flex;
-  flex-direction:column;
-  gap:9px;
-}
-
-.card{
-  background:linear-gradient(180deg,#11192a,#0d1421);
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:11px;
-  box-shadow:0 14px 40px #0004;
-}
-
-.players{
-  display:flex;
-  flex-direction:column;
-  gap:6px;
-}
-
-.player{
-  height:48px;
-  padding:7px 10px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  background:#0a101c;
-  border:1px solid #202b42;
-  border-radius:10px;
-}
-
-.player.active{
-  border-color:#5c49a7;
-  box-shadow:0 0 0 1px #7957ff33;
-}
-
-.player-left{
-  display:flex;
-  align-items:center;
-  gap:8px;
-}
-
-.player-icon{
-  width:30px;
-  height:30px;
-  border-radius:8px;
-  display:grid;
-  place-items:center;
-  background:#1b2538;
-  font-size:18px;
-}
-
-.player-name{
-  font-size:12px;
-  font-weight:800;
-}
-
-.player-sub{
-  color:#748096;
-  font-size:9px;
-}
-
-.clock{
-  font-family:monospace;
-  font-size:17px;
-  font-weight:900;
-}
-
-/* EVAL */
-
-.analysis{
-  display:grid;
-  grid-template-columns:34px 1fr;
-  gap:9px;
-  min-height:62px;
-}
-
-.eval-bar{
-  position:relative;
-  overflow:hidden;
-  border-radius:7px;
-  background:#e8ebf0;
-  border:1px solid #34405a;
-}
-
-.eval-black{
-  position:absolute;
-  top:0;
-  left:0;
-  right:0;
-  height:50%;
-  background:#222a38;
-  transition:height .35s ease;
-}
-
-.eval-mark{
-  position:absolute;
-  left:50%;
-  top:50%;
-  width:100%;
-  height:1px;
-  background:#7957ff;
-  opacity:.8;
-}
-
-.eval-info{
-  min-width:0;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-}
-
-.eval-score{
-  font-size:21px;
-  font-weight:900;
-}
-
-.eval-label{
-  color:var(--muted);
-  font-size:10px;
-}
-
-.best{
-  margin-top:5px;
-  font-size:11px;
-  font-weight:800;
-}
-
-.best span{
-  color:var(--accent2);
-}
-
-/* MOVES */
-
-.moves-card{
-  min-height:0;
-  flex:1;
-  display:flex;
-  flex-direction:column;
-}
-
-.title{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  color:#cbd5e1;
-  font-size:10px;
-  font-weight:900;
-  text-transform:uppercase;
-  letter-spacing:.9px;
-  margin-bottom:7px;
-}
-
-.moves{
-  min-height:0;
-  flex:1;
-  overflow:auto;
-  padding-right:2px;
-}
-
-.move-row{
-  display:grid;
-  grid-template-columns:28px 1fr 1fr;
-  padding:5px 6px;
-  border-radius:7px;
-  font-size:11px;
-}
-
-.move-row:nth-child(even){
-  background:#0a101b;
-}
-
-.move-number{
-  color:#66738a;
-}
-
-.move{
-  font-weight:800;
-}
-
-.move.latest{
-  color:#b49fff;
-}
-
-.empty{
-  text-align:center;
-  color:#59657a;
-  padding:16px;
-  font-size:11px;
-}
-
-/* SETTINGS */
-
-.settings{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:7px;
-}
-
-.setting{
-  background:#0a101b;
-  border:1px solid #202b42;
-  border-radius:9px;
-  padding:7px;
-}
-
-.setting label{
-  display:block;
-  color:#738098;
-  font-size:8px;
-  font-weight:800;
-  text-transform:uppercase;
-  margin-bottom:4px;
-}
-
-select{
-  width:100%;
-  border:0;
-  outline:0;
-  background:transparent;
-  color:#edf1ff;
-  font-size:11px;
-  font-weight:800;
-}
-
-option{
-  background:#111827;
-}
-
-/* BUTTONS */
-
-.controls{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:6px;
-}
-
-button{
-  border:1px solid #2a3751;
-  background:#172136;
-  color:#eef2ff;
-  border-radius:9px;
-  padding:8px 5px;
-  font-size:10px;
-  font-weight:800;
-  transition:transform .08s,background .12s;
-}
-
-button:hover{
-  background:#202c45;
-}
-
-button:active{
-  transform:scale(.97);
-}
-
-button.primary{
-  background:linear-gradient(135deg,#7957ff,#6042dc);
-  border-color:#8063ff;
-}
-
-/* ENGINE */
-
-.engine-card{
-  font-size:9px;
-  color:#748198;
-}
-
-.engine-state{
-  color:#dce3f2;
-  font-weight:800;
-}
-
-.debug{
-  margin-top:6px;
-  padding:6px;
-  border-radius:8px;
-  background:#070b13;
-  border:1px solid #1b2538;
-  font-family:monospace;
-  line-height:1.45;
-}
-
-.debug span{
-  color:#d6dced;
-  word-break:break-word;
-}
-
-/* MODALS */
-
-.modal{
-  position:fixed;
-  inset:0;
-  z-index:50;
-  display:none;
-  place-items:center;
-  background:#000b;
-}
-
-.modal.show{
-  display:grid;
-}
-
-.modal-box{
-  width:min(330px,90vw);
-  padding:21px;
-  background:#101827;
-  border:1px solid #35425d;
-  border-radius:16px;
-  box-shadow:0 30px 100px #000d;
-  text-align:center;
-}
-
-.modal h2{
-  margin:0 0 7px;
-  font-size:22px;
-}
-
-.modal p{
-  color:#8995aa;
-  font-size:11px;
-  margin:0 0 16px;
-}
-
-.promotion-buttons{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:7px;
-}
-
-.promotion-buttons button{
-  height:53px;
-  font-size:29px;
-}
-
-.modal-actions{
-  display:flex;
-  gap:7px;
-}
-
-.modal-actions button{
-  flex:1;
-}
-
-/* MOBILE */
-
-@media(max-width:850px){
-  html,body{
-    overflow:auto;
+  0% {
+    opacity: .35;
+    transform: scale(.85);
   }
 
-  .app{
-    height:auto;
-    min-height:100vh;
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
   }
 
-  .main{
-    grid-template-columns:1fr;
+  100% {
+    opacity: .35;
+    transform: scale(.85);
   }
 
-  .board-shell{
-    width:min(94vw,590px);
+}
+
+
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+.main {
+
+  flex: 1;
+
+  display: grid;
+
+  grid-template-columns:
+    minmax(0,1fr)
+    285px;
+
+  gap: 16px;
+
+  padding: 12px 16px 14px;
+
+  align-items: start;
+}
+
+
+/* =========================================================
+   BOARD AREA
+   ========================================================= */
+
+.board-area {
+
+  min-width: 0;
+
+  display: flex;
+
+  justify-content: center;
+}
+
+
+.board-column {
+
+  width:
+    var(--board-size);
+
+  max-width: 100%;
+}
+
+
+.player-strip {
+
+  height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 4px;
+
+  margin-bottom: 7px;
+}
+
+
+.player-name {
+
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+
+.player-piece {
+
+  width: 25px;
+  height: 25px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 7px;
+
+  background:
+    rgba(255,255,255,.06);
+
+  font-size: 17px;
+}
+
+
+.clock {
+
+  min-width: 65px;
+
+  padding: 5px 9px;
+
+  border-radius: 8px;
+
+  background:
+    rgba(255,255,255,.055);
+
+  color: var(--muted);
+
+  text-align: center;
+
+  font-family:
+    ui-monospace,
+    SFMono-Regular,
+    Menlo,
+    monospace;
+
+  font-size: 14px;
+  font-weight: 800;
+}
+
+
+.clock.active {
+
+  color: var(--text);
+
+  background:
+    rgba(101,168,255,.13);
+
+  box-shadow:
+    0 0 0 1px
+    rgba(101,168,255,.16);
+}
+
+
+/* =========================================================
+   BOARD SHELL
+   ========================================================= */
+
+.board-shell {
+
+  position: relative;
+
+  width: 100%;
+
+  aspect-ratio: 1 / 1;
+
+  border-radius: 10px;
+
+  padding: 5px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.12),
+      rgba(255,255,255,.025)
+    );
+
+  box-shadow:
+    0 18px 55px rgba(0,0,0,.42),
+    0 0 0 1px rgba(255,255,255,.06);
+}
+
+
+#board {
+
+  width: 100%;
+  height: 100%;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(8,1fr);
+
+  grid-template-rows:
+    repeat(8,1fr);
+
+  overflow: hidden;
+
+  border-radius: 6px;
+}
+
+
+/* =========================================================
+   SQUARES
+   ========================================================= */
+
+.square {
+
+  position: relative;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  user-select: none;
+
+  cursor: pointer;
+
+  transition:
+    filter .08s ease;
+}
+
+
+.square.light {
+  background: var(--light-square);
+}
+
+
+.square.dark {
+  background: var(--dark-square);
+}
+
+
+.square:hover {
+  filter: brightness(1.06);
+}
+
+
+/* =========================================================
+   LAST MOVE
+   ========================================================= */
+
+.square.last-move {
+
+  box-shadow:
+    inset 0 0 0 999px
+    rgba(255,205,70,.25);
+}
+
+
+/* =========================================================
+   CHECK
+   ========================================================= */
+
+.square.check {
+
+  box-shadow:
+    inset 0 0 0 999px
+    rgba(255,60,60,.42);
+
+  animation:
+    checkFlash .45s ease;
+}
+
+
+@keyframes checkFlash {
+
+  0% {
+    filter: brightness(1.35);
   }
 
-  .side{
-    max-height:none;
+  100% {
+    filter: brightness(1);
+  }
+
+}
+
+
+/* =========================================================
+   PIECES
+   ========================================================= */
+
+.piece {
+
+  position: relative;
+
+  z-index: 3;
+
+  font-family:
+    "Arial Unicode MS",
+    "Noto Sans Symbols 2",
+    "Segoe UI Symbol",
+    sans-serif;
+
+  font-size:
+    clamp(30px, 6.5vw, 53px);
+
+  line-height: 1;
+
+  transform:
+    translateY(-1px);
+
+  cursor: pointer;
+
+  pointer-events: none;
+
+  user-select: none;
+}
+
+
+/*
+White pieces get a subtle shadow.
+Black pieces remain dark but readable.
+*/
+
+.piece.white {
+
+  color: #ffffff;
+
+  text-shadow:
+    0 2px 0 rgba(0,0,0,.38),
+    0 4px 8px rgba(0,0,0,.25);
+}
+
+
+.piece.black {
+
+  color: #202633;
+
+  text-shadow:
+    0 1px 0 rgba(255,255,255,.2),
+    0 3px 5px rgba(0,0,0,.35);
+}
+
+
+/* =========================================================
+   MOVE DOT
+   ========================================================= */
+
+.move-dot {
+
+  position: absolute;
+
+  width: 18%;
+  height: 18%;
+
+  border-radius: 50%;
+
+  background:
+    rgba(30,40,55,.42);
+
+  z-index: 2;
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   CAPTURE RING
+   ========================================================= */
+
+.capture-ring {
+
+  position: absolute;
+
+  inset: 10%;
+
+  border:
+    5px solid
+    rgba(35,45,60,.42);
+
+  border-radius: 50%;
+
+  z-index: 2;
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   BOARD LABELS
+   ========================================================= */
+
+.coord-file,
+.coord-rank {
+
+  position: absolute;
+
+  font-size: 9px;
+  font-weight: 800;
+
+  opacity: .75;
+
+  pointer-events: none;
+}
+
+
+.coord-file {
+  right: 3px;
+  bottom: 2px;
+}
+
+
+.coord-rank {
+  left: 3px;
+  top: 2px;
+}
+
+
+.square.light .coord-file,
+.square.light .coord-rank {
+
+  color:
+    rgba(50,65,80,.7);
+}
+
+
+.square.dark .coord-file,
+.square.dark .coord-rank {
+
+  color:
+    rgba(240,245,250,.72);
+}
+
+
+/* =========================================================
+   THINKING OVERLAY
+   ========================================================= */
+
+.thinking-overlay {
+
+  position: absolute;
+
+  inset: 5px;
+
+  display: none;
+
+  align-items: flex-end;
+  justify-content: center;
+
+  padding-bottom: 14px;
+
+  pointer-events: none;
+
+  z-index: 10;
+}
+
+
+.thinking-overlay.show {
+  display: flex;
+}
+
+
+.thinking-card {
+
+  display: flex;
+  align-items: center;
+
+  gap: 9px;
+
+  padding: 8px 12px;
+
+  border:
+    1px solid rgba(101,168,255,.2);
+
+  border-radius: 999px;
+
+  background:
+    rgba(8,12,20,.86);
+
+  backdrop-filter:
+    blur(10px);
+
+  font-size: 11px;
+  font-weight: 700;
+
+  box-shadow:
+    0 7px 25px rgba(0,0,0,.35);
+}
+
+
+.spinner {
+
+  width: 12px;
+  height: 12px;
+
+  border:
+    2px solid rgba(255,255,255,.18);
+
+  border-top-color:
+    var(--accent);
+
+  border-radius: 50%;
+
+  animation:
+    spin .7s linear infinite;
+}
+
+
+@keyframes spin {
+
+  to {
+    transform: rotate(360deg);
+  }
+
+}
+
+
+/* =========================================================
+   CONTROLS
+   ========================================================= */
+
+.controls {
+
+  display: grid;
+
+  grid-template-columns:
+    1.4fr
+    1fr
+    1fr
+    1fr;
+
+  gap: 7px;
+
+  margin-top: 9px;
+}
+
+
+button,
+select {
+
+  font: inherit;
+}
+
+
+.controls button,
+.test-button {
+
+  min-height: 34px;
+
+  border:
+    1px solid var(--line);
+
+  border-radius: 8px;
+
+  background:
+    rgba(255,255,255,.045);
+
+  color: var(--text);
+
+  font-size: 11px;
+  font-weight: 800;
+
+  cursor: pointer;
+
+  transition:
+    background .12s ease,
+    transform .12s ease,
+    border-color .12s ease;
+}
+
+
+.controls button:hover,
+.test-button:hover {
+
+  background:
+    rgba(255,255,255,.085);
+
+  border-color:
+    rgba(255,255,255,.15);
+}
+
+
+.controls button:active,
+.test-button:active {
+
+  transform:
+    scale(.97);
+}
+
+
+.controls button.primary {
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(101,168,255,.22),
+      rgba(139,108,255,.2)
+    );
+
+  border-color:
+    rgba(101,168,255,.25);
+}
+
+
+.controls button.danger {
+
+  color:
+    #ff8b8b;
+}
+
+
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar {
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 10px;
+
+  min-width: 0;
+}
+
+
+/* =========================================================
+   CARD
+   ========================================================= */
+
+.card {
+
+  border:
+    1px solid var(--line);
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(23,29,42,.95),
+      rgba(15,20,30,.95)
+    );
+
+  box-shadow:
+    0 8px 30px rgba(0,0,0,.18);
+
+  overflow: hidden;
+}
+
+
+.card-header {
+
+  min-height: 38px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 9px 12px;
+
+  border-bottom:
+    1px solid var(--line);
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+
+.card-header span:last-child {
+
+  color: var(--muted);
+
+  font-size: 10px;
+}
+
+
+.card-body {
+
+  padding: 11px 12px;
+}
+
+
+/* =========================================================
+   EVALUATION
+   ========================================================= */
+
+.eval-wrap {
+
+  display: flex;
+
+  gap: 11px;
+}
+
+
+.eval-bar {
+
+  width: 25px;
+
+  height: 106px;
+
+  border-radius: 6px;
+
+  overflow: hidden;
+
+  background:
+    #202632;
+
+  position: relative;
+}
+
+
+.eval-fill {
+
+  position: absolute;
+
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  height: 50%;
+
+  background:
+    #f2f4f7;
+
+  transition:
+    height .3s ease;
+}
+
+
+.eval-info {
+
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+}
+
+
+.eval-number {
+
+  font-size: 25px;
+
+  font-weight: 900;
+
+  letter-spacing: -1px;
+}
+
+
+.eval-label {
+
+  margin-top: 3px;
+
+  color: var(--muted);
+
+  font-size: 10px;
+
+  line-height: 1.35;
+}
+
+
+/* =========================================================
+   MOVES
+   ========================================================= */
+
+.moves {
+
+  max-height: 175px;
+
+  overflow-y: auto;
+
+  scrollbar-width: thin;
+}
+
+
+.empty {
+
+  padding: 10px 2px;
+
+  color: var(--muted);
+
+  font-size: 11px;
+}
+
+
+.move-row {
+
+  display: grid;
+
+  grid-template-columns:
+    32px
+    1fr
+    1fr;
+
+  min-height: 27px;
+
+  align-items: center;
+
+  border-radius: 6px;
+
+  font-size: 11px;
+}
+
+
+.move-row:nth-child(even) {
+
+  background:
+    rgba(255,255,255,.025);
+}
+
+
+.move-number {
+
+  padding-left: 4px;
+
+  color: var(--muted);
+
+  font-size: 10px;
+}
+
+
+.move {
+
+  padding: 5px 6px;
+
+  border-radius: 5px;
+
+  font-weight: 700;
+}
+
+
+.move.current {
+
+  background:
+    rgba(101,168,255,.15);
+
+  color:
+    #cfe3ff;
+}
+
+
+/* =========================================================
+   SETTINGS
+   ========================================================= */
+
+.setting {
+
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    125px;
+
+  align-items: center;
+
+  gap: 10px;
+
+  margin-bottom: 9px;
+}
+
+
+.setting:last-child {
+  margin-bottom: 0;
+}
+
+
+.setting label {
+
+  color: var(--muted);
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+
+.setting select {
+
+  width: 100%;
+
+  height: 32px;
+
+  padding: 0 8px;
+
+  border:
+    1px solid var(--line);
+
+  border-radius: 7px;
+
+  background:
+    #151c29;
+
+  color: var(--text);
+
+  outline: none;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   ENGINE STATUS
+   ========================================================= */
+
+.status {
+
+  color: var(--muted);
+
+  font-size: 11px;
+
+  line-height: 1.45;
+
+  overflow-wrap: anywhere;
+}
+
+
+.status.good {
+  color: var(--good);
+}
+
+
+.status.bad {
+  color: var(--bad);
+}
+
+
+/* =========================================================
+   ENGINE DEBUG
+   ========================================================= */
+
+.engine-debug {
+
+  margin-top: 9px;
+
+  padding: 8px;
+
+  border:
+    1px solid var(--line);
+
+  border-radius: 8px;
+
+  background:
+    rgba(0,0,0,.16);
+
+  font-size: 9px;
+
+  line-height: 1.3;
+}
+
+
+.engine-debug-row {
+
+  display: grid;
+
+  grid-template-columns:
+    65px
+    1fr;
+
+  gap: 7px;
+
+  margin: 4px 0;
+}
+
+
+.engine-debug-row span {
+
+  color: var(--muted);
+}
+
+
+.engine-debug-row b {
+
+  color: var(--text);
+
+  font-weight: 600;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* =========================================================
+   TEST BUTTON
+   ========================================================= */
+
+.test-button {
+
+  width: 100%;
+
+  margin-top: 9px;
+
+  min-height: 31px;
+
+  color:
+    #cfe3ff;
+
+  border-color:
+    rgba(101,168,255,.2);
+}
+
+
+/* =========================================================
+   PROMOTION MODAL
+   ========================================================= */
+
+.modal {
+
+  position: fixed;
+
+  inset: 0;
+
+  display: none;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 20px;
+
+  background:
+    rgba(0,0,0,.65);
+
+  backdrop-filter:
+    blur(7px);
+
+  z-index: 100;
+}
+
+
+.modal.show {
+  display: flex;
+}
+
+
+.modal-card {
+
+  width: min(320px,100%);
+
+  padding: 20px;
+
+  border:
+    1px solid var(--line);
+
+  border-radius: 15px;
+
+  background:
+    #131a27;
+
+  box-shadow:
+    0 25px 80px rgba(0,0,0,.55);
+
+  text-align: center;
+}
+
+
+.modal-title {
+
+  font-size: 18px;
+  font-weight: 900;
+}
+
+
+.modal-text {
+
+  margin-top: 6px;
+
+  color: var(--muted);
+
+  font-size: 11px;
+}
+
+
+.promotion-buttons {
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(4,1fr);
+
+  gap: 8px;
+
+  margin-top: 16px;
+}
+
+
+.promotion-buttons button {
+
+  height: 58px;
+
+  border:
+    1px solid var(--line);
+
+  border-radius: 9px;
+
+  background:
+    rgba(255,255,255,.045);
+
+  color: white;
+
+  font-size: 32px;
+
+  cursor: pointer;
+}
+
+
+.promotion-buttons button:hover {
+
+  background:
+    rgba(101,168,255,.13);
+}
+
+
+/* =========================================================
+   MOBILE
+   ========================================================= */
+
+@media (max-width: 820px) {
+
+  :root {
+
+    --board-size:
+      min(
+        calc(100vw - 24px),
+        calc(100vh - 210px),
+        620px
+      );
+  }
+
+
+  .topbar {
+
+    height: 54px;
+    flex-basis: 54px;
+
+    padding: 0 11px;
+  }
+
+
+  .main {
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    padding:
+      9px 10px 18px;
+
+    gap: 12px;
+  }
+
+
+  .board-area,
+  .board-column {
+
+    width: 100%;
+
+    max-width:
+      var(--board-size);
+  }
+
+
+  .sidebar {
+
+    width: 100%;
+
+    max-width:
+      var(--board-size);
+  }
+
+
+  .controls {
+
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+
+  .moves {
+
+    max-height: 180px;
   }
 }
+
+
+/* =========================================================
+   SHORT CHROMEBOOK SCREEN
+   ========================================================= */
+
+@media
+(max-height: 720px)
+and (min-width: 821px) {
+
+  :root {
+
+    --board-size:
+      min(
+        540px,
+        calc(100vh - 142px),
+        calc(100vw - 335px)
+      );
+  }
+
+
+  .topbar {
+
+    height: 52px;
+    flex-basis: 52px;
+  }
+
+
+  .main {
+
+    padding:
+      7px 12px 9px;
+
+    gap: 12px;
+  }
+
+
+  .player-strip {
+
+    height: 32px;
+
+    margin-bottom: 4px;
+  }
+
+
+  .controls {
+
+    margin-top: 5px;
+  }
+
+
+  .card-header {
+
+    min-height: 32px;
+
+    padding:
+      7px 10px;
+  }
+
+
+  .card-body {
+
+    padding:
+      8px 10px;
+  }
+
+
+  .eval-bar {
+
+    height: 82px;
+  }
+
+
+  .moves {
+
+    max-height: 125px;
+  }
+
+
+  .engine-debug {
+
+    margin-top: 5px;
+
+    padding: 5px;
+  }
+
+
+  .engine-debug-row {
+
+    margin: 2px 0;
+  }
+
+
+  .test-button {
+
+    margin-top: 5px;
+  }
+}
+
+
+/* =========================================================
+   VERY SHORT SCREEN
+   ========================================================= */
+
+@media (max-height: 650px) {
+
+  :root {
+
+    --board-size:
+      min(
+        485px,
+        calc(100vh - 125px),
+        calc(100vw - 330px)
+      );
+  }
+
+
+  .topbar {
+
+    height: 48px;
+    flex-basis: 48px;
+  }
+
+
+  .logo {
+
+    font-size: 17px;
+  }
+
+
+  .logo-icon {
+
+    width: 29px;
+    height: 29px;
+
+    font-size: 17px;
+  }
+
+
+  .player-strip {
+
+    height: 27px;
+  }
+
+
+  .clock {
+
+    padding: 3px 7px;
+
+    font-size: 12px;
+  }
+
+
+  .controls button {
+
+    min-height: 29px;
+
+    font-size: 10px;
+  }
+}
+
 </style>
 </head>
+
 
 <body>
 
 <div class="app">
 
-<header class="header">
 
-  <div class="logo-area">
-    <div class="logo">♞</div>
+<!-- =======================================================
+     TOP BAR
+     ======================================================= -->
 
-    <div class="logo-text">
-      <h1>Nova Chess</h1>
-      <span>V3 • Think. Calculate. Conquer.</span>
+<header class="topbar">
+
+  <div class="logo">
+
+    <div class="logo-icon">
+      ♞
     </div>
+
+    <span>
+      Nova Chess
+    </span>
+
+    <span class="version">
+      V3.1
+    </span>
+
   </div>
 
-  <div class="status">
-    <span id="statusDot" class="status-dot"></span>
-    <span id="engineStatus">Starting Stockfish…</span>
+
+  <div
+    id="enginePill"
+    class="engine-pill"
+  >
+
+    <span class="engine-dot"></span>
+
+    <span id="engineText">
+      Starting Stockfish…
+    </span>
+
   </div>
 
 </header>
 
 
+
+<!-- =======================================================
+     MAIN
+     ======================================================= -->
+
 <main class="main">
 
-<section class="board-zone">
 
-  <div class="board-shell">
-    <div id="board" class="board"></div>
+<!-- =======================================================
+     BOARD
+     ======================================================= -->
+
+<section class="board-area">
+
+<div class="board-column">
+
+
+<!-- BLACK -->
+
+<div class="player-strip">
+
+  <div class="player-name">
+
+    <span class="player-piece">
+      ♟
+    </span>
+
+    <span>
+      Nova Engine
+    </span>
+
+  </div>
+
+
+  <div
+    id="blackClock"
+    class="clock"
+  >
+    5:00
+  </div>
+
+</div>
+
+
+
+<!-- BOARD -->
+
+<div class="board-shell">
+
+  <div id="board"></div>
+
+
+  <div
+    id="thinkingOverlay"
+    class="thinking-overlay"
+  >
+
+    <div class="thinking-card">
+
+      <span class="spinner"></span>
+
+      <span>
+        Nova is thinking…
+      </span>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+
+<!-- WHITE -->
+
+<div
+  class="player-strip"
+  style="
+    margin-top:7px;
+    margin-bottom:0;
+  "
+>
+
+  <div class="player-name">
+
+    <span class="player-piece">
+      ♙
+    </span>
+
+    <span>
+      You
+    </span>
+
+  </div>
+
+
+  <div
+    id="whiteClock"
+    class="clock active"
+  >
+    5:00
+  </div>
+
+</div>
+
+
+
+<!-- CONTROLS -->
+
+<div class="controls">
+
+  <button
+    id="newGameBtn"
+    class="primary"
+  >
+    New Game
+  </button>
+
+  <button id="undoBtn">
+    Undo
+  </button>
+
+  <button
+    id="resignBtn"
+    class="danger"
+  >
+    Resign
+  </button>
+
+  <button id="flipBtn">
+    Flip
+  </button>
+
+</div>
+
+
+</div>
+
+</section>
+
+
+
+<!-- =======================================================
+     SIDEBAR
+     ======================================================= -->
+
+<aside class="sidebar">
+
+
+<!-- EVALUATION -->
+
+<section class="card">
+
+  <div class="card-header">
+
+    <span>
+      Evaluation
+    </span>
+
+    <span id="depthLabel">
+      Depth —
+    </span>
+
+  </div>
+
+
+  <div class="card-body">
+
+    <div class="eval-wrap">
+
+      <div class="eval-bar">
+
+        <div
+          id="evalFill"
+          class="eval-fill"
+        ></div>
+
+      </div>
+
+
+      <div class="eval-info">
+
+        <div
+          id="evalNumber"
+          class="eval-number"
+        >
+          0.0
+        </div>
+
+        <div
+          id="evalLabel"
+          class="eval-label"
+        >
+          Starting position
+        </div>
+
+      </div>
+
+    </div>
+
   </div>
 
 </section>
 
 
-<aside class="side">
 
-  <!-- PLAYERS -->
+<!-- MOVES -->
 
-  <div class="card players">
+<section class="card">
 
-    <div id="whitePlayer" class="player active">
+  <div class="card-header">
 
-      <div class="player-left">
-
-        <div class="player-icon">♙</div>
-
-        <div>
-          <div class="player-name">You</div>
-          <div class="player-sub">White</div>
-        </div>
-
-      </div>
-
-      <div id="whiteClock" class="clock">
-        10:00
-      </div>
-
-    </div>
-
-
-    <div id="blackPlayer" class="player">
-
-      <div class="player-left">
-
-        <div class="player-icon">♟</div>
-
-        <div>
-          <div class="player-name">Stockfish</div>
-          <div class="player-sub" id="difficultyLabel">Medium</div>
-        </div>
-
-      </div>
-
-      <div id="blackClock" class="clock">
-        10:00
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <!-- ANALYSIS -->
-
-  <div class="card">
-
-    <div class="title">
-      <span>Engine Analysis</span>
-      <span id="depthText">Depth —</span>
-    </div>
-
-    <div class="analysis">
-
-      <div class="eval-bar">
-        <div id="evalBlack" class="eval-black"></div>
-        <div class="eval-mark"></div>
-      </div>
-
-      <div class="eval-info">
-
-        <div id="evalScore" class="eval-score">
-          +0.00
-        </div>
-
-        <div id="evalLabel" class="eval-label">
-          Starting position
-        </div>
-
-        <div class="best">
-          Best move:
-          <span id="bestMove">—</span>
-        </div>
-
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <!-- MOVES -->
-
-  <div class="card moves-card">
-
-    <div class="title">
-      <span>Moves</span>
-      <span id="moveCount">0</span>
-    </div>
-
-    <div id="moves" class="moves">
-      <div class="empty">
-        Make your first move.
-      </div>
-    </div>
-
-  </div>
-
-
-  <!-- SETTINGS -->
-
-  <div class="card">
-
-    <div class="settings">
-
-      <div class="setting">
-
-        <label>Difficulty</label>
-
-        <select id="difficulty">
-
-          <option value="0">Beginner</option>
-          <option value="4">Easy</option>
-          <option value="8" selected>Medium</option>
-          <option value="12">Hard</option>
-          <option value="16">Expert</option>
-          <option value="20">Maximum</option>
-
-        </select>
-
-      </div>
-
-
-      <div class="setting">
-
-        <label>Time</label>
-
-        <select id="timeControl">
-
-          <option value="300">5 min</option>
-          <option value="600" selected>10 min</option>
-          <option value="900">15 min</option>
-          <option value="1800">30 min</option>
-
-        </select>
-
-      </div>
-
-    </div>
-
-  </div>
-
-
-  <!-- CONTROLS -->
-
-  <div class="controls">
-
-    <button id="newGame" class="primary">
-      New Game
-    </button>
-
-    <button id="undo">
-      Undo
-    </button>
-
-    <button id="flip">
-      Flip
-    </button>
-
-    <button id="engineTest">
-      Test
-    </button>
-
-  </div>
-
-
-  <!-- DEBUG -->
-
-  <div class="card engine-card">
-
-    Engine:
-    <span id="engineState" class="engine-state">
-      Loading…
+    <span>
+      Moves
     </span>
 
-    <div class="debug">
+    <span id="moveCount">
+      0
+    </span>
 
-      <div>
-        State:
-        <span id="debugState">Starting</span>
+  </div>
+
+
+  <div
+    id="moves"
+    class="moves"
+  >
+
+    <div class="empty">
+      Make your first move.
+    </div>
+
+  </div>
+
+</section>
+
+
+
+<!-- SETTINGS -->
+
+<section class="card">
+
+  <div class="card-header">
+
+    <span>
+      Game Settings
+    </span>
+
+  </div>
+
+
+  <div class="card-body">
+
+
+    <div class="setting">
+
+      <label for="difficulty">
+        Difficulty
+      </label>
+
+      <select id="difficulty">
+
+        <option value="7">
+          Beginner
+        </option>
+
+        <option value="9">
+          Easy
+        </option>
+
+        <option
+          value="11"
+          selected
+        >
+          Medium
+        </option>
+
+        <option value="13">
+          Hard
+        </option>
+
+        <option value="15">
+          Expert
+        </option>
+
+        <option value="17">
+          Maximum
+        </option>
+
+      </select>
+
+    </div>
+
+
+
+    <div class="setting">
+
+      <label for="timeControl">
+        Time Control
+      </label>
+
+      <select id="timeControl">
+
+        <option value="60">
+          1 + 0
+        </option>
+
+        <option value="180">
+          3 + 0
+        </option>
+
+        <option
+          value="300"
+          selected
+        >
+          5 + 0
+        </option>
+
+        <option value="600">
+          10 + 0
+        </option>
+
+      </select>
+
+    </div>
+
+
+  </div>
+
+</section>
+
+
+
+<!-- ENGINE -->
+
+<section class="card">
+
+  <div class="card-header">
+
+    <span>
+      Stockfish Engine
+    </span>
+
+    <span>
+      ASM-JS
+    </span>
+
+  </div>
+
+
+  <div class="card-body">
+
+    <div
+      id="engineStatus"
+      class="status"
+    >
+      Loading Stockfish…
+    </div>
+
+
+    <div
+      id="engineDebug"
+      class="engine-debug"
+    >
+
+      <div class="engine-debug-row">
+
+        <span>
+          State
+        </span>
+
+        <b>
+          Starting
+        </b>
+
       </div>
 
-      <div>
-        Command:
-        <span id="debugCommand">—</span>
+
+      <div class="engine-debug-row">
+
+        <span>
+          Last command
+        </span>
+
+        <b>
+          —
+        </b>
+
       </div>
 
-      <div>
-        Output:
-        <span id="debugOutput">—</span>
+
+      <div class="engine-debug-row">
+
+        <span>
+          Last output
+        </span>
+
+        <b>
+          —
+        </b>
+
       </div>
 
     </div>
 
+
+    <button
+      id="testEngineBtn"
+      class="test-button"
+    >
+      Test Stockfish
+    </button>
+
   </div>
+
+</section>
+
 
 </aside>
 
@@ -872,50 +2111,43 @@ button.primary{
 </div>
 
 
-<!-- PROMOTION -->
 
-<div id="promotionModal" class="modal">
+<!-- =======================================================
+     PROMOTION
+     ======================================================= -->
 
-  <div class="modal-box">
+<div
+  id="promotionModal"
+  class="modal"
+>
 
-    <h2>Promote Pawn</h2>
+  <div class="modal-card">
 
-    <p>Choose your new piece.</p>
+    <div class="modal-title">
+      Promote Pawn
+    </div>
+
+    <div class="modal-text">
+      Choose a piece.
+    </div>
+
 
     <div class="promotion-buttons">
 
-      <button data-promotion="q">♕</button>
-      <button data-promotion="r">♖</button>
-      <button data-promotion="b">♗</button>
-      <button data-promotion="n">♘</button>
-
-    </div>
-
-  </div>
-
-</div>
-
-
-<!-- GAME OVER -->
-
-<div id="gameOverModal" class="modal">
-
-  <div class="modal-box">
-
-    <h2 id="gameOverTitle">
-      Game Over
-    </h2>
-
-    <p id="gameOverText"></p>
-
-    <div class="modal-actions">
-
-      <button id="closeGameOver">
-        Close
+      <button data-piece="q">
+        ♕
       </button>
 
-      <button id="gameOverNew" class="primary">
-        New Game
+      <button data-piece="r">
+        ♖
+      </button>
+
+      <button data-piece="b">
+        ♗
+      </button>
+
+      <button data-piece="n">
+        ♘
       </button>
 
     </div>
@@ -923,392 +2155,1139 @@ button.primary{
   </div>
 
 </div>
+
 
 
 <script>
 
-/* ============================================================
-   NOVA CHESS V3
-   ============================================================ */
+"use strict";
 
-const ENGINE_FILE = "./stockfish-18-asm.js";
 
-let game = new Chess();
+/* =========================================================
+   CONFIG
+   ========================================================= */
+
+const ENGINE_FILE =
+  "./stockfish-18-asm.js";
+
+
+/* =========================================================
+   ENGINE VARIABLES
+   ========================================================= */
 
 let engine = null;
+
 let engineReady = false;
+
+let engineStarting = false;
+
 let engineThinking = false;
 
-let analysisMode = false;
+let engineTesting = false;
 
-let selectedSquare = null;
-let legalTargets = [];
+let engineSearchId = 0;
 
-let flipped = false;
+let engineStartTimer = null;
 
-let pendingPromotion = null;
+let engineMoveTimer = null;
 
-let lastMove = null;
+let engineTestTimer = null;
 
-let engineTimer = null;
+let engineLastCommand = "";
 
-let whiteTime = 600;
-let blackTime = 600;
-let clockInterval = null;
-let clockRunning = false;
-
-let engineLastCommand = "—";
-let engineLastOutput = "—";
-
-let currentEval = 0;
-let currentDepth = 0;
-
-let difficulty = 8;
-
-const PIECES = {
-  wp:"♙",
-  wr:"♖",
-  wn:"♘",
-  wb:"♗",
-  wq:"♕",
-  wk:"♔",
-
-  bp:"♟",
-  br:"♜",
-  bn:"♞",
-  bb:"♝",
-  bq:"♛",
-  bk:"♚"
-};
-
-const FILES = [
-  "a","b","c","d","e","f","g","h"
-];
+let engineLastOutput = "";
 
 
-/* ============================================================
+/* =========================================================
+   CHESS
+   ========================================================= */
+
+let game =
+  new Chess();
+
+let selectedSquare =
+  null;
+
+let legalTargets =
+  [];
+
+let flipped =
+  false;
+
+let pendingPromotion =
+  null;
+
+let lastMove =
+  null;
+
+
+/* =========================================================
+   CLOCK
+   ========================================================= */
+
+let initialSeconds =
+  300;
+
+let whiteSeconds =
+  300;
+
+let blackSeconds =
+  300;
+
+let incrementSeconds =
+  0;
+
+let clockTimer =
+  null;
+
+let gameStarted =
+  false;
+
+
+/* =========================================================
    ELEMENTS
-   ============================================================ */
+   ========================================================= */
 
-const boardEl =
+const boardElement =
   document.getElementById("board");
 
-const movesEl =
-  document.getElementById("moves");
+const enginePill =
+  document.getElementById("enginePill");
 
-const engineStatusEl =
+const engineText =
+  document.getElementById("engineText");
+
+const engineStatus =
   document.getElementById("engineStatus");
 
-const engineStateEl =
-  document.getElementById("engineState");
+const thinkingOverlay =
+  document.getElementById("thinkingOverlay");
 
-const statusDotEl =
-  document.getElementById("statusDot");
-
-const debugStateEl =
-  document.getElementById("debugState");
-
-const debugCommandEl =
-  document.getElementById("debugCommand");
-
-const debugOutputEl =
-  document.getElementById("debugOutput");
-
-const evalScoreEl =
-  document.getElementById("evalScore");
-
-const evalLabelEl =
-  document.getElementById("evalLabel");
-
-const bestMoveEl =
-  document.getElementById("bestMove");
-
-const depthTextEl =
-  document.getElementById("depthText");
-
-const evalBlackEl =
-  document.getElementById("evalBlack");
-
-const whiteClockEl =
+const whiteClock =
   document.getElementById("whiteClock");
 
-const blackClockEl =
+const blackClock =
   document.getElementById("blackClock");
 
-const whitePlayerEl =
-  document.getElementById("whitePlayer");
+const movesElement =
+  document.getElementById("moves");
 
-const blackPlayerEl =
-  document.getElementById("blackPlayer");
+const moveCount =
+  document.getElementById("moveCount");
 
-const difficultyEl =
+const evalNumber =
+  document.getElementById("evalNumber");
+
+const evalLabel =
+  document.getElementById("evalLabel");
+
+const evalFill =
+  document.getElementById("evalFill");
+
+const depthLabel =
+  document.getElementById("depthLabel");
+
+const difficulty =
   document.getElementById("difficulty");
 
-const timeControlEl =
+const timeControl =
   document.getElementById("timeControl");
-
-const difficultyLabelEl =
-  document.getElementById("difficultyLabel");
 
 const promotionModal =
   document.getElementById("promotionModal");
 
-const gameOverModal =
-  document.getElementById("gameOverModal");
+const engineDebug =
+  document.getElementById("engineDebug");
+
+const testEngineBtn =
+  document.getElementById("testEngineBtn");
 
 
-/* ============================================================
+/* =========================================================
+   PIECES
+   ========================================================= */
+
+const PIECES = {
+
+  w: {
+    p: "♙",
+    n: "♘",
+    b: "♗",
+    r: "♖",
+    q: "♕",
+    k: "♔"
+  },
+
+  b: {
+    p: "♟",
+    n: "♞",
+    b: "♝",
+    r: "♜",
+    q: "♛",
+    k: "♚"
+  }
+
+};
+
+
+/* =========================================================
+   FILE / RANK ARRAYS
+   ========================================================= */
+
+const FILES =
+  ["a","b","c","d","e","f","g","h"];
+
+const RANKS =
+  ["8","7","6","5","4","3","2","1"];
+
+
+/* =========================================================
    ENGINE UI
-   ============================================================ */
+   ========================================================= */
 
-function setEngineStatus(text,type="normal"){
+function updateEngineDebug() {
 
-  engineStatusEl.textContent = text;
-  engineStateEl.textContent = text;
-
-  statusDotEl.className =
-    "status-dot";
-
-  if(type === "ready"){
-    statusDotEl.classList.add("ready");
-  }
-
-  if(type === "thinking"){
-    statusDotEl.classList.add("thinking");
-  }
-
-  if(type === "error"){
-    statusDotEl.classList.add("error");
-  }
-
-  debugStateEl.textContent = text;
-}
-
-
-function updateDebug(){
-
-  debugCommandEl.textContent =
-    engineLastCommand;
-
-  debugOutputEl.textContent =
-    engineLastOutput;
-}
-
-
-function sendEngine(command){
-
-  if(!engine){
+  if (!engineDebug) {
     return;
   }
+
+  const rows =
+    engineDebug.querySelectorAll(
+      ".engine-debug-row"
+    );
+
+  if (rows[0]) {
+
+    rows[0]
+      .querySelector("b")
+      .textContent =
+      engineText.textContent || "—";
+  }
+
+  if (rows[1]) {
+
+    rows[1]
+      .querySelector("b")
+      .textContent =
+      engineLastCommand || "—";
+  }
+
+  if (rows[2]) {
+
+    rows[2]
+      .querySelector("b")
+      .textContent =
+      engineLastOutput || "—";
+  }
+
+}
+
+
+function setEngineStatus(
+  text,
+  type = ""
+) {
+
+  engineText.textContent =
+    text;
+
+  engineStatus.textContent =
+    text;
+
+  engineStatus.className =
+    "status " +
+    (
+      type === "ready"
+        ? "good"
+        : type === "error"
+          ? "bad"
+          : ""
+    );
+
+  enginePill.className =
+    "engine-pill " + type;
+
+  updateEngineDebug();
+
+}
+
+
+function setCommand(
+  command
+) {
 
   engineLastCommand =
     command;
 
-  updateDebug();
+  updateEngineDebug();
 
-  try{
-    engine.postMessage(command);
-  }catch(error){
-
-    engineLastOutput =
-      "SEND ERROR: " + error.message;
-
-    updateDebug();
-  }
 }
 
 
-/* ============================================================
-   BOARD
-   ============================================================ */
+function setOutput(
+  output
+) {
 
-function renderBoard(){
+  engineLastOutput =
+    output;
 
-  boardEl.innerHTML = "";
+  updateEngineDebug();
 
-  const position =
-    game.board();
+}
 
-  let checkSquare = null;
 
-  if(game.in_check()){
+/* =========================================================
+   ENGINE ERROR
+   ========================================================= */
 
-    const kingColor =
-      game.turn();
+function engineError(
+  message
+) {
 
-    for(let r=0;r<8;r++){
+  engineReady =
+    false;
 
-      for(let c=0;c<8;c++){
+  engineStarting =
+    false;
 
-        const p =
-          position[r][c];
+  engineThinking =
+    false;
 
-        if(
-          p &&
-          p.type === "k" &&
-          p.color === kingColor
-        ){
-          checkSquare =
-            FILES[c] + (8-r);
-        }
-      }
-    }
+  engineTesting =
+    false;
+
+  clearTimeout(
+    engineStartTimer
+  );
+
+  clearTimeout(
+    engineMoveTimer
+  );
+
+  clearTimeout(
+    engineTestTimer
+  );
+
+  thinkingOverlay.classList.remove(
+    "show"
+  );
+
+  setEngineStatus(
+    "ENGINE ERROR: " + message,
+    "error"
+  );
+
+}
+
+
+/* =========================================================
+   START ENGINE
+   ========================================================= */
+
+function startEngine() {
+
+  if (engineStarting) {
+    return;
+  }
+
+  engineStarting =
+    true;
+
+  engineReady =
+    false;
+
+  setEngineStatus(
+    "Loading Stockfish ASM…"
+  );
+
+  setCommand(
+    "creating Worker"
+  );
+
+
+  try {
+
+    engine =
+      new Worker(
+        ENGINE_FILE
+      );
+
+  } catch (error) {
+
+    engineError(
+      "Could not create Worker: " +
+      error.message
+    );
+
+    return;
   }
 
 
-  for(let visualRow=0;visualRow<8;visualRow++){
+  /* -------------------------------------------------------
+     MESSAGE HANDLER
+     ------------------------------------------------------- */
 
-    const row =
-      flipped
-        ? 7-visualRow
-        : visualRow;
+  engine.onmessage =
+    function(event) {
 
-    for(let visualCol=0;visualCol<8;visualCol++){
+      const raw =
+        String(
+          event.data || ""
+        );
 
-      const col =
-        flipped
-          ? 7-visualCol
-          : visualCol;
+      /*
+        Some worker builds send several UCI lines
+        in one message. Handle every line.
+      */
+
+      const lines =
+        raw.split(/\r?\n/);
+
+      for (
+        let i = 0;
+        i < lines.length;
+        i++
+      ) {
+
+        const line =
+          lines[i].trim();
+
+        if (!line) {
+          continue;
+        }
+
+        handleEngineLine(
+          line
+        );
+
+      }
+
+    };
+
+
+  /* -------------------------------------------------------
+     WORKER ERROR
+     ------------------------------------------------------- */
+
+  engine.onerror =
+    function() {
+
+      engineError(
+        "Worker failed to load. Make sure stockfish-18-asm.js is beside index.html."
+      );
+
+    };
+
+
+  engine.onmessageerror =
+    function() {
+
+      engineError(
+        "Worker message error."
+      );
+
+    };
+
+
+  /* -------------------------------------------------------
+     UCI
+     ------------------------------------------------------- */
+
+  try {
+
+    setCommand(
+      "uci"
+    );
+
+    engine.postMessage(
+      "uci"
+    );
+
+  } catch (error) {
+
+    engineError(
+      "Could not send UCI command: " +
+      error.message
+    );
+
+    return;
+  }
+
+
+  /*
+    ASM-JS may take a while on a Chromebook.
+  */
+
+  engineStartTimer =
+    setTimeout(
+      function() {
+
+        if (!engineReady) {
+
+          engineError(
+            "Stockfish did not finish starting after 30 seconds."
+          );
+
+        }
+
+      },
+      30000
+    );
+
+}
+
+
+/* =========================================================
+   ENGINE OUTPUT
+   ========================================================= */
+
+function handleEngineLine(
+  line
+) {
+
+  /*
+    Always display useful output.
+  */
+
+  setOutput(
+    line
+  );
+
+
+  /* -------------------------------------------------------
+     UCI OK
+     ------------------------------------------------------- */
+
+  if (
+    line === "uciok"
+  ) {
+
+    setEngineStatus(
+      "Stockfish identified — checking readiness…"
+    );
+
+    setCommand(
+      "isready"
+    );
+
+    try {
+
+      engine.postMessage(
+        "isready"
+      );
+
+    } catch (error) {
+
+      engineError(
+        "isready failed: " +
+        error.message
+      );
+
+    }
+
+    return;
+  }
+
+
+  /* -------------------------------------------------------
+     READY OK
+     ------------------------------------------------------- */
+
+  if (
+    line === "readyok"
+  ) {
+
+    clearTimeout(
+      engineStartTimer
+    );
+
+    engineReady =
+      true;
+
+    engineStarting =
+      false;
+
+    setEngineStatus(
+      "Stockfish ready",
+      "ready"
+    );
+
+    return;
+  }
+
+
+  /* -------------------------------------------------------
+     INFO
+     ------------------------------------------------------- */
+
+  if (
+    line.startsWith("info ")
+  ) {
+
+    parseEngineInfo(
+      line
+    );
+
+    return;
+  }
+
+
+  /* -------------------------------------------------------
+     BEST MOVE
+     ------------------------------------------------------- */
+
+  if (
+    line.startsWith("bestmove")
+  ) {
+
+    handleBestMove(
+      line
+    );
+
+    return;
+  }
+
+}
+
+
+/* =========================================================
+   PARSE ENGINE INFO
+   ========================================================= */
+
+function parseEngineInfo(
+  line
+) {
+
+  /*
+    Depth
+  */
+
+  const depthMatch =
+    line.match(
+      /\bdepth\s+(\d+)/
+    );
+
+  if (depthMatch) {
+
+    const depth =
+      Number(
+        depthMatch[1]
+      );
+
+    if (
+      Number.isFinite(depth)
+    ) {
+
+      depthLabel.textContent =
+        "Depth " + depth;
+
+    }
+
+  }
+
+
+  /*
+    Score
+  */
+
+  const scoreMatch =
+    line.match(
+      /\bscore\s+(cp|mate)\s+(-?\d+)/
+    );
+
+  if (!scoreMatch) {
+    return;
+  }
+
+
+  const kind =
+    scoreMatch[1];
+
+  const value =
+    Number(
+      scoreMatch[2]
+    );
+
+
+  if (!Number.isFinite(value)) {
+    return;
+  }
+
+
+  let evaluation;
+
+
+  if (
+    kind === "mate"
+  ) {
+
+    evaluation =
+      value > 0
+        ? 99
+        : -99;
+
+  } else {
+
+    evaluation =
+      value / 100;
+
+  }
+
+
+  lastEvaluation =
+    evaluation;
+
+  updateEvaluation(
+    evaluation
+  );
+
+}
+
+
+/* =========================================================
+   EVALUATION
+   ========================================================= */
+
+function updateEvaluation(
+  value
+) {
+
+  if (!Number.isFinite(value)) {
+    return;
+  }
+
+
+  /*
+    Clamp for display.
+  */
+
+  const clamped =
+    Math.max(
+      -5,
+      Math.min(
+        5,
+        value
+      )
+    );
+
+
+  /*
+    Convert -5..+5 to 0..100.
+  */
+
+  const percent =
+    ((clamped + 5) / 10) * 100;
+
+
+  evalFill.style.height =
+    percent + "%";
+
+
+  if (
+    value > 20
+  ) {
+
+    evalNumber.textContent =
+      "M" +
+      Math.round(
+        value
+      );
+
+    evalLabel.textContent =
+      "Nova has a forced mate";
+
+  } else if (
+    value < -20
+  ) {
+
+    evalNumber.textContent =
+      "M" +
+      Math.round(
+        Math.abs(value)
+      );
+
+    evalLabel.textContent =
+      "You have a forced mate";
+
+  } else {
+
+    const sign =
+      value > 0
+        ? "+"
+        : "";
+
+    evalNumber.textContent =
+      sign +
+      value.toFixed(1);
+
+    if (value > .35) {
+
+      evalLabel.textContent =
+        "Nova is better";
+
+    } else if (value < -.35) {
+
+      evalLabel.textContent =
+        "You are better";
+
+    } else {
+
+      evalLabel.textContent =
+        "Position is balanced";
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   BOARD CREATION
+   ========================================================= */
+
+function createBoard() {
+
+  boardElement.innerHTML =
+    "";
+
+
+  const files =
+    flipped
+      ? [...FILES].reverse()
+      : FILES;
+
+
+  const ranks =
+    flipped
+      ? [...RANKS].reverse()
+      : RANKS;
+
+
+  for (
+    let rankIndex = 0;
+    rankIndex < 8;
+    rankIndex++
+  ) {
+
+    for (
+      let fileIndex = 0;
+      fileIndex < 8;
+      fileIndex++
+    ) {
 
       const file =
-        FILES[col];
+        files[fileIndex];
 
       const rank =
-        8-row;
-
-      const squareName =
-        file + rank;
-
-      const piece =
-        position[row][col];
+        ranks[rankIndex];
 
       const square =
-        document.createElement("div");
+        file + rank;
 
-      const light =
-        (row+col)%2===0;
 
-      square.className =
+      const squareElement =
+        document.createElement(
+          "div"
+        );
+
+
+      squareElement.className =
         "square " +
-        (light ? "light" : "dark");
+        (
+          (
+            FILES.indexOf(file) +
+            Number(rank)
+          ) % 2 === 0
+            ? "light"
+            : "dark"
+        );
 
-      square.dataset.square =
-        squareName;
+
+      squareElement.dataset.square =
+        square;
 
 
-      if(
+      /*
+        Last move.
+      */
+
+      if (
         lastMove &&
         (
-          squareName === lastMove.from ||
-          squareName === lastMove.to
+          square === lastMove.from ||
+          square === lastMove.to
         )
-      ){
-        square.classList.add("last");
+      ) {
+
+        squareElement.classList.add(
+          "last-move"
+        );
+
       }
 
 
-      if(squareName === selectedSquare){
-        square.classList.add("selected");
+      /*
+        Check king.
+      */
+
+      if (
+        isKingInCheckSquare(
+          square
+        )
+      ) {
+
+        squareElement.classList.add(
+          "check"
+        );
+
       }
 
 
-      if(legalTargets.includes(squareName)){
+      /*
+        Selected square.
+      */
 
-        if(piece){
-          square.classList.add("capture");
-        }else{
-          square.classList.add("legal");
-        }
+      if (
+        selectedSquare === square
+      ) {
+
+        squareElement.style.filter =
+          "brightness(1.12)";
+
+        squareElement.style.boxShadow =
+          "inset 0 0 0 999px rgba(101,168,255,.22)";
+
       }
 
 
-      if(squareName === checkSquare){
-        square.classList.add("check");
-      }
+      /*
+        Piece.
+      */
+
+      const piece =
+        game.get(square);
 
 
-      if(piece){
+      if (piece) {
 
-        const pieceEl =
-          document.createElement("div");
+        const pieceElement =
+          document.createElement(
+            "div"
+          );
 
-        pieceEl.className =
+        pieceElement.className =
           "piece " +
           (
             piece.color === "w"
-              ? "white-piece"
-              : "black-piece"
+              ? "white"
+              : "black"
           );
 
-        pieceEl.textContent =
+        pieceElement.textContent =
           PIECES[
-            piece.color + piece.type
+            piece.color
+          ][
+            piece.type
           ];
 
-        square.appendChild(pieceEl);
+
+        squareElement.appendChild(
+          pieceElement
+        );
+
       }
 
 
-      if(
-        (!flipped && col===0) ||
-        (flipped && col===7)
-      ){
+      /*
+        Legal target.
+      */
 
-        const rankEl =
-          document.createElement("span");
+      if (
+        legalTargets.includes(
+          square
+        )
+      ) {
 
-        rankEl.className =
-          "coord rank";
+        const targetPiece =
+          game.get(square);
 
-        rankEl.textContent =
-          rank;
 
-        square.appendChild(rankEl);
+        if (targetPiece) {
+
+          const ring =
+            document.createElement(
+              "div"
+            );
+
+          ring.className =
+            "capture-ring";
+
+          squareElement.appendChild(
+            ring
+          );
+
+        } else {
+
+          const dot =
+            document.createElement(
+              "div"
+            );
+
+          dot.className =
+            "move-dot";
+
+          squareElement.appendChild(
+            dot
+          );
+
+        }
+
       }
 
 
-      if(
-        (!flipped && row===7) ||
-        (flipped && row===0)
-      ){
+      /*
+        Coordinates.
+      */
 
-        const fileEl =
-          document.createElement("span");
+      if (
+        fileIndex === 7
+      ) {
 
-        fileEl.className =
-          "coord file";
+        const fileLabel =
+          document.createElement(
+            "span"
+          );
 
-        fileEl.textContent =
+        fileLabel.className =
+          "coord-file";
+
+        fileLabel.textContent =
           file;
 
-        square.appendChild(fileEl);
+        squareElement.appendChild(
+          fileLabel
+        );
+
       }
 
 
-      square.addEventListener(
+      if (
+        fileIndex === 0
+      ) {
+
+        const rankLabel =
+          document.createElement(
+            "span"
+          );
+
+        rankLabel.className =
+          "coord-rank";
+
+        rankLabel.textContent =
+          rank;
+
+        squareElement.appendChild(
+          rankLabel
+        );
+
+      }
+
+
+      squareElement.addEventListener(
         "click",
-        ()=>handleSquareClick(squareName)
+        function() {
+
+          handleSquareClick(
+            square
+          );
+
+        }
       );
 
-      boardEl.appendChild(square);
+
+      boardElement.appendChild(
+        squareElement
+      );
+
     }
+
   }
 
-  updatePlayerTurn();
 }
 
 
-/* ============================================================
-   INPUT
-   ============================================================ */
+/* =========================================================
+   CHECK SQUARE
+   ========================================================= */
 
-function handleSquareClick(square){
+function isKingInCheckSquare(
+  square
+) {
 
-  if(
-    engineThinking ||
-    game.game_over() ||
+  /*
+    Don't use game.in_check() on every square.
+    Instead find the king and test whether the
+    current side is in check.
+  */
+
+  if (
+    !game.in_check()
+  ) {
+
+    return false;
+  }
+
+
+  const turn =
+    game.turn();
+
+
+  const piece =
+    game.get(square);
+
+
+  return (
+    piece &&
+    piece.type === "k" &&
+    piece.color === turn
+  );
+
+}
+
+
+/* =========================================================
+   CLICK SQUARE
+   ========================================================= */
+
+function handleSquareClick(
+  square
+) {
+
+  /*
+    Player is White.
+  */
+
+  if (
+    game.game_over()
+  ) {
+
+    return;
+  }
+
+
+  if (
     game.turn() !== "w"
-  ){
+  ) {
+
+    return;
+  }
+
+
+  if (
+    engineThinking
+  ) {
+
     return;
   }
 
@@ -1317,616 +3296,310 @@ function handleSquareClick(square){
     game.get(square);
 
 
-  if(!selectedSquare){
-
-    if(
-      piece &&
-      piece.color === "w"
-    ){
-
-      selectedSquare =
-        square;
-
-      legalTargets =
-        game.moves({
-          square:square,
-          verbose:true
-        }).map(m=>m.to);
-
-      renderBoard();
-    }
-
-    return;
-  }
-
-
-  if(
-    piece &&
-    piece.color === "w"
-  ){
-
-    selectedSquare =
-      square;
-
-    legalTargets =
-      game.moves({
-        square:square,
-        verbose:true
-      }).map(m=>m.to);
-
-    renderBoard();
-
-    return;
-  }
-
-
-  const choices =
-    game.moves({
-      square:selectedSquare,
-      verbose:true
-    }).filter(m=>m.to===square);
-
-
-  if(!choices.length){
-
-    selectedSquare = null;
-    legalTargets = [];
-
-    renderBoard();
-
-    return;
-  }
-
-
-  const chosen =
-    choices[0];
-
-
-  if(chosen.flags.includes("p")){
-
-    pendingPromotion = {
-      from:selectedSquare,
-      to:square
-    };
-
-    promotionModal.classList.add("show");
-
-    return;
-  }
-
-
-  playPlayerMove(
-    selectedSquare,
-    square
-  );
-}
-
-
-/* ============================================================
-   PLAYER MOVE
-   ============================================================ */
-
-function playPlayerMove(from,to,promotion){
-
-  const move = {
-    from:from,
-    to:to
-  };
-
-  if(promotion){
-    move.promotion = promotion;
-  }
-
-
-  const result =
-    game.move(move);
-
-
-  if(!result){
-    return;
-  }
-
-
-  lastMove = {
-    from:result.from,
-    to:result.to
-  };
-
-
-  selectedSquare = null;
-  legalTargets = [];
-
-
-  updateEvaluation(0,"Analyzing…");
-  renderBoard();
-  renderMoves();
-
-
-  if(checkGameEnd()){
-    return;
-  }
-
-
-  startClock();
-
   /*
-    Ask Stockfish to evaluate the new position
-    and make Black's move.
+    Existing selection.
   */
 
-  requestEngineMove();
-}
+  if (
+    selectedSquare
+  ) {
 
+    /*
+      Legal destination.
+    */
 
-/* ============================================================
-   PROMOTION
-   ============================================================ */
+    if (
+      legalTargets.includes(
+        square
+      )
+    ) {
 
-document
-.querySelectorAll("[data-promotion]")
-.forEach(button=>{
+      attemptPlayerMove(
+        selectedSquare,
+        square
+      );
 
-  button.addEventListener("click",()=>{
-
-    if(!pendingPromotion){
       return;
     }
 
-    const p =
-      button.dataset.promotion;
 
-    const move =
-      pendingPromotion;
+    /*
+      Select another white piece.
+    */
 
-    pendingPromotion = null;
+    if (
+      piece &&
+      piece.color === "w"
+    ) {
 
-    promotionModal.classList.remove(
+      selectSquare(
+        square
+      );
+
+      return;
+    }
+
+
+    clearSelection();
+
+    return;
+  }
+
+
+  /*
+    Select white piece.
+  */
+
+  if (
+    piece &&
+    piece.color === "w"
+  ) {
+
+    selectSquare(
+      square
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   SELECT
+   ========================================================= */
+
+function selectSquare(
+  square
+) {
+
+  selectedSquare =
+    square;
+
+
+  legalTargets =
+    game.moves({
+      square: square,
+      verbose: true
+    }).map(
+      move => move.to
+    );
+
+
+  createBoard();
+
+}
+
+
+/* =========================================================
+   CLEAR SELECTION
+   ========================================================= */
+
+function clearSelection() {
+
+  selectedSquare =
+    null;
+
+  legalTargets =
+    [];
+
+  createBoard();
+
+}
+
+
+/* =========================================================
+   ATTEMPT PLAYER MOVE
+   ========================================================= */
+
+function attemptPlayerMove(
+  from,
+  to
+) {
+
+  const piece =
+    game.get(from);
+
+
+  /*
+    Promotion.
+  */
+
+  if (
+    piece &&
+    piece.type === "p" &&
+    to[1] === "8"
+  ) {
+
+    pendingPromotion = {
+      from: from,
+      to: to
+    };
+
+
+    promotionModal.classList.add(
       "show"
     );
 
-    playPlayerMove(
-      move.from,
-      move.to,
-      p
-    );
-  });
-
-});
-
-
-/* ============================================================
-   MOVE LIST
-   ============================================================ */
-
-function renderMoves(){
-
-  const history =
-    game.history();
-
-  document.getElementById("moveCount")
-    .textContent =
-    history.length;
-
-
-  if(!history.length){
-
-    movesEl.innerHTML =
-      '<div class="empty">Make your first move.</div>';
-
     return;
   }
 
 
-  movesEl.innerHTML = "";
-
-
-  for(let i=0;i<history.length;i+=2){
-
-    const row =
-      document.createElement("div");
-
-    row.className =
-      "move-row";
-
-
-    const number =
-      document.createElement("div");
-
-    number.className =
-      "move-number";
-
-    number.textContent =
-      (i/2+1) + ".";
-
-
-    const white =
-      document.createElement("div");
-
-    white.className =
-      "move";
-
-    white.textContent =
-      history[i] || "";
-
-
-    const black =
-      document.createElement("div");
-
-    black.className =
-      "move";
-
-    black.textContent =
-      history[i+1] || "";
-
-
-    if(i === history.length-1){
-      white.classList.add("latest");
-    }
-
-    if(i+1 === history.length-1){
-      black.classList.add("latest");
-    }
-
-
-    row.appendChild(number);
-    row.appendChild(white);
-    row.appendChild(black);
-
-    movesEl.appendChild(row);
-  }
-
-
-  movesEl.scrollTop =
-    movesEl.scrollHeight;
-}
-
-
-/* ============================================================
-   ENGINE START
-   ============================================================ */
-
-function startEngine(){
-
-  if(typeof Chess !== "function"){
-
-    setEngineStatus(
-      "Chess.js failed",
-      "error"
-    );
-
-    return;
-  }
-
-
-  try{
-
-    engine =
-      new Worker(ENGINE_FILE);
-
-  }catch(error){
-
-    setEngineStatus(
-      "Engine failed to start",
-      "error"
-    );
-
-    engineLastOutput =
-      error.message;
-
-    updateDebug();
-
-    return;
-  }
-
-
-  engine.onmessage =
-    event=>{
-
-      const line =
-        String(event.data || "").trim();
-
-      if(!line){
-        return;
-      }
-
-      engineLastOutput =
-        line;
-
-      updateDebug();
-
-      handleEngineLine(line);
-    };
-
-
-  engine.onerror =
-    error=>{
-
-      engineThinking = false;
-
-      clearTimeout(engineTimer);
-
-      setEngineStatus(
-        "ENGINE ERROR",
-        "error"
-      );
-
-      engineLastOutput =
-        error.message ||
-        "Worker failed";
-
-      updateDebug();
-    };
-
-
-  sendEngine("uci");
-}
-
-
-/* ============================================================
-   ENGINE OUTPUT
-   ============================================================ */
-
-function handleEngineLine(line){
-
-  if(line === "uciok"){
-
-    /*
-      Configure Stockfish after UCI handshake.
-    */
-
-    sendEngine(
-      "setoption name Skill Level value " +
-      difficulty
-    );
-
-    sendEngine("setoption name Threads value 1");
-
-    sendEngine("isready");
-
-    return;
-  }
-
-
-  if(line === "readyok"){
-
-    engineReady = true;
-
-    setEngineStatus(
-      "Stockfish ready",
-      "ready"
-    );
-
-    /*
-      If the user somehow made a move before
-      the engine finished loading, catch up.
-    */
-
-    if(
-      game.turn() === "b" &&
-      !game.game_over() &&
-      !engineThinking
-    ){
-      requestEngineMove();
-    }
-
-    return;
-  }
-
-
-  if(line.startsWith("info")){
-
-    parseEngineInfo(line);
-
-    return;
-  }
-
-
-  if(line.startsWith("bestmove")){
-
-    clearTimeout(engineTimer);
-
-    const parts =
-      line.split(/\s+/);
-
-    const best =
-      parts[1];
-
-
-    /*
-      IMPORTANT:
-      Analysis/test searches must NOT move the
-      actual chess game.
-    */
-
-    if(analysisMode){
-
-      analysisMode = false;
-
-      engineThinking = false;
-
-      if(best && best !== "(none)"){
-
-        bestMoveEl.textContent =
-          uciToSan(best);
-
-      }
-
-      setEngineStatus(
-        "Stockfish ready",
-        "ready"
-      );
-
-      return;
-    }
-
-
-    engineThinking = false;
-
-    if(
-      best &&
-      best !== "(none)" &&
-      best !== "0000"
-    ){
-
-      applyEngineMove(best);
-
-    }else{
-
-      setEngineStatus(
-        "No legal engine move",
-        "error"
-      );
-
-      checkGameEnd();
-    }
-
-    return;
-  }
-}
-
-
-/* ============================================================
-   ENGINE ANALYSIS PARSER
-   ============================================================ */
-
-function parseEngineInfo(line){
-
-  const depthMatch =
-    line.match(/\bdepth\s+(\d+)/);
-
-  if(depthMatch){
-
-    currentDepth =
-      Number(depthMatch[1]);
-
-    depthTextEl.textContent =
-      "Depth " + currentDepth;
-  }
-
-
-  const scoreMatch =
-    line.match(
-      /\bscore\s+(cp|mate)\s+(-?\d+)/
-    );
-
-
-  if(!scoreMatch){
-    return;
-  }
-
-
-  const type =
-    scoreMatch[1];
-
-  const value =
-    Number(scoreMatch[2]);
-
-
-  let score = 0;
-
-
-  if(type === "cp"){
-
-    /*
-      Stockfish score is from the side to move.
-      During Black's search we flip it so the UI
-      always represents White's perspective.
-    */
-
-    score =
-      value / 100;
-
-    if(game.turn() === "b"){
-      score = -score;
-    }
-
-  }else{
-
-    score =
-      value > 0
-        ? 10
-        : -10;
-
-    if(game.turn() === "b"){
-      score = -score;
-    }
-  }
-
-
-  currentEval = score;
-
-  updateEvaluation(
-    score,
-    evaluationLabel(score)
+  makePlayerMove(
+    from,
+    to,
+    "q"
   );
+
 }
 
 
-/* ============================================================
-   EVALUATION
-   ============================================================ */
+/* =========================================================
+   MAKE PLAYER MOVE
+   ========================================================= */
 
-function updateEvaluation(score,label){
+function makePlayerMove(
+  from,
+  to,
+  promotion
+) {
 
-  const safe =
-    Math.max(-5,Math.min(5,score));
-
-  const blackHeight =
-    50 - safe * 9;
-
-  evalBlackEl.style.height =
-    Math.max(3,Math.min(97,blackHeight)) +
-    "%";
+  const move =
+    game.move({
+      from: from,
+      to: to,
+      promotion: promotion
+    });
 
 
-  const sign =
-    score >= 0 ? "+" : "";
+  if (!move) {
 
-  evalScoreEl.textContent =
-    sign + score.toFixed(2);
+    clearSelection();
 
-  evalLabelEl.textContent =
-    label;
+    return;
+  }
+
+
+  /*
+    Store last move.
+  */
+
+  lastMove = {
+    from: move.from,
+    to: move.to
+  };
+
+
+  selectedSquare =
+    null;
+
+  legalTargets =
+    [];
+
+
+  /*
+    Add increment.
+  */
+
+  whiteSeconds +=
+    incrementSeconds;
+
+
+  gameStarted =
+    true;
+
+
+  renderEverything();
+
+
+  const ended =
+    checkGameEnd();
+
+
+  if (
+    !ended &&
+    game.turn() === "b"
+  ) {
+
+    startClock();
+
+    requestEngineMove();
+
+  }
+
 }
 
 
-function evaluationLabel(score){
+/* =========================================================
+   PROMOTION BUTTONS
+   ========================================================= */
 
-  if(score > 2){
-    return "White is winning";
-  }
+document
+  .querySelectorAll(
+    ".promotion-buttons button"
+  )
+  .forEach(
+    function(button) {
 
-  if(score > .8){
-    return "White is better";
-  }
+      button.addEventListener(
+        "click",
+        function() {
 
-  if(score > .25){
-    return "White is slightly better";
-  }
+          if (
+            !pendingPromotion
+          ) {
 
-  if(score < -2){
-    return "Black is winning";
-  }
-
-  if(score < -.8){
-    return "Black is better";
-  }
-
-  if(score < -.25){
-    return "Black is slightly better";
-  }
-
-  return "Position is balanced";
-}
+            return;
+          }
 
 
-/* ============================================================
-   ENGINE MOVE
-   ============================================================ */
+          const promotion =
+            this.dataset.piece;
 
-function requestEngineMove(){
 
-  if(!engineReady){
+          const move =
+            pendingPromotion;
+
+
+          pendingPromotion =
+            null;
+
+
+          promotionModal.classList.remove(
+            "show"
+          );
+
+
+          makePlayerMove(
+            move.from,
+            move.to,
+            promotion
+          );
+
+        }
+      );
+
+    }
+  );
+
+
+/* =========================================================
+   REQUEST ENGINE MOVE
+   ========================================================= */
+
+function requestEngineMove() {
+
+  /*
+    Visible diagnostic.
+  */
+
+  setCommand(
+    "REQUEST ENGINE MOVE"
+  );
+
+
+  if (
+    !engineReady
+  ) {
 
     setEngineStatus(
       "Waiting for Stockfish…"
@@ -1936,782 +3609,1413 @@ function requestEngineMove(){
   }
 
 
-  if(
-    engineThinking ||
-    game.game_over() ||
-    game.turn() !== "b"
-  ){
+  if (
+    game.game_over()
+  ) {
+
     return;
   }
 
 
-  engineThinking = true;
-  analysisMode = false;
+  if (
+    game.turn() !== "b"
+  ) {
+
+    return;
+  }
 
 
-  setEngineStatus(
-    "Stockfish thinking…",
-    "thinking"
+  clearTimeout(
+    engineMoveTimer
   );
 
 
-  const fen =
-    game.fen();
+  const mySearchId =
+    ++engineSearchId;
 
 
-  sendEngine("stop");
-  sendEngine("ucinewgame");
+  engineThinking =
+    true;
 
-  sendEngine(
-    "position fen " + fen
+
+  thinkingOverlay.classList.add(
+    "show"
   );
+
+
+  enginePill.className =
+    "engine-pill thinking";
+
+
+  engineText.textContent =
+    "Nova is thinking";
+
+
+  engineStatus.textContent =
+    "Preparing engine search…";
 
 
   /*
-    Difficulty controls how much time Stockfish
-    gets. Maximum remains Chromebook-friendly.
+  ==========================================================
+  IMPORTANT ENGINE FIX
+  ==========================================================
+
+  Use the COMPLETE UCI move history.
+
+  This is the protocol path that works reliably
+  with the ASM-JS Stockfish build.
   */
 
-  const time =
-    getThinkTime();
+  const history =
+    game.history({
+      verbose: true
+    });
 
 
-  sendEngine(
-    "go movetime " + time
+  const uciMoves =
+    history.map(
+      function(move) {
+
+        return (
+          move.from +
+          move.to +
+          (
+            move.promotion || ""
+          )
+        );
+
+      }
+    );
+
+
+  const positionCommand =
+    "position startpos" +
+    (
+      uciMoves.length
+        ? " moves " +
+          uciMoves.join(" ")
+        : ""
+    );
+
+
+  /*
+    Difficulty is search depth.
+
+    Lower depths are much faster on a Chromebook.
+  */
+
+  const depth =
+    Number(
+      difficulty.value
+    );
+
+
+  const goCommand =
+    "go depth " +
+    depth;
+
+
+  try {
+
+    /*
+      Stop anything old.
+    */
+
+    setCommand(
+      "stop"
+    );
+
+    engine.postMessage(
+      "stop"
+    );
+
+
+    /*
+      Start a clean search.
+    */
+
+    setCommand(
+      "ucinewgame"
+    );
+
+    engine.postMessage(
+      "ucinewgame"
+    );
+
+
+    /*
+      Send complete position.
+    */
+
+    setCommand(
+      positionCommand
+    );
+
+    engine.postMessage(
+      positionCommand
+    );
+
+
+    /*
+      Search.
+    */
+
+    setCommand(
+      goCommand
+    );
+
+    engine.postMessage(
+      goCommand
+    );
+
+
+    engineStatus.textContent =
+      "Searching at depth " +
+      depth +
+      "…";
+
+    updateEngineDebug();
+
+  } catch (error) {
+
+    finishEngineThinking();
+
+    engineError(
+      "Could not send search: " +
+      error.message
+    );
+
+    return;
+  }
+
+
+  /*
+    Safety watchdog.
+
+    Depth searches can take longer on a Chromebook,
+    so allow plenty of time.
+  */
+
+  engineMoveTimer =
+    setTimeout(
+      function() {
+
+        if (
+          engineThinking &&
+          mySearchId === engineSearchId
+        ) {
+
+          try {
+
+            engine.postMessage(
+              "stop"
+            );
+
+          } catch (_) {}
+
+
+          finishEngineThinking();
+
+
+          engineError(
+            "Search timed out. Last command: " +
+            engineLastCommand
+          );
+
+        }
+
+      },
+      30000
+    );
+
+}
+
+
+/* =========================================================
+   HANDLE BEST MOVE
+   ========================================================= */
+
+function handleBestMove(
+  line
+) {
+
+  /*
+    A test search can also return bestmove.
+  */
+
+  if (
+    engineTesting
+  ) {
+
+    clearTimeout(
+      engineTestTimer
+    );
+
+    engineTesting =
+      false;
+
+    const parts =
+      line.split(
+        /\s+/
+      );
+
+
+    const bestmove =
+      parts[1] || "none";
+
+
+    setEngineStatus(
+      "TEST PASSED — bestmove " +
+      bestmove,
+      "ready"
+    );
+
+
+    setCommand(
+      "test complete"
+    );
+
+    setOutput(
+      line
+    );
+
+
+    return;
+  }
+
+
+  if (
+    !engineThinking
+  ) {
+
+    return;
+  }
+
+
+  clearTimeout(
+    engineMoveTimer
   );
 
 
-  clearTimeout(engineTimer);
-
-  engineTimer =
-    setTimeout(()=>{
-
-      if(engineThinking){
-
-        engineThinking = false;
-
-        sendEngine("stop");
-
-        setEngineStatus(
-          "Engine timed out",
-          "error"
-        );
-
-        engineLastOutput =
-          "No bestmove after 8 seconds";
-
-        updateDebug();
-      }
-
-    },8000);
-}
+  const parts =
+    line.split(
+      /\s+/
+    );
 
 
-function getThinkTime(){
+  const bestmove =
+    parts[1];
 
-  switch(Number(difficulty)){
 
-    case 0:
-      return 250;
+  if (
+    !bestmove ||
+    bestmove === "(none)"
+  ) {
 
-    case 4:
-      return 400;
+    finishEngineThinking();
 
-    case 8:
-      return 700;
+    checkGameEnd();
 
-    case 12:
-      return 1100;
-
-    case 16:
-      return 1600;
-
-    case 20:
-      return 2200;
-
-    default:
-      return 700;
+    return;
   }
-}
 
 
-/* ============================================================
-   APPLY ENGINE MOVE
-   ============================================================ */
+  /*
+    UCI move format:
 
-function applyEngineMove(uci){
+      e2e4
+      e7e8q
+  */
 
   const from =
-    uci.substring(0,2);
+    bestmove.substring(
+      0,
+      2
+    );
+
 
   const to =
-    uci.substring(2,4);
+    bestmove.substring(
+      2,
+      4
+    );
+
 
   const promotion =
-    uci.length >= 5
-      ? uci.substring(4,5)
+    bestmove.length >= 5
+      ? bestmove.substring(
+          4,
+          5
+        )
       : undefined;
 
 
-  const move = {
-    from:from,
-    to:to
-  };
+  try {
 
+    const move =
+      game.move({
+        from: from,
+        to: to,
+        promotion: promotion
+      });
 
-  if(promotion){
-    move.promotion =
-      promotion;
-  }
 
+    if (!move) {
 
-  const result =
-    game.move(move);
+      finishEngineThinking();
 
-
-  if(!result){
-
-    setEngineStatus(
-      "Engine returned invalid move",
-      "error"
-    );
-
-    engineLastOutput =
-      "INVALID: " + uci;
-
-    updateDebug();
-
-    return;
-  }
-
-
-  lastMove = {
-    from:result.from,
-    to:result.to
-  };
-
-
-  bestMoveEl.textContent =
-    result.san;
-
-  renderBoard();
-  renderMoves();
-
-
-  if(checkGameEnd()){
-    return;
-  }
-
-
-  setEngineStatus(
-    "Stockfish ready",
-    "ready"
-  );
-
-  startClock();
-}
-
-
-/* ============================================================
-   UCI → SAN
-   ============================================================ */
-
-function uciToSan(uci){
-
-  if(!uci || uci.length < 4){
-    return "—";
-  }
-
-
-  const temp =
-    new Chess(game.fen());
-
-
-  const move = {
-    from:uci.substring(0,2),
-    to:uci.substring(2,4)
-  };
-
-
-  if(uci.length >= 5){
-    move.promotion =
-      uci.substring(4,5);
-  }
-
-
-  const result =
-    temp.move(move);
-
-
-  return result
-    ? result.san
-    : uci;
-}
-
-
-/* ============================================================
-   ENGINE TEST
-   ============================================================ */
-
-document
-.getElementById("engineTest")
-.addEventListener("click",()=>{
-
-  if(!engineReady){
-
-    setEngineStatus(
-      "Stockfish is still loading…",
-      "error"
-    );
-
-    return;
-  }
-
-
-  if(engineThinking){
-    return;
-  }
-
-
-  /*
-    This is now a REAL analysis test.
-    It cannot accidentally move the board.
-  */
-
-  analysisMode = true;
-  engineThinking = true;
-
-
-  setEngineStatus(
-    "Analyzing position…",
-    "thinking"
-  );
-
-
-  sendEngine("stop");
-  sendEngine("ucinewgame");
-
-  sendEngine(
-    "position fen " +
-    game.fen()
-  );
-
-  sendEngine(
-    "go movetime 700"
-  );
-
-
-  clearTimeout(engineTimer);
-
-  engineTimer =
-    setTimeout(()=>{
-
-      if(analysisMode){
-
-        analysisMode = false;
-        engineThinking = false;
-
-        sendEngine("stop");
-
-        setEngineStatus(
-          "Analysis timed out",
-          "error"
-        );
-      }
-
-    },8000);
-});
-
-
-/* ============================================================
-   DIFFICULTY
-   ============================================================ */
-
-difficultyEl.addEventListener(
-  "change",
-  ()=>{
-
-    difficulty =
-      Number(difficultyEl.value);
-
-    difficultyLabelEl.textContent =
-      difficultyName(difficulty);
-
-
-    if(engineReady){
-
-      sendEngine(
-        "setoption name Skill Level value " +
-        difficulty
+      engineError(
+        "Stockfish returned an illegal move: " +
+        bestmove
       );
 
-      sendEngine("isready");
-    }
-  }
-);
-
-
-function difficultyName(level){
-
-  if(level === 0) return "Beginner";
-  if(level === 4) return "Easy";
-  if(level === 8) return "Medium";
-  if(level === 12) return "Hard";
-  if(level === 16) return "Expert";
-
-  return "Maximum";
-}
-
-
-/* ============================================================
-   CLOCK
-   ============================================================ */
-
-function startClock(){
-
-  if(clockRunning){
-    return;
-  }
-
-  clockRunning = true;
-
-
-  clockInterval =
-    setInterval(()=>{
-
-      if(game.game_over()){
-
-        stopClock();
-
-        return;
-      }
-
-
-      if(game.turn() === "w"){
-
-        whiteTime--;
-
-        if(whiteTime <= 0){
-
-          whiteTime = 0;
-
-          stopClock();
-
-          showTimeout("Stockfish Wins");
-
-        }
-
-      }else{
-
-        blackTime--;
-
-        if(blackTime <= 0){
-
-          blackTime = 0;
-
-          stopClock();
-
-          showTimeout("You Win!");
-
-        }
-      }
-
-
-      updateClocks();
-
-    },1000);
-}
-
-
-function stopClock(){
-
-  clockRunning = false;
-
-  clearInterval(clockInterval);
-
-  clockInterval = null;
-}
-
-
-function updateClocks(){
-
-  whiteClockEl.textContent =
-    formatTime(whiteTime);
-
-  blackClockEl.textContent =
-    formatTime(blackTime);
-
-
-  whitePlayerEl.classList.toggle(
-    "active",
-    game.turn() === "w"
-  );
-
-  blackPlayerEl.classList.toggle(
-    "active",
-    game.turn() === "b"
-  );
-}
-
-
-function formatTime(seconds){
-
-  const m =
-    Math.floor(seconds/60);
-
-  const s =
-    seconds%60;
-
-  return (
-    String(m).padStart(2,"0") +
-    ":" +
-    String(s).padStart(2,"0")
-  );
-}
-
-
-/* ============================================================
-   GAME END
-   ============================================================ */
-
-function checkGameEnd(){
-
-  if(!game.game_over()){
-    return false;
-  }
-
-
-  stopClock();
-
-
-  let title =
-    "Game Over";
-
-  let text =
-    "";
-
-
-  if(game.in_checkmate()){
-
-    if(game.turn() === "w"){
-
-      title =
-        "Stockfish Wins";
-
-      text =
-        "Checkmate. Better luck next game.";
-
-    }else{
-
-      title =
-        "You Win!";
-
-      text =
-        "You delivered checkmate.";
+      return;
     }
 
-  }else if(game.in_draw()){
 
-    title =
-      "Draw";
+    lastMove = {
+      from: move.from,
+      to: move.to
+    };
 
-    text =
-      "The game ended in a draw.";
 
-  }else{
+    blackSeconds +=
+      incrementSeconds;
 
-    title =
-      "Game Over";
 
-    text =
-      "No legal moves remain.";
+    finishEngineThinking();
+
+
+    renderEverything();
+
+
+    checkGameEnd();
+
+  } catch (error) {
+
+    finishEngineThinking();
+
+    engineError(
+      "Could not apply Stockfish move: " +
+      error.message
+    );
+
   }
 
-
-  document.getElementById(
-    "gameOverTitle"
-  ).textContent =
-    title;
-
-
-  document.getElementById(
-    "gameOverText"
-  ).textContent =
-    text;
-
-
-  gameOverModal.classList.add(
-    "show"
-  );
-
-
-  return true;
 }
 
 
-function showTimeout(title){
+/* =========================================================
+   FINISH ENGINE THINKING
+   ========================================================= */
 
-  document.getElementById(
-    "gameOverTitle"
-  ).textContent =
-    title;
+function finishEngineThinking() {
 
-  document.getElementById(
-    "gameOverText"
-  ).textContent =
-    "Time has expired.";
+  engineThinking =
+    false;
 
-  gameOverModal.classList.add(
-    "show"
-  );
-}
-
-
-/* ============================================================
-   NEW GAME
-   ============================================================ */
-
-function newGame(){
-
-  if(engine){
-
-    sendEngine("stop");
-  }
-
-
-  game =
-    new Chess();
-
-
-  selectedSquare = null;
-  legalTargets = [];
-
-  pendingPromotion = null;
-
-  lastMove = null;
-
-  engineThinking = false;
-  analysisMode = false;
-
-  clearTimeout(engineTimer);
-
-  whiteTime =
-    Number(timeControlEl.value);
-
-  blackTime =
-    Number(timeControlEl.value);
-
-
-  stopClock();
-
-
-  promotionModal.classList.remove(
-    "show"
+  clearTimeout(
+    engineMoveTimer
   );
 
-  gameOverModal.classList.remove(
+  thinkingOverlay.classList.remove(
     "show"
   );
 
 
-  currentEval = 0;
-  currentDepth = 0;
-
-
-  updateEvaluation(
-    0,
-    "Starting position"
-  );
-
-
-  depthTextEl.textContent =
-    "Depth —";
-
-  bestMoveEl.textContent =
-    "—";
-
-
-  renderBoard();
-  renderMoves();
-  updateClocks();
-
-
-  if(engineReady){
-
-    sendEngine("ucinewgame");
-    sendEngine("isready");
+  if (
+    engineReady
+  ) {
 
     setEngineStatus(
       "Stockfish ready",
       "ready"
     );
 
-  }else{
-
-    setEngineStatus(
-      "Starting Stockfish…"
-    );
   }
+
 }
 
 
-/* ============================================================
-   UNDO
-   ============================================================ */
+/* =========================================================
+   TEST STOCKFISH
+   ========================================================= */
 
-document
-.getElementById("undo")
-.addEventListener("click",()=>{
+function testStockfish() {
 
-  if(
-    engineThinking ||
-    game.history().length === 0
-  ){
+  if (
+    !engineReady
+  ) {
+
+    setEngineStatus(
+      "Stockfish is not ready yet."
+    );
+
     return;
   }
 
 
-  /*
-    Usually remove both the engine move and
-    the player's previous move.
-  */
+  if (
+    engineThinking
+  ) {
 
-  if(game.turn() === "w"){
+    setEngineStatus(
+      "Nova is currently thinking."
+    );
 
-    game.undo();
-
-    if(game.history().length){
-      game.undo();
-    }
-
-  }else{
-
-    game.undo();
+    return;
   }
 
 
-  selectedSquare = null;
-  legalTargets = [];
+  if (
+    engineTesting
+  ) {
 
-  lastMove = null;
-
-
-  if(engine){
-
-    sendEngine("stop");
-    sendEngine("isready");
+    return;
   }
 
 
-  updateEvaluation(
-    0,
-    "Position restored"
+  engineTesting =
+    true;
+
+
+  setEngineStatus(
+    "Testing Stockfish…"
   );
 
-  bestMoveEl.textContent =
-    "—";
 
-  renderBoard();
+  setCommand(
+    "stop"
+  );
+
+  engine.postMessage(
+    "stop"
+  );
+
+
+  setCommand(
+    "ucinewgame"
+  );
+
+  engine.postMessage(
+    "ucinewgame"
+  );
+
+
+  /*
+    Simple starting-position test.
+
+    If Stockfish returns a bestmove,
+    the engine itself is working.
+  */
+
+  setCommand(
+    "position startpos"
+  );
+
+  engine.postMessage(
+    "position startpos"
+  );
+
+
+  setCommand(
+    "go depth 6"
+  );
+
+  engine.postMessage(
+    "go depth 6"
+  );
+
+
+  engineTestTimer =
+    setTimeout(
+      function() {
+
+        if (
+          engineTesting
+        ) {
+
+          engineTesting =
+            false;
+
+          try {
+
+            engine.postMessage(
+              "stop"
+            );
+
+          } catch (_) {}
+
+
+          engineError(
+            "TEST FAILED — no bestmove after 20 seconds."
+          );
+
+        }
+
+      },
+      20000
+    );
+
+}
+
+
+/* =========================================================
+   RENDER EVERYTHING
+   ========================================================= */
+
+function renderEverything() {
+
+  createBoard();
+
   renderMoves();
-});
+
+  updateClocks();
+
+}
 
 
-/* ============================================================
-   FLIP
-   ============================================================ */
+/* =========================================================
+   MOVE LIST
+   ========================================================= */
 
-document
-.getElementById("flip")
-.addEventListener("click",()=>{
+function renderMoves() {
+
+  const history =
+    game.history();
+
+
+  moveCount.textContent =
+    history.length;
+
+
+  if (
+    history.length === 0
+  ) {
+
+    movesElement.innerHTML =
+      '<div class="empty">Make your first move.</div>';
+
+    return;
+  }
+
+
+  let html = "";
+
+
+  for (
+    let i = 0;
+    i < history.length;
+    i += 2
+  ) {
+
+    const moveNumber =
+      Math.floor(i / 2) + 1;
+
+
+    const white =
+      history[i] || "";
+
+
+    const black =
+      history[i + 1] || "";
+
+
+    const whiteCurrent =
+      i === history.length - 1;
+
+
+    const blackCurrent =
+      i + 1 === history.length - 1;
+
+
+    html +=
+      '<div class="move-row">' +
+
+        '<div class="move-number">' +
+          moveNumber +
+          '.</div>' +
+
+        '<div class="move ' +
+          (
+            whiteCurrent
+              ? "current"
+              : ""
+          ) +
+        '">' +
+          white +
+        '</div>' +
+
+        '<div class="move ' +
+          (
+            blackCurrent
+              ? "current"
+              : ""
+          ) +
+        '">' +
+          black +
+        '</div>' +
+
+      '</div>';
+
+  }
+
+
+  movesElement.innerHTML =
+    html;
+
+
+  movesElement.scrollTop =
+    movesElement.scrollHeight;
+
+}
+
+
+/* =========================================================
+   CLOCK FORMAT
+   ========================================================= */
+
+function formatTime(
+  seconds
+) {
+
+  seconds =
+    Math.max(
+      0,
+      Math.ceil(
+        seconds
+      )
+    );
+
+
+  const minutes =
+    Math.floor(
+      seconds / 60
+    );
+
+
+  const secs =
+    seconds % 60;
+
+
+  return (
+    minutes +
+    ":" +
+    String(
+      secs
+    ).padStart(
+      2,
+      "0"
+    )
+  );
+
+}
+
+
+/* =========================================================
+   UPDATE CLOCKS
+   ========================================================= */
+
+function updateClocks() {
+
+  whiteClock.textContent =
+    formatTime(
+      whiteSeconds
+    );
+
+
+  blackClock.textContent =
+    formatTime(
+      blackSeconds
+    );
+
+
+  whiteClock.classList.toggle(
+    "active",
+    game.turn() === "w" &&
+    !game.game_over()
+  );
+
+
+  blackClock.classList.toggle(
+    "active",
+    game.turn() === "b" &&
+    !game.game_over()
+  );
+
+}
+
+
+/* =========================================================
+   START CLOCK
+   ========================================================= */
+
+function startClock() {
+
+  clearInterval(
+    clockTimer
+  );
+
+
+  if (
+    game.game_over()
+  ) {
+
+    return;
+  }
+
+
+  clockTimer =
+    setInterval(
+      function() {
+
+        if (
+          !gameStarted ||
+          engineThinking ||
+          engineTesting
+        ) {
+
+          return;
+        }
+
+
+        if (
+          game.turn() === "w"
+        ) {
+
+          whiteSeconds =
+            Math.max(
+              0,
+              whiteSeconds - .1
+            );
+
+        } else {
+
+          blackSeconds =
+            Math.max(
+              0,
+              blackSeconds - .1
+            );
+
+        }
+
+
+        updateClocks();
+
+
+        if (
+          whiteSeconds <= 0
+        ) {
+
+          clearInterval(
+            clockTimer
+          );
+
+          endGame(
+            "Nova wins on time."
+          );
+
+        }
+
+
+        if (
+          blackSeconds <= 0
+        ) {
+
+          clearInterval(
+            clockTimer
+          );
+
+          endGame(
+            "You win on time."
+          );
+
+        }
+
+      },
+      100
+    );
+
+}
+
+
+/* =========================================================
+   CHECK GAME END
+   ========================================================= */
+
+function checkGameEnd() {
+
+  if (
+    game.is_checkmate()
+  ) {
+
+    const message =
+      game.turn() === "w"
+        ? "Nova wins by checkmate."
+        : "You win by checkmate.";
+
+
+    endGame(
+      message
+    );
+
+    return true;
+  }
+
+
+  if (
+    game.is_draw()
+  ) {
+
+    endGame(
+      "Draw."
+    );
+
+    return true;
+  }
+
+
+  return false;
+
+}
+
+
+/* =========================================================
+   END GAME
+   ========================================================= */
+
+function endGame(
+  message
+) {
+
+  clearInterval(
+    clockTimer
+  );
+
+
+  clearTimeout(
+    engineMoveTimer
+  );
+
+
+  engineThinking =
+    false;
+
+
+  thinkingOverlay.classList.remove(
+    "show"
+  );
+
+
+  engineText.textContent =
+    message;
+
+
+  engineStatus.textContent =
+    message;
+
+
+  enginePill.className =
+    "engine-pill";
+
+
+  updateClocks();
+
+}
+
+
+/* =========================================================
+   NEW GAME
+   ========================================================= */
+
+function newGame() {
+
+  clearInterval(
+    clockTimer
+  );
+
+
+  clearTimeout(
+    engineMoveTimer
+  );
+
+
+  clearTimeout(
+    engineTestTimer
+  );
+
+
+  engineThinking =
+    false;
+
+
+  engineTesting =
+    false;
+
+
+  engineSearchId++;
+
+
+  thinkingOverlay.classList.remove(
+    "show"
+  );
+
+
+  promotionModal.classList.remove(
+    "show"
+  );
+
+
+  pendingPromotion =
+    null;
+
+
+  game =
+    new Chess();
+
+
+  selectedSquare =
+    null;
+
+
+  legalTargets =
+    [];
+
+
+  lastMove =
+    null;
+
+
+  initialSeconds =
+    Number(
+      timeControl.value
+    );
+
+
+  whiteSeconds =
+    initialSeconds;
+
+
+  blackSeconds =
+    initialSeconds;
+
+
+  gameStarted =
+    false;
+
+
+  lastEvaluation =
+    0;
+
+
+  evalNumber.textContent =
+    "0.0";
+
+
+  evalLabel.textContent =
+    "Starting position";
+
+
+  evalFill.style.height =
+    "50%";
+
+
+  depthLabel.textContent =
+    "Depth —";
+
+
+  renderEverything();
+
+
+  /*
+    Reset the engine state without replacing
+    the worker.
+  */
+
+  if (
+    engine &&
+    engineReady
+  ) {
+
+    try {
+
+      setCommand(
+        "stop"
+      );
+
+      engine.postMessage(
+        "stop"
+      );
+
+
+      setCommand(
+        "ucinewgame"
+      );
+
+      engine.postMessage(
+        "ucinewgame"
+      );
+
+
+      setCommand(
+        "isready"
+      );
+
+      engine.postMessage(
+        "isready"
+      );
+
+    } catch (_) {}
+
+  }
+
+
+  if (
+    engineReady
+  ) {
+
+    setEngineStatus(
+      "Stockfish ready",
+      "ready"
+    );
+
+  } else {
+
+    setEngineStatus(
+      "Waiting for Stockfish…"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   UNDO
+   ========================================================= */
+
+function undoMove() {
+
+  if (
+    engineThinking
+  ) {
+
+    try {
+
+      engine.postMessage(
+        "stop"
+      );
+
+    } catch (_) {}
+
+
+    clearTimeout(
+      engineMoveTimer
+    );
+
+
+    engineThinking =
+      false;
+
+
+    engineSearchId++;
+
+
+    thinkingOverlay.classList.remove(
+      "show"
+    );
+
+  }
+
+
+  /*
+    Normally remove:
+
+      your move
+      Nova's move
+
+    so you get the turn back.
+  */
+
+  const historyLength =
+    game.history().length;
+
+
+  if (
+    historyLength >= 2
+  ) {
+
+    game.undo();
+    game.undo();
+
+  } else if (
+    historyLength === 1
+  ) {
+
+    game.undo();
+
+  } else {
+
+    return;
+  }
+
+
+  selectedSquare =
+    null;
+
+
+  legalTargets =
+    [];
+
+
+  lastMove =
+    null;
+
+
+  whiteSeconds =
+    initialSeconds;
+
+
+  blackSeconds =
+    initialSeconds;
+
+
+  gameStarted =
+    false;
+
+
+  renderEverything();
+
+
+  if (
+    engineReady
+  ) {
+
+    setEngineStatus(
+      "Stockfish ready",
+      "ready"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   RESIGN
+   ========================================================= */
+
+function resign() {
+
+  if (
+    game.game_over()
+  ) {
+
+    return;
+  }
+
+
+  endGame(
+    "You resigned. Nova wins."
+  );
+
+}
+
+
+/* =========================================================
+   FLIP BOARD
+   ========================================================= */
+
+function flipBoard() {
 
   flipped =
     !flipped;
 
-  renderBoard();
-});
+  createBoard();
+
+}
 
 
-/* ============================================================
-   TIME CONTROL
-   ============================================================ */
+/* =========================================================
+   DIFFICULTY
+   ========================================================= */
 
-timeControlEl.addEventListener(
+difficulty.addEventListener(
   "change",
-  ()=>{
+  function() {
 
     /*
-      Apply immediately only when no game
-      has started.
+      Nothing is sent to Stockfish here.
+
+      We deliberately use search depth instead of
+      Skill Level / Threads options because this keeps
+      the ASM-JS engine path simple and reliable.
     */
 
-    if(game.history().length === 0){
+    if (
+      engineReady
+    ) {
 
-      whiteTime =
-        Number(timeControlEl.value);
+      setEngineStatus(
+        "Difficulty set to " +
+        this.options[
+          this.selectedIndex
+        ].text,
+        "ready"
+      );
 
-      blackTime =
-        Number(timeControlEl.value);
+    }
+
+  }
+);
+
+
+/* =========================================================
+   TIME CONTROL
+   ========================================================= */
+
+timeControl.addEventListener(
+  "change",
+  function() {
+
+    /*
+      Only change clocks before the game begins.
+    */
+
+    if (
+      game.history().length === 0
+    ) {
+
+      initialSeconds =
+        Number(
+          this.value
+        );
+
+
+      whiteSeconds =
+        initialSeconds;
+
+
+      blackSeconds =
+        initialSeconds;
+
 
       updateClocks();
+
     }
+
   }
 );
 
 
-/* ============================================================
-   MODAL BUTTONS
-   ============================================================ */
+/* =========================================================
+   BUTTONS
+   ========================================================= */
 
 document
-.getElementById("newGame")
-.addEventListener(
-  "click",
-  newGame
-);
-
-
-document
-.getElementById("gameOverNew")
-.addEventListener(
-  "click",
-  newGame
-);
+  .getElementById(
+    "newGameBtn"
+  )
+  .addEventListener(
+    "click",
+    newGame
+  );
 
 
 document
-.getElementById("closeGameOver")
-.addEventListener(
+  .getElementById(
+    "undoBtn"
+  )
+  .addEventListener(
+    "click",
+    undoMove
+  );
+
+
+document
+  .getElementById(
+    "resignBtn"
+  )
+  .addEventListener(
+    "click",
+    resign
+  );
+
+
+document
+  .getElementById(
+    "flipBtn"
+  )
+  .addEventListener(
+    "click",
+    flipBoard
+  );
+
+
+testEngineBtn.addEventListener(
   "click",
-  ()=>{
-    gameOverModal.classList.remove(
-      "show"
-    );
-  }
+  testStockfish
 );
 
 
-/* ============================================================
+/* =========================================================
    INITIALIZE
-   ============================================================ */
+   ========================================================= */
 
-whiteTime =
-  Number(timeControlEl.value);
+function initialize() {
 
-blackTime =
-  Number(timeControlEl.value);
+  /*
+    Make sure chess.js loaded.
+  */
 
-updateClocks();
+  if (
+    typeof Chess !== "function"
+  ) {
 
-renderBoard();
+    setEngineStatus(
+      "CHESS ERROR: chess.js did not load. Your school network may be blocking the CDN.",
+      "error"
+    );
 
-renderMoves();
+    return;
+  }
 
-updateEvaluation(
-  0,
-  "Starting position"
-);
 
-startEngine();
+  initialSeconds =
+    Number(
+      timeControl.value
+    );
+
+
+  whiteSeconds =
+    initialSeconds;
+
+
+  blackSeconds =
+    initialSeconds;
+
+
+  updateClocks();
+
+  createBoard();
+
+  renderMoves();
+
+  updateEvaluation(
+    0
+  );
+
+
+  /*
+    START REAL STOCKFISH.
+  */
+
+  startEngine();
+
+}
+
+
+initialize();
 
 </script>
 
