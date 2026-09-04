@@ -2,860 +2,963 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <title>Nova Chess</title>
+
+<!--
+  IMPORTANT:
+  Put these two files in the SAME folder:
+    index.html
+    stockfish-18-asm.js
+
+  The ASM engine does NOT need a .wasm file.
+-->
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
 <style>
-:root{
-    --bg:#080b13;
-    --panel:#111724;
-    --panel2:#171e2e;
-    --border:rgba(255,255,255,.09);
-    --text:#f5f7ff;
-    --muted:#8b96ad;
-    --accent:#7c5cff;
-    --accent2:#00d4ff;
-    --good:#43e69a;
-    --danger:#ff5577;
+:root {
+  --bg: #080b12;
+  --panel: rgba(18, 23, 34, .88);
+  --panel2: rgba(25, 31, 45, .9);
+  --line: rgba(255,255,255,.08);
+  --text: #f4f7fb;
+  --muted: #8f9bad;
 
-    --light:#e8edf5;
-    --dark:#62718d;
+  --light-square: #dbe5f0;
+  --dark-square: #58708d;
+
+  --accent: #63a8ff;
+  --accent2: #8d6cff;
+  --green: #51d88a;
+  --red: #ff6262;
+
+  --board-max: min(
+    72vh,
+    calc(100vw - 390px),
+    680px
+  );
 }
 
-*{
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
+* {
+  box-sizing: border-box;
 }
 
 html,
-body{
-    width:100%;
-    height:100%;
-    margin:0;
-    overflow:hidden;
+body {
+  margin: 0;
+  width: 100%;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(82,127,255,.12), transparent 30%),
+    radial-gradient(circle at 90% 80%, rgba(130,70,255,.09), transparent 28%),
+    var(--bg);
+  color: var(--text);
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
 }
 
-body{
-    font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;
-    color:var(--text);
+body {
+  overflow-x: hidden;
+}
 
-    background:
-        radial-gradient(circle at 10% 10%,rgba(124,92,255,.15),transparent 32%),
-        radial-gradient(circle at 90% 90%,rgba(0,212,255,.09),transparent 32%),
-        var(--bg);
+/* ---------- APP ---------- */
+
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- TOP BAR ---------- */
+
+.topbar {
+  height: 64px;
+  flex: 0 0 64px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 22px;
+
+  border-bottom: 1px solid var(--line);
+
+  background: rgba(7,10,17,.78);
+  backdrop-filter: blur(18px);
+
+  position: relative;
+  z-index: 20;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -.4px;
+}
+
+.logo-icon {
+  width: 34px;
+  height: 34px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 10px;
+
+  background:
+    linear-gradient(135deg, var(--accent), var(--accent2));
+
+  box-shadow:
+    0 0 22px rgba(99,168,255,.22);
+
+  font-size: 19px;
+}
+
+.engine-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 8px 12px;
+
+  border: 1px solid var(--line);
+  border-radius: 999px;
+
+  background: rgba(255,255,255,.035);
+
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.engine-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #777;
+  box-shadow: 0 0 0 transparent;
+}
+
+.engine-pill.ready .engine-dot {
+  background: var(--green);
+  box-shadow: 0 0 12px rgba(81,216,138,.7);
+}
+
+.engine-pill.thinking .engine-dot {
+  background: var(--accent);
+  box-shadow: 0 0 14px rgba(99,168,255,.8);
+  animation: pulse 1s infinite;
+}
+
+.engine-pill.error .engine-dot {
+  background: var(--red);
+  box-shadow: 0 0 12px rgba(255,98,98,.6);
+}
+
+@keyframes pulse {
+  50% {
+    opacity: .35;
+    transform: scale(.7);
+  }
+}
+
+/* ---------- MAIN ---------- */
+
+.main {
+  flex: 1;
+
+  width: 100%;
+  max-width: 1420px;
+
+  margin: 0 auto;
+
+  padding: 18px;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 18px;
+
+  align-items: start;
+}
+
+/* ---------- BOARD AREA ---------- */
+
+.board-area {
+  min-width: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.board-column {
+  width: min(100%, 760px);
+}
+
+.player-strip {
+  width: var(--board-max);
+  max-width: 100%;
+
+  margin: 0 auto 9px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.player-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.player-piece {
+  width: 22px;
+  height: 22px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 7px;
+
+  background: rgba(255,255,255,.07);
+
+  font-size: 15px;
+}
+
+.clock {
+  min-width: 76px;
+
+  padding: 7px 10px;
+
+  text-align: center;
+
+  border-radius: 9px;
+
+  background: rgba(255,255,255,.05);
+
+  font-variant-numeric: tabular-nums;
+
+  font-size: 15px;
+  font-weight: 800;
+
+  color: var(--text);
+}
+
+.clock.active {
+  background: rgba(99,168,255,.16);
+  box-shadow: inset 0 0 0 1px rgba(99,168,255,.25);
+}
+
+/* ---------- BOARD ---------- */
+
+.board-shell {
+  position: relative;
+
+  width: var(--board-max);
+  max-width: 100%;
+  aspect-ratio: 1;
+
+  margin: 0 auto;
+
+  border-radius: 13px;
+
+  box-shadow:
+    0 22px 55px rgba(0,0,0,.42),
+    0 0 0 1px rgba(255,255,255,.07);
+
+  overflow: hidden;
+}
+
+#board {
+  width: 100%;
+  height: 100%;
+
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+
+  user-select: none;
+  -webkit-user-select: none;
+
+  touch-action: manipulation;
+}
+
+.square {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  transition:
+    filter .1s ease,
+    box-shadow .1s ease;
+
+  overflow: hidden;
+}
+
+.square.light {
+  background: var(--light-square);
+}
+
+.square.dark {
+  background: var(--dark-square);
+}
+
+.square:hover {
+  filter: brightness(1.07);
+}
+
+.square.selected {
+  box-shadow:
+    inset 0 0 0 4px rgba(255,255,255,.75);
+  z-index: 2;
+}
+
+.square.last-move {
+  box-shadow:
+    inset 0 0 0 999px rgba(255,214,78,.22);
+}
+
+.square.legal::after {
+  content: "";
+
+  width: 20%;
+  height: 20%;
+
+  position: absolute;
+
+  border-radius: 50%;
+
+  background: rgba(20,25,35,.27);
+}
+
+.square.capture::after {
+  content: "";
+
+  position: absolute;
+
+  width: 76%;
+  height: 76%;
+
+  border-radius: 50%;
+
+  border: 5px solid rgba(255,255,255,.33);
+}
+
+.square.check {
+  background:
+    radial-gradient(circle,
+      rgba(255,50,50,.92),
+      rgba(255,50,50,.38) 43%,
+      transparent 72%);
+}
+
+/* ---------- PIECES ---------- */
+
+.piece {
+  position: relative;
+
+  width: 82%;
+  height: 82%;
+
+  display: grid;
+  place-items: center;
+
+  font-family:
+    "Arial Unicode MS",
+    "Segoe UI Symbol",
+    "Noto Sans Symbols 2",
+    serif;
+
+  font-size: clamp(29px, 6.5vw, 63px);
+
+  line-height: 1;
+
+  z-index: 3;
+
+  transform: translateY(-1px);
+
+  pointer-events: none;
+
+  text-shadow:
+    0 2px 2px rgba(0,0,0,.35);
+}
+
+.piece.white {
+  color: #fff;
+  text-shadow:
+    0 1px 1px rgba(0,0,0,.75),
+    0 2px 5px rgba(0,0,0,.25);
+}
+
+.piece.black {
+  color: #151922;
+  text-shadow:
+    0 1px 1px rgba(255,255,255,.18),
+    0 2px 5px rgba(0,0,0,.3);
+}
+
+/* Coordinates */
+
+.coord {
+  position: absolute;
+
+  font-size: 10px;
+  font-weight: 800;
+
+  opacity: .7;
+
+  pointer-events: none;
+}
+
+.rank {
+  top: 3px;
+  left: 4px;
+}
+
+.file {
+  right: 4px;
+  bottom: 3px;
+}
+
+.light .coord {
+  color: var(--dark-square);
+}
+
+.dark .coord {
+  color: var(--light-square);
+}
+
+/* ---------- THINKING ---------- */
+
+.thinking-overlay {
+  position: absolute;
+  inset: 0;
+
+  display: none;
+  place-items: center;
+
+  background: rgba(5,8,14,.20);
+
+  pointer-events: none;
+
+  z-index: 10;
+}
+
+.thinking-overlay.show {
+  display: grid;
+}
+
+.thinking-card {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  padding: 10px 14px;
+
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 999px;
+
+  background: rgba(10,14,22,.82);
+  backdrop-filter: blur(12px);
+
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.spinner {
+  width: 13px;
+  height: 13px;
+
+  border-radius: 50%;
+
+  border: 2px solid rgba(255,255,255,.25);
+  border-top-color: var(--accent);
+
+  animation: spin .7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- BOARD CONTROLS ---------- */
+
+.controls {
+  width: var(--board-max);
+  max-width: 100%;
+
+  margin: 12px auto 0;
+
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
 }
 
 button,
-select{
-    font:inherit;
+select {
+  border: 1px solid var(--line);
+
+  border-radius: 10px;
+
+  background: rgba(255,255,255,.055);
+
+  color: var(--text);
+
+  padding: 10px 12px;
+
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+
+  cursor: pointer;
+
+  outline: none;
+
+  transition:
+    background .15s ease,
+    border-color .15s ease,
+    transform .1s ease;
 }
 
-button{
-    cursor:pointer;
+button:hover,
+select:hover {
+  background: rgba(255,255,255,.09);
+  border-color: rgba(255,255,255,.15);
 }
 
-/* =========================================================
-   APP
-========================================================= */
-
-.app{
-    width:100%;
-    height:100dvh;
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
-
-    padding:10px;
+button:active {
+  transform: translateY(1px);
 }
 
-.shell{
-    width:min(1240px,100%);
-    height:min(760px,100%);
+button.primary {
+  background:
+    linear-gradient(135deg, rgba(99,168,255,.22), rgba(141,108,255,.22));
 
-    display:grid;
-    grid-template-columns:minmax(0,1fr) 300px;
-
-    gap:12px;
+  border-color: rgba(99,168,255,.28);
 }
 
-/* =========================================================
-   BOARD PANEL
-========================================================= */
-
-.board-panel{
-    min-width:0;
-    min-height:0;
-
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-
-    padding:12px;
-
-    border:1px solid var(--border);
-    border-radius:20px;
-
-    background:rgba(15,21,34,.72);
-
-    box-shadow:
-        0 20px 60px rgba(0,0,0,.4),
-        inset 0 1px rgba(255,255,255,.04);
-
-    backdrop-filter:blur(14px);
+button.danger {
+  color: #ff9b9b;
 }
 
-.topbar{
-    width:min(100%,660px);
-
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-
-    margin-bottom:8px;
+button:disabled {
+  opacity: .4;
+  cursor: not-allowed;
 }
 
-.logo{
-    display:flex;
-    align-items:center;
-    gap:8px;
-
-    font-size:17px;
-    font-weight:850;
+.full {
+  grid-column: 1 / -1;
 }
 
-.logo-icon{
-    width:31px;
-    height:31px;
+/* ---------- SIDEBAR ---------- */
 
-    display:grid;
-    place-items:center;
+.sidebar {
+  min-width: 0;
 
-    border-radius:9px;
+  display: flex;
+  flex-direction: column;
 
-    background:linear-gradient(
-        135deg,
-        var(--accent),
-        var(--accent2)
+  gap: 12px;
+}
+
+.card {
+  background: var(--panel);
+
+  border: 1px solid var(--line);
+
+  border-radius: 15px;
+
+  box-shadow:
+    0 12px 35px rgba(0,0,0,.2);
+
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 14px 15px 11px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border-bottom: 1px solid var(--line);
+
+  font-size: 12px;
+  font-weight: 850;
+
+  text-transform: uppercase;
+  letter-spacing: .8px;
+
+  color: var(--muted);
+}
+
+.card-body {
+  padding: 14px;
+}
+
+/* ---------- EVAL ---------- */
+
+.eval-wrap {
+  display: grid;
+  grid-template-columns: 10px 1fr;
+  gap: 12px;
+
+  align-items: center;
+}
+
+.eval-bar {
+  width: 10px;
+  height: 145px;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      to top,
+      #1a1d24 0%,
+      #1a1d24 50%,
+      #f1f3f5 50%,
+      #f1f3f5 100%
     );
 
-    box-shadow:0 6px 20px rgba(124,92,255,.25);
+  position: relative;
+  overflow: hidden;
+
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.1);
 }
 
-.turn-label{
-    color:var(--muted);
-    font-size:12px;
-    font-weight:700;
+.eval-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  height: 50%;
+
+  background: #f1f3f5;
+
+  transition: height .25s ease;
 }
 
-/* =========================================================
-   BOARD
-========================================================= */
+.eval-number {
+  font-size: 31px;
+  font-weight: 900;
 
-.board-wrap{
-    width:min(
-        100%,
-        calc(100vh - 145px),
-        660px
+  letter-spacing: -1.5px;
+}
+
+.eval-label {
+  margin-top: 3px;
+
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* ---------- MOVES ---------- */
+
+.moves {
+  max-height: 315px;
+
+  overflow-y: auto;
+
+  scrollbar-width: thin;
+}
+
+.move-row {
+  display: grid;
+  grid-template-columns: 36px 1fr 1fr;
+
+  min-height: 34px;
+
+  align-items: center;
+
+  border-radius: 7px;
+
+  font-size: 13px;
+}
+
+.move-row:nth-child(odd) {
+  background: rgba(255,255,255,.025);
+}
+
+.move-number {
+  padding-left: 8px;
+
+  color: #687487;
+  font-variant-numeric: tabular-nums;
+}
+
+.move {
+  padding: 0 6px;
+
+  font-weight: 700;
+}
+
+.move.current {
+  color: #fff;
+  background: rgba(99,168,255,.14);
+  border-radius: 6px;
+}
+
+.empty {
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
+  padding: 12px 0;
+}
+
+/* ---------- SETTINGS ---------- */
+
+.setting {
+  display: grid;
+
+  grid-template-columns: 1fr auto;
+
+  align-items: center;
+
+  gap: 10px;
+
+  margin-bottom: 12px;
+}
+
+.setting:last-child {
+  margin-bottom: 0;
+}
+
+.setting label {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.setting select {
+  min-width: 125px;
+}
+
+/* ---------- STATUS ---------- */
+
+.status {
+  padding: 10px 12px;
+
+  border-radius: 10px;
+
+  background: rgba(255,255,255,.035);
+
+  color: var(--muted);
+
+  font-size: 11px;
+  line-height: 1.45;
+
+  word-break: break-word;
+}
+
+.status.good {
+  color: #8eeab1;
+  background: rgba(81,216,138,.07);
+}
+
+.status.bad {
+  color: #ff9d9d;
+  background: rgba(255,98,98,.07);
+}
+
+/* ---------- MODAL ---------- */
+
+.modal {
+  position: fixed;
+  inset: 0;
+
+  display: none;
+  place-items: center;
+
+  background: rgba(0,0,0,.64);
+
+  backdrop-filter: blur(7px);
+
+  z-index: 100;
+}
+
+.modal.show {
+  display: grid;
+}
+
+.modal-card {
+  width: min(420px, calc(100vw - 32px));
+
+  padding: 22px;
+
+  border-radius: 17px;
+
+  border: 1px solid var(--line);
+
+  background: #121722;
+
+  box-shadow: 0 30px 80px rgba(0,0,0,.5);
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 900;
+
+  margin-bottom: 8px;
+}
+
+.modal-text {
+  color: var(--muted);
+  font-size: 13px;
+
+  line-height: 1.55;
+
+  margin-bottom: 18px;
+}
+
+.promotion-buttons {
+  display: grid;
+  grid-template-columns: repeat(4,1fr);
+
+  gap: 8px;
+}
+
+.promotion-buttons button {
+  font-size: 28px;
+  padding: 13px 5px;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (max-width: 1050px) {
+  :root {
+    --board-max: min(
+      70vh,
+      calc(100vw - 355px),
+      620px
     );
+  }
 
-    aspect-ratio:1;
-
-    padding:5px;
-
-    border-radius:13px;
-
-    background:#090d16;
-
-    box-shadow:
-        0 20px 50px rgba(0,0,0,.5),
-        0 0 0 1px rgba(255,255,255,.06);
+  .main {
+    grid-template-columns: minmax(0,1fr) 290px;
+    gap: 14px;
+    padding: 14px;
+  }
 }
 
-.board{
-    width:100%;
-    height:100%;
-
-    display:grid;
-
-    grid-template-columns:repeat(8,1fr);
-    grid-template-rows:repeat(8,1fr);
-
-    overflow:hidden;
-
-    border-radius:8px;
-}
-
-.square{
-    position:relative;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    user-select:none;
-    touch-action:manipulation;
-}
-
-.square.light{
-    background:var(--light);
-}
-
-.square.dark{
-    background:var(--dark);
-}
-
-.square.selected{
-    box-shadow:
-        inset 0 0 0 4px rgba(124,92,255,.9),
-        inset 0 0 24px rgba(124,92,255,.35);
-
-    z-index:5;
-}
-
-.square.last{
-    box-shadow:
-        inset 0 0 0 999px rgba(255,220,70,.14);
-}
-
-.square.check{
-    box-shadow:
-        inset 0 0 0 999px rgba(255,50,75,.36),
-        inset 0 0 25px rgba(255,50,75,.6);
-}
-
-.square.legal::after{
-    content:"";
-
-    position:absolute;
-
-    width:22%;
-    height:22%;
-
-    border-radius:50%;
-
-    background:rgba(20,28,42,.35);
-
-    z-index:2;
-}
-
-.square.capture::after{
-    content:"";
-
-    position:absolute;
-
-    width:70%;
-    height:70%;
-
-    border-radius:50%;
-
-    border:4px solid rgba(255,255,255,.35);
-
-    z-index:2;
-}
-
-.piece{
-    position:relative;
-    z-index:3;
-
-    font-family:
-        "Noto Sans Symbols 2",
-        "Segoe UI Symbol",
-        "DejaVu Sans",
-        serif;
-
-    font-size:clamp(27px,6.8vw,68px);
-
-    line-height:1;
-
-    user-select:none;
-
-    pointer-events:none;
-
-    text-shadow:
-        0 2px 3px rgba(0,0,0,.3),
-        0 5px 13px rgba(0,0,0,.15);
-}
-
-.white-piece{
-    color:#fff;
-}
-
-.black-piece{
-    color:#171c26;
-}
-
-.coord{
-    position:absolute;
-
-    z-index:4;
-
-    pointer-events:none;
-
-    font-size:8px;
-    font-weight:850;
-
-    opacity:.65;
-}
-
-.coord.file{
-    right:4px;
-    bottom:2px;
-}
-
-.coord.rank{
-    left:4px;
-    top:2px;
-}
-
-.light .coord{
-    color:#61708c;
-}
-
-.dark .coord{
-    color:#eef3ff;
-}
-
-/* =========================================================
-   BOARD CONTROLS
-========================================================= */
-
-.board-controls{
-    width:min(100%,660px);
-
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-
-    gap:7px;
-
-    margin-top:8px;
-}
-
-.control-btn{
-    min-width:0;
-
-    padding:8px;
-
-    border:1px solid var(--border);
-    border-radius:10px;
-
-    background:rgba(255,255,255,.045);
-
-    color:var(--text);
-
-    font-size:11px;
-    font-weight:750;
-}
-
-.control-btn:hover{
-    background:rgba(255,255,255,.08);
-}
-
-/* =========================================================
-   SIDEBAR
-========================================================= */
-
-.sidebar{
-    min-height:0;
-
-    display:flex;
-    flex-direction:column;
-
-    gap:8px;
-
-    overflow-y:auto;
-
-    scrollbar-width:none;
-}
-
-.sidebar::-webkit-scrollbar{
-    display:none;
-}
-
-.card{
-    padding:11px;
-
-    border:1px solid var(--border);
-    border-radius:15px;
-
-    background:rgba(16,22,36,.78);
-
-    box-shadow:
-        0 12px 30px rgba(0,0,0,.2),
-        inset 0 1px rgba(255,255,255,.03);
-}
-
-.card-title{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-
-    margin-bottom:8px;
-
-    color:var(--muted);
-
-    font-size:10px;
-    font-weight:850;
-
-    letter-spacing:1px;
-    text-transform:uppercase;
-}
-
-/* =========================================================
-   ENGINE
-========================================================= */
-
-.engine-status{
-    display:flex;
-    align-items:center;
-    gap:8px;
-
-    font-size:12px;
-    font-weight:750;
-}
-
-.status-dot{
-    width:8px;
-    height:8px;
-
-    flex:none;
-
-    border-radius:50%;
-
-    background:#777;
-}
-
-.status-dot.loading{
-    background:#ffbd4a;
-    box-shadow:0 0 12px rgba(255,189,74,.55);
-}
-
-.status-dot.ready{
-    background:var(--good);
-    box-shadow:0 0 12px rgba(67,230,154,.55);
-}
-
-.status-dot.error{
-    background:var(--danger);
-    box-shadow:0 0 12px rgba(255,85,119,.55);
-}
-
-.diagnostic{
-    display:none;
-
-    margin-top:8px;
-
-    padding:8px;
-
-    border-radius:9px;
-
-    background:rgba(255,85,119,.08);
-
-    border:1px solid rgba(255,85,119,.2);
-
-    color:#ff9bad;
-
-    font-size:10px;
-    line-height:1.4;
-}
-
-.diagnostic.show{
-    display:block;
-}
-
-.thinking{
-    display:none;
-
-    align-items:center;
-    justify-content:center;
-
-    gap:7px;
-
-    margin-top:8px;
-
-    color:var(--muted);
-
-    font-size:10px;
-}
-
-.thinking.show{
-    display:flex;
-}
-
-.spinner{
-    width:11px;
-    height:11px;
-
-    border:2px solid rgba(255,255,255,.12);
-    border-top-color:var(--accent);
-
-    border-radius:50%;
-
-    animation:spin .7s linear infinite;
-}
-
-@keyframes spin{
-    to{
-        transform:rotate(360deg);
-    }
-}
-
-/* =========================================================
-   CLOCK
-========================================================= */
-
-.clocks{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-
-    gap:7px;
-}
-
-.clock{
-    padding:9px;
-
-    border-radius:10px;
-
-    background:rgba(255,255,255,.035);
-
-    border:1px solid rgba(255,255,255,.06);
-}
-
-.clock.active{
-    border-color:rgba(124,92,255,.5);
-
-    background:rgba(124,92,255,.1);
-}
-
-.clock.low .clock-time{
-    color:#ff6f87;
-}
-
-.clock-label{
-    color:var(--muted);
-
-    font-size:9px;
-    font-weight:750;
-}
-
-.clock-time{
-    margin-top:2px;
-
-    font-size:21px;
-    font-weight:850;
-
-    letter-spacing:-1px;
-
-    font-variant-numeric:tabular-nums;
-}
-
-/* =========================================================
-   EVALUATION
-========================================================= */
-
-.eval{
-    height:7px;
-
-    overflow:hidden;
-
-    border-radius:99px;
-
-    background:rgba(255,255,255,.07);
-}
-
-.eval-fill{
-    width:50%;
-    height:100%;
-
-    border-radius:99px;
-
-    background:linear-gradient(
-        90deg,
-        #59667c,
-        #f4f7ff
+@media (max-width: 820px) {
+  :root {
+    --board-max: min(
+      calc(100vw - 24px),
+      72vh,
+      680px
     );
+  }
 
-    transition:width .25s ease;
+  .topbar {
+    height: 56px;
+    flex-basis: 56px;
+    padding: 0 12px;
+  }
+
+  .engine-pill {
+    padding: 7px 9px;
+  }
+
+  .main {
+    display: flex;
+    flex-direction: column;
+
+    padding: 10px 10px 18px;
+
+    gap: 14px;
+  }
+
+  .board-area {
+    width: 100%;
+  }
+
+  .board-column {
+    width: 100%;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+
+  .card {
+    width: 100%;
+  }
 }
 
-.eval-number{
-    margin-top:6px;
-
-    text-align:center;
-
-    color:var(--muted);
-
-    font-size:11px;
-    font-weight:800;
-
-    font-variant-numeric:tabular-nums;
-}
-
-/* =========================================================
-   MOVES
-========================================================= */
-
-.moves{
-    max-height:145px;
-
-    overflow:auto;
-
-    scrollbar-width:thin;
-}
-
-.move-row{
-    display:grid;
-    grid-template-columns:27px 1fr 1fr;
-
-    padding:4px;
-
-    border-radius:6px;
-
-    font-size:11px;
-}
-
-.move-row:nth-child(odd){
-    background:rgba(255,255,255,.025);
-}
-
-.move-number{
-    color:var(--muted);
-}
-
-.move{
-    font-weight:750;
-}
-
-.empty{
-    padding:9px;
-
-    color:var(--muted);
-
-    text-align:center;
-
-    font-size:10px;
-}
-
-/* =========================================================
-   SETTINGS
-========================================================= */
-
-.setting{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-
-    gap:7px;
-
-    margin:6px 0;
-}
-
-.setting label{
-    color:#d9dfed;
-
-    font-size:11px;
-    font-weight:650;
-}
-
-select{
-    min-width:116px;
-
-    padding:5px 7px;
-
-    border:1px solid var(--border);
-    border-radius:8px;
-
-    outline:none;
-
-    background:#171e2e;
-    color:var(--text);
-
-    font-size:10px;
-}
-
-/* =========================================================
-   ACTIONS
-========================================================= */
-
-.actions{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-
-    gap:6px;
-}
-
-.action{
-    padding:8px;
-
-    border:1px solid var(--border);
-    border-radius:9px;
-
-    background:rgba(255,255,255,.045);
-
-    color:var(--text);
-
-    font-size:10px;
-    font-weight:800;
-}
-
-.action.primary{
-    border:0;
-
-    background:linear-gradient(
-        135deg,
-        var(--accent),
-        #5b8cff
+@media (max-height: 720px) and (min-width: 821px) {
+  :root {
+    --board-max: min(
+      62vh,
+      calc(100vw - 380px),
+      580px
     );
+  }
 
-    box-shadow:0 7px 20px rgba(124,92,255,.2);
+  .topbar {
+    height: 54px;
+    flex-basis: 54px;
+  }
+
+  .main {
+    padding-top: 9px;
+    padding-bottom: 9px;
+  }
+
+  .sidebar {
+    gap: 8px;
+  }
+
+  .card-header {
+    padding: 10px 13px 8px;
+  }
+
+  .card-body {
+    padding: 10px 13px;
+  }
+
+  .eval-bar {
+    height: 100px;
+  }
+
+  .moves {
+    max-height: 220px;
+  }
 }
 
-.action.danger{
-    color:#ff8298;
-}
+/* Chromebook small landscape */
 
-/* =========================================================
-   MODALS
-========================================================= */
-
-.overlay{
-    position:fixed;
-    inset:0;
-
-    display:none;
-    place-items:center;
-
-    z-index:100;
-
-    background:rgba(0,0,0,.68);
-
-    backdrop-filter:blur(8px);
-}
-
-.overlay.show{
-    display:grid;
-}
-
-.modal{
-    width:min(340px,calc(100% - 28px));
-
-    padding:20px;
-
-    border:1px solid rgba(255,255,255,.1);
-    border-radius:18px;
-
-    background:#111725;
-
-    box-shadow:0 30px 80px rgba(0,0,0,.6);
-
-    text-align:center;
-}
-
-.modal h2{
-    margin:0 0 6px;
-
-    font-size:19px;
-}
-
-.modal p{
-    margin:0 0 14px;
-
-    color:var(--muted);
-
-    font-size:11px;
-}
-
-.promotion-grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-
-    gap:7px;
-}
-
-.promo{
-    padding:7px;
-
-    border:1px solid var(--border);
-    border-radius:11px;
-
-    background:rgba(255,255,255,.05);
-
-    color:var(--text);
-
-    font-size:32px;
-}
-
-/* =========================================================
-   MOBILE
-========================================================= */
-
-@media(max-width:900px){
-
-    html,
-    body{
-        overflow:auto;
-    }
-
-    .app{
-        height:auto;
-        min-height:100dvh;
-
-        align-items:flex-start;
-
-        padding:7px;
-    }
-
-    .shell{
-        height:auto;
-
-        grid-template-columns:1fr;
-    }
-
-    .board-panel{
-        padding:8px;
-        border-radius:15px;
-    }
-
-    .board-wrap{
-        width:min(
-            calc(100vw - 25px),
-            calc(100vh - 125px)
-        );
-    }
-
-    .sidebar{
-        overflow:visible;
-    }
-}
-
-@media(max-height:700px) and (min-width:901px){
-
-    .board-wrap{
-        width:min(
-            calc(100vh - 120px),
-            calc(100vw - 365px)
-        );
-    }
-
-    .board-panel{
-        padding:8px;
-    }
-
-    .card{
-        padding:8px;
-    }
-
-    .sidebar{
-        gap:6px;
-    }
-
-    .moves{
-        max-height:115px;
-    }
+@media (max-height: 650px) {
+  :root {
+    --board-max: min(
+      57vh,
+      calc(100vw - 365px),
+      500px
+    );
+  }
 }
 </style>
 </head>
@@ -863,2208 +966,2188 @@ select{
 <body>
 
 <div class="app">
-<div class="shell">
 
-<section class="board-panel">
+  <!-- TOP -->
 
-    <div class="topbar">
+  <header class="topbar">
 
-        <div class="logo">
-            <div class="logo-icon">♞</div>
-            <span>Nova Chess</span>
-        </div>
-
-        <div id="turnLabel" class="turn-label">
-            Your move
-        </div>
-
+    <div class="logo">
+      <div class="logo-icon">♞</div>
+      <span>Nova Chess</span>
     </div>
 
-    <div class="board-wrap">
-        <div id="board" class="board"></div>
+    <div id="enginePill" class="engine-pill">
+      <span class="engine-dot"></span>
+      <span id="engineText">Starting engine…</span>
     </div>
 
-    <div class="board-controls">
-
-        <button id="undoBtn" class="control-btn">
-            ↶ Undo
-        </button>
-
-        <button id="flipBtn" class="control-btn">
-            ⇄ Flip
-        </button>
-
-        <button id="soundBtn" class="control-btn">
-            🔊 Sound
-        </button>
-
-        <button id="resignBtn" class="control-btn">
-            ⚑ Resign
-        </button>
-
-    </div>
-
-</section>
+  </header>
 
 
-<aside class="sidebar">
+  <!-- MAIN -->
 
-    <div class="card">
+  <main class="main">
 
-        <div class="card-title">
-            <span>Engine</span>
-            <span>SF 18</span>
+    <!-- BOARD -->
+
+    <section class="board-area">
+
+      <div class="board-column">
+
+        <div class="player-strip">
+
+          <div class="player-name">
+            <span class="player-piece">♟</span>
+            <span>Nova Engine</span>
+          </div>
+
+          <div id="blackClock" class="clock">
+            5:00
+          </div>
+
         </div>
 
-        <div class="engine-status">
-            <span id="statusDot" class="status-dot loading"></span>
-            <span id="engineStatus">
-                Starting Stockfish…
-            </span>
-        </div>
 
-        <div id="diagnostic" class="diagnostic"></div>
+        <div class="board-shell">
 
-        <div id="thinking" class="thinking">
-            <span class="spinner"></span>
-            <span>Stockfish is thinking…</span>
-        </div>
+          <div id="board"></div>
 
-    </div>
+          <div id="thinkingOverlay" class="thinking-overlay">
 
-
-    <div class="card">
-
-        <div class="card-title">
-            <span>Clock</span>
-            <span id="modeLabel">Blitz 5+0</span>
-        </div>
-
-        <div class="clocks">
-
-            <div id="blackClock" class="clock">
-                <div class="clock-label">BLACK</div>
-                <div id="blackTime" class="clock-time">
-                    5:00
-                </div>
+            <div class="thinking-card">
+              <span class="spinner"></span>
+              <span>Nova is thinking…</span>
             </div>
 
-            <div id="whiteClock" class="clock active">
-                <div class="clock-label">WHITE</div>
-                <div id="whiteTime" class="clock-time">
-                    5:00
-                </div>
+          </div>
+
+        </div>
+
+
+        <div class="player-strip" style="margin-top:9px;margin-bottom:0;">
+
+          <div class="player-name">
+            <span class="player-piece">♙</span>
+            <span>You</span>
+          </div>
+
+          <div id="whiteClock" class="clock active">
+            5:00
+          </div>
+
+        </div>
+
+
+        <div class="controls">
+
+          <button id="newGameBtn" class="primary">
+            New Game
+          </button>
+
+          <button id="undoBtn">
+            Undo
+          </button>
+
+          <button id="resignBtn" class="danger">
+            Resign
+          </button>
+
+          <button id="flipBtn">
+            Flip Board
+          </button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+      <!-- EVALUATION -->
+
+      <section class="card">
+
+        <div class="card-header">
+          <span>Evaluation</span>
+          <span id="depthLabel">Depth —</span>
+        </div>
+
+        <div class="card-body">
+
+          <div class="eval-wrap">
+
+            <div class="eval-bar">
+              <div id="evalFill" class="eval-fill"></div>
             </div>
 
+            <div>
+              <div id="evalNumber" class="eval-number">
+                0.0
+              </div>
+
+              <div id="evalLabel" class="eval-label">
+                Starting position
+              </div>
+            </div>
+
+          </div>
+
         </div>
 
-    </div>
+      </section>
 
 
-    <div class="card">
+      <!-- MOVES -->
 
-        <div class="card-title">
-            <span>Evaluation</span>
-        </div>
+      <section class="card">
 
-        <div class="eval">
-            <div id="evalFill" class="eval-fill"></div>
-        </div>
-
-        <div id="evalNumber" class="eval-number">
-            +0.00
-        </div>
-
-    </div>
-
-
-    <div class="card">
-
-        <div class="card-title">
-            <span>Moves</span>
-            <span id="moveCount">0</span>
+        <div class="card-header">
+          <span>Moves</span>
+          <span id="moveCount">0</span>
         </div>
 
         <div id="moves" class="moves">
-            <div class="empty">No moves yet</div>
+
+          <div class="empty">
+            Make your first move.
+          </div>
+
         </div>
 
-    </div>
+      </section>
 
 
-    <div class="card">
+      <!-- SETTINGS -->
 
-        <div class="card-title">
-            <span>Game</span>
+      <section class="card">
+
+        <div class="card-header">
+          <span>Game Settings</span>
         </div>
 
-        <div class="setting">
+        <div class="card-body">
 
-            <label>Time control</label>
+          <div class="setting">
 
-            <select id="modeSelect">
+            <label for="difficulty">
+              Difficulty
+            </label>
 
-                <option value="60+0">Bullet 1+0</option>
-                <option value="120+1">Bullet 2+1</option>
-                <option value="300+0" selected>Blitz 5+0</option>
-                <option value="300+3">Blitz 5+3</option>
-                <option value="180+2">Blitz 3+2</option>
-                <option value="600+0">Rapid 10+0</option>
-                <option value="600+5">Rapid 10+5</option>
-                <option value="900+10">Rapid 15+10</option>
-                <option value="1800+0">Classical 30+0</option>
+            <select id="difficulty">
+
+              <option value="500">
+                Easy
+              </option>
+
+              <option value="1200" selected>
+                Medium
+              </option>
+
+              <option value="2200">
+                Hard
+              </option>
+
+              <option value="4000">
+                Expert
+              </option>
 
             </select>
 
-        </div>
+          </div>
 
 
-        <div class="setting">
+          <div class="setting">
 
-            <label>Difficulty</label>
+            <label for="timeControl">
+              Time Control
+            </label>
 
-            <select id="difficultySelect">
+            <select id="timeControl">
 
-                <option value="500">Easy</option>
-                <option value="1500" selected>Medium</option>
-                <option value="3000">Hard</option>
-                <option value="5000">Expert</option>
+              <option value="60">
+                1 + 0
+              </option>
+
+              <option value="180">
+                3 + 0
+              </option>
+
+              <option value="300" selected>
+                5 + 0
+              </option>
+
+              <option value="600">
+                10 + 0
+              </option>
 
             </select>
 
-        </div>
-
-
-        <div class="setting">
-
-            <label>Board theme</label>
-
-            <select id="themeSelect">
-
-                <option value="classic" selected>Classic</option>
-                <option value="blue">Blue</option>
-
-            </select>
+          </div>
 
         </div>
 
-    </div>
+      </section>
 
 
-    <div class="card">
+      <!-- ENGINE STATUS -->
 
-        <div class="actions">
+      <section class="card">
 
-            <button id="newGameBtn" class="action primary">
-                New Game
-            </button>
+        <div class="card-header">
+          <span>Engine</span>
+        </div>
 
-            <button id="settingsBtn" class="action">
-                Settings
-            </button>
+        <div class="card-body">
+
+          <div id="engineStatus" class="status">
+            Loading Stockfish…
+          </div>
 
         </div>
 
-    </div>
+      </section>
 
-</aside>
+    </aside>
 
-</div>
-</div>
-
-
-<!-- =========================================================
-     PROMOTION
-========================================================= -->
-
-<div id="promotionOverlay" class="overlay">
-
-    <div class="modal">
-
-        <h2>Choose promotion</h2>
-
-        <p>Pick the piece for your pawn.</p>
-
-        <div class="promotion-grid">
-
-            <button class="promo" data-piece="q">♕</button>
-            <button class="promo" data-piece="r">♖</button>
-            <button class="promo" data-piece="b">♗</button>
-            <button class="promo" data-piece="n">♘</button>
-
-        </div>
-
-    </div>
+  </main>
 
 </div>
 
 
-<!-- =========================================================
-     GAME OVER
-========================================================= -->
+<!-- PROMOTION -->
 
-<div id="gameOverOverlay" class="overlay">
+<div id="promotionModal" class="modal">
 
-    <div class="modal">
+  <div class="modal-card">
 
-        <h2 id="gameOverTitle">Game Over</h2>
+    <div class="modal-title">
+      Promote Pawn
+    </div>
 
-        <p id="gameOverText"></p>
+    <div class="modal-text">
+      Choose the piece you want your pawn to become.
+    </div>
 
-        <button
-            id="gameOverNewBtn"
-            class="action primary"
-            style="width:100%">
-            New Game
-        </button>
+    <div class="promotion-buttons">
+
+      <button data-piece="q">♕</button>
+      <button data-piece="r">♖</button>
+      <button data-piece="b">♗</button>
+      <button data-piece="n">♘</button>
 
     </div>
+
+  </div>
 
 </div>
 
 
 <script>
+"use strict";
 
 /* =========================================================
    NOVA CHESS
-   Stockfish 18 ASM-JS
-========================================================= */
+   Stockfish ASM-JS Worker
+   ========================================================= */
 
 
-/* =========================================================
-   GAME
-========================================================= */
+/* ---------- ENGINE CONFIG ---------- */
 
-let game = new Chess();
-
-const boardEl =
-    document.getElementById("board");
-
-const movesEl =
-    document.getElementById("moves");
-
-const moveCountEl =
-    document.getElementById("moveCount");
-
-const turnLabel =
-    document.getElementById("turnLabel");
-
-const engineStatusEl =
-    document.getElementById("engineStatus");
-
-const statusDot =
-    document.getElementById("statusDot");
-
-const diagnosticEl =
-    document.getElementById("diagnostic");
-
-const thinkingEl =
-    document.getElementById("thinking");
-
-const evalFill =
-    document.getElementById("evalFill");
-
-const evalNumber =
-    document.getElementById("evalNumber");
-
-const whiteTimeEl =
-    document.getElementById("whiteTime");
-
-const blackTimeEl =
-    document.getElementById("blackTime");
-
-const whiteClockEl =
-    document.getElementById("whiteClock");
-
-const blackClockEl =
-    document.getElementById("blackClock");
-
-const modeLabelEl =
-    document.getElementById("modeLabel");
-
-
-/* =========================================================
-   PIECES
-========================================================= */
-
-const pieceSymbols = {
-
-    w:{
-        p:"♙",
-        n:"♘",
-        b:"♗",
-        r:"♖",
-        q:"♕",
-        k:"♔"
-    },
-
-    b:{
-        p:"♟",
-        n:"♞",
-        b:"♝",
-        r:"♜",
-        q:"♛",
-        k:"♚"
-    }
-
-};
-
-
-/* =========================================================
-   BOARD STATE
-========================================================= */
-
-let orientation = "w";
-
-let selectedSquare = null;
-
-let legalTargets = [];
-
-let lastMove = null;
-
-let squareMap = {};
-
-let pendingPromotion = null;
-
-
-/* =========================================================
-   ENGINE
-========================================================= */
-
-/*
-   IMPORTANT:
-
-   We are using ONLY:
-
-       stockfish-18-asm.js
-
-   It must be in the same folder as index.html.
-
-   There is NO .wasm dependency.
-*/
-
-const ENGINE_FILE =
-    "./stockfish-18-asm.js";
+const ENGINE_FILE = "./stockfish-18-asm.js";
 
 let engine = null;
 
 let engineReady = false;
-
+let engineStarting = false;
 let engineThinking = false;
 
-let engineInitializing = false;
-
-let pendingEngineMove = false;
-
-let engineTimeout = null;
-
-let searchGeneration = 0;
-
-let activeSearchGeneration = null;
-
-let engineThinkTime = 1500;
+let engineStartTimer = null;
+let engineMoveTimer = null;
 
 
-/* =========================================================
-   CLOCK
-========================================================= */
+/* ---------- CHESS ---------- */
+
+let game = new Chess();
+
+let selectedSquare = null;
+let legalTargets = [];
+
+let flipped = false;
+
+let pendingPromotion = null;
+
+
+/* ---------- CLOCK ---------- */
+
+let initialSeconds = 300;
 
 let whiteSeconds = 300;
-
 let blackSeconds = 300;
 
 let incrementSeconds = 0;
 
-let currentTurn = "w";
-
-let clockInterval = null;
+let clockTimer = null;
 
 let gameStarted = false;
 
-let gameFinished = false;
+
+/* ---------- SETTINGS ---------- */
+
+let engineThinkTime = 1200;
+
+
+/* ---------- ENGINE EVALUATION ---------- */
+
+let lastEvaluation = 0;
+let lastDepth = 0;
 
 
 /* =========================================================
-   SOUND
-========================================================= */
+   ELEMENTS
+   ========================================================= */
 
-let soundEnabled = true;
+const boardElement =
+  document.getElementById("board");
 
-let audioContext = null;
+const enginePill =
+  document.getElementById("enginePill");
+
+const engineText =
+  document.getElementById("engineText");
+
+const engineStatus =
+  document.getElementById("engineStatus");
+
+const thinkingOverlay =
+  document.getElementById("thinkingOverlay");
+
+const whiteClock =
+  document.getElementById("whiteClock");
+
+const blackClock =
+  document.getElementById("blackClock");
+
+const movesElement =
+  document.getElementById("moves");
+
+const moveCount =
+  document.getElementById("moveCount");
+
+const evalNumber =
+  document.getElementById("evalNumber");
+
+const evalLabel =
+  document.getElementById("evalLabel");
+
+const evalFill =
+  document.getElementById("evalFill");
+
+const depthLabel =
+  document.getElementById("depthLabel");
+
+const difficulty =
+  document.getElementById("difficulty");
+
+const timeControl =
+  document.getElementById("timeControl");
+
+const promotionModal =
+  document.getElementById("promotionModal");
 
 
 /* =========================================================
-   MODES
-========================================================= */
+   PIECES
+   ========================================================= */
 
-const modeNames = {
+const PIECES = {
 
-    "60+0":"Bullet 1+0",
-    "120+1":"Bullet 2+1",
+  w: {
+    p: "♙",
+    n: "♘",
+    b: "♗",
+    r: "♖",
+    q: "♕",
+    k: "♔"
+  },
 
-    "300+0":"Blitz 5+0",
-    "300+3":"Blitz 5+3",
-    "180+2":"Blitz 3+2",
-
-    "600+0":"Rapid 10+0",
-    "600+5":"Rapid 10+5",
-
-    "900+10":"Rapid 15+10",
-
-    "1800+0":"Classical 30+0"
+  b: {
+    p: "♟",
+    n: "♞",
+    b: "♝",
+    r: "♜",
+    q: "♛",
+    k: "♚"
+  }
 
 };
 
-let currentMode = "300+0";
+
+/* =========================================================
+   ENGINE STATUS UI
+   ========================================================= */
+
+function setEngineStatus(
+  text,
+  type = ""
+) {
+
+  engineText.textContent = text;
+
+  enginePill.className =
+    "engine-pill " + type;
+
+  engineStatus.textContent = text;
+
+  engineStatus.className =
+    "status " +
+    (type === "ready"
+      ? "good"
+      : type === "error"
+        ? "bad"
+        : "");
+
+}
+
+
+function engineError(message) {
+
+  engineReady = false;
+  engineStarting = false;
+
+  clearTimeout(engineStartTimer);
+
+  setEngineStatus(
+    "ENGINE ERROR: " + message,
+    "error"
+  );
+
+  console.error(message);
+}
+
+
+/* =========================================================
+   START STOCKFISH
+   ========================================================= */
+
+function startEngine() {
+
+  if (engineStarting) return;
+
+  engineStarting = true;
+  engineReady = false;
+
+  setEngineStatus(
+    "Loading Stockfish ASM…"
+  );
+
+  try {
+
+    /*
+      IMPORTANT:
+      This is deliberately just the JS file.
+
+      No .wasm.
+      No Module config.
+      No Hash option.
+    */
+
+    engine = new Worker(
+      ENGINE_FILE
+    );
+
+  } catch (error) {
+
+    engineError(
+      "Could not create Worker: " +
+      error.message
+    );
+
+    return;
+  }
+
+
+  engine.onmessage = function(event) {
+
+    const line =
+      String(event.data || "").trim();
+
+    if (!line) return;
+
+    handleEngineLine(line);
+  };
+
+
+  engine.onerror = function(event) {
+
+    engineError(
+      "Worker failed to load. Check that stockfish-18-asm.js is beside index.html."
+    );
+
+  };
+
+
+  engine.onmessageerror = function() {
+
+    engineError(
+      "Worker message error."
+    );
+
+  };
+
+
+  /*
+    Start UCI.
+
+    We intentionally do NOT send Hash here.
+  */
+
+  try {
+
+    engine.postMessage("uci");
+
+  } catch (error) {
+
+    engineError(
+      "Could not communicate with engine: " +
+      error.message
+    );
+
+    return;
+  }
+
+
+  /*
+    ASM-JS can take a while to initialize on a Chromebook.
+  */
+
+  engineStartTimer = setTimeout(
+    function() {
+
+      if (!engineReady) {
+
+        engineError(
+          "Stockfish did not finish starting. The ASM engine can be slow on Chromebooks."
+        );
+
+      }
+
+    },
+    30000
+  );
+
+}
+
+
+/* =========================================================
+   ENGINE OUTPUT
+   ========================================================= */
+
+function handleEngineLine(line) {
+
+  /*
+    UCI handshake
+  */
+
+  if (line === "uciok") {
+
+    setEngineStatus(
+      "Stockfish identified — preparing…"
+    );
+
+    try {
+
+      engine.postMessage(
+        "isready"
+      );
+
+    } catch (error) {
+
+      engineError(
+        "isready failed: " +
+        error.message
+      );
+    }
+
+    return;
+  }
+
+
+  if (line === "readyok") {
+
+    clearTimeout(engineStartTimer);
+
+    engineReady = true;
+    engineStarting = false;
+
+    setEngineStatus(
+      "Stockfish ready",
+      "ready"
+    );
+
+    return;
+  }
+
+
+  /*
+    Evaluation information
+  */
+
+  if (line.startsWith("info ")) {
+
+    parseEngineInfo(line);
+
+    return;
+  }
+
+
+  /*
+    Actual engine move
+  */
+
+  if (line.startsWith("bestmove")) {
+
+    handleBestMove(line);
+
+    return;
+  }
+
+
+  /*
+    Show engine errors directly on screen.
+  */
+
+  if (
+    line.toLowerCase().includes("error") ||
+    line.toLowerCase().includes("failed")
+  ) {
+
+    engineStatus.textContent =
+      "Stockfish: " + line;
+
+  }
+
+}
+
+
+/* =========================================================
+   ENGINE INFO
+   ========================================================= */
+
+function parseEngineInfo(line) {
+
+  const depthMatch =
+    line.match(/\bdepth\s+(\d+)/);
+
+  if (depthMatch) {
+
+    lastDepth =
+      Number(depthMatch[1]);
+
+    depthLabel.textContent =
+      "Depth " + lastDepth;
+  }
+
+
+  /*
+    cp = centipawns
+    mate = mating score
+  */
+
+  const cpMatch =
+    line.match(/\bscore\s+cp\s+(-?\d+)/);
+
+  const mateMatch =
+    line.match(/\bscore\s+mate\s+(-?\d+)/);
+
+  if (mateMatch) {
+
+    const mate =
+      Number(mateMatch[1]);
+
+    /*
+      Stockfish score is from side-to-move perspective.
+      During Black's turn, reverse it so our display remains
+      White-positive.
+    */
+
+    const whiteMate =
+      game.turn() === "w"
+        ? mate
+        : -mate;
+
+    lastEvaluation =
+      whiteMate > 0
+        ? 100
+        : -100;
+
+    evalNumber.textContent =
+      "M" + Math.abs(mate);
+
+    evalLabel.textContent =
+      mate > 0
+        ? "Mate for side to move"
+        : "Mate against side to move";
+
+    updateEvalBar();
+
+    return;
+  }
+
+
+  if (cpMatch) {
+
+    let cp =
+      Number(cpMatch[1]) / 100;
+
+    /*
+      Stockfish score is relative to side to move.
+    */
+
+    if (game.turn() === "b") {
+      cp = -cp;
+    }
+
+    /*
+      Keep evaluation sane visually.
+    */
+
+    cp =
+      Math.max(-10, Math.min(10, cp));
+
+    lastEvaluation = cp;
+
+    evalNumber.textContent =
+      (cp >= 0 ? "+" : "") +
+      cp.toFixed(1);
+
+    evalLabel.textContent =
+      cp > .15
+        ? "White advantage"
+        : cp < -.15
+          ? "Black advantage"
+          : "Balanced";
+
+    updateEvalBar();
+  }
+
+}
+
+
+/* =========================================================
+   EVALUATION BAR
+   ========================================================= */
+
+function updateEvalBar() {
+
+  /*
+    Logistic-style visual mapping.
+
+    +10 => almost 100%
+    -10 => almost 0%
+     0  => 50%
+  */
+
+  const x =
+    Math.max(
+      0.04,
+      Math.min(
+        0.96,
+        1 / (1 + Math.exp(-lastEvaluation))
+      )
+    );
+
+  evalFill.style.height =
+    (x * 100) + "%";
+
+}
 
 
 /* =========================================================
    BOARD CREATION
-========================================================= */
+   ========================================================= */
 
-function createBoard(){
+function createBoard() {
 
-    boardEl.innerHTML = "";
+  boardElement.innerHTML = "";
 
-    squareMap = {};
+  for (let visualRow = 0; visualRow < 8; visualRow++) {
 
-    for(let rank=8;rank>=1;rank--){
+    for (let visualCol = 0; visualCol < 8; visualCol++) {
 
-        for(let file=0;file<8;file++){
+      const square =
+        document.createElement("div");
 
-            const fileChar =
-                String.fromCharCode(97 + file);
+      square.className = "square";
 
-            const name =
-                fileChar + rank;
+      const row =
+        flipped
+          ? 7 - visualRow
+          : visualRow;
 
-            const square =
-                document.createElement("div");
+      const col =
+        flipped
+          ? 7 - visualCol
+          : visualCol;
 
-            square.className =
-                "square " +
-                (
-                    (file + rank) % 2 === 0
-                    ? "light"
-                    : "dark"
-                );
+      const file =
+        String.fromCharCode(
+          97 + col
+        );
 
-            square.dataset.square = name;
+      const rank =
+        8 - row;
 
-            square.addEventListener(
-                "click",
-                onSquareClick
-            );
+      const name =
+        file + rank;
 
-            const fileCoord =
-                document.createElement("span");
+      square.dataset.square = name;
 
-            fileCoord.className = "coord file";
-            fileCoord.textContent = fileChar;
-
-            const rankCoord =
-                document.createElement("span");
-
-            rankCoord.className = "coord rank";
-            rankCoord.textContent = rank;
-
-            square.appendChild(fileCoord);
-            square.appendChild(rankCoord);
-
-            boardEl.appendChild(square);
-
-            squareMap[name] = square;
+      square.addEventListener(
+        "click",
+        function() {
+          handleSquareClick(name);
         }
-    }
+      );
 
-    renderBoard();
+      boardElement.appendChild(square);
+    }
+  }
+
+  renderBoard();
 }
 
 
 /* =========================================================
    BOARD RENDER
-========================================================= */
+   ========================================================= */
 
-function renderBoard(){
+function renderBoard() {
 
-    const files =
-        orientation === "w"
-        ? ["a","b","c","d","e","f","g","h"]
-        : ["h","g","f","e","d","c","b","a"];
+  const board =
+    game.board();
 
-    const ranks =
-        orientation === "w"
-        ? [8,7,6,5,4,3,2,1]
-        : [1,2,3,4,5,6,7,8];
+  const squareElements =
+    boardElement.children;
+
+
+  /*
+    We reuse the same 64 DOM elements.
+    This is much cheaper than rebuilding the board.
+  */
+
+  for (let visualIndex = 0;
+       visualIndex < 64;
+       visualIndex++) {
+
+    const squareElement =
+      squareElements[visualIndex];
+
+    const name =
+      squareElement.dataset.square;
+
+    const file =
+      name.charCodeAt(0) - 97;
+
+    const rank =
+      Number(name[1]);
+
+    const row =
+      8 - rank;
+
+    const piece =
+      board[row][file];
 
 
     /*
-       Put the squares into orientation order.
-
-       We reuse the existing DOM nodes instead
-       of recreating the entire board.
+      Square colors
     */
 
-    const fragment =
-        document.createDocumentFragment();
+    squareElement.className =
+      "square " +
+      (
+        (row + file) % 2 === 0
+          ? "light"
+          : "dark"
+      );
 
-    for(const rank of ranks){
 
-        for(const file of files){
+    /*
+      Selection
+    */
 
-            fragment.appendChild(
-                squareMap[file + rank]
-            );
-        }
+    if (selectedSquare === name) {
+
+      squareElement.classList.add(
+        "selected"
+      );
+
     }
 
-    boardEl.appendChild(fragment);
+
+    /*
+      Legal target
+    */
+
+    if (
+      legalTargets.includes(name)
+    ) {
+
+      if (game.get(name)) {
+
+        squareElement.classList.add(
+          "capture"
+        );
+
+      } else {
+
+        squareElement.classList.add(
+          "legal"
+        );
+
+      }
+
+    }
 
 
     /*
-       Clear visual state.
+      Last move
     */
 
-    Object.values(squareMap).forEach(
-        square => {
+    const history =
+      game.history({
+        verbose: true
+      });
 
-            square.classList.remove(
-                "selected",
-                "legal",
-                "capture",
-                "last",
-                "check"
-            );
+    const last =
+      history.length
+        ? history[history.length - 1]
+        : null;
 
-            const oldPiece =
-                square.querySelector(".piece");
+    if (
+      last &&
+      (
+        last.from === name ||
+        last.to === name
+      )
+    ) {
 
-            if(oldPiece)
-                oldPiece.remove();
-        }
+      squareElement.classList.add(
+        "last-move"
+      );
+
+    }
+
+
+    /*
+      Check square
+    */
+
+    if (
+      game.in_check() &&
+      piece &&
+      piece.type === "k"
+    ) {
+
+      if (
+        piece.color === game.turn()
+      ) {
+
+        squareElement.classList.add(
+          "check"
+        );
+
+      }
+
+    }
+
+
+    /*
+      Piece
+    */
+
+    let pieceElement =
+      squareElement.querySelector(
+        ".piece"
+      );
+
+    if (piece) {
+
+      if (!pieceElement) {
+
+        pieceElement =
+          document.createElement("div");
+
+        pieceElement.className =
+          "piece";
+
+        squareElement.appendChild(
+          pieceElement
+        );
+      }
+
+      pieceElement.textContent =
+        PIECES[piece.color][piece.type];
+
+      pieceElement.className =
+        "piece " +
+        (
+          piece.color === "w"
+            ? "white"
+            : "black"
+        );
+
+    } else {
+
+      if (pieceElement) {
+        pieceElement.remove();
+      }
+
+    }
+
+
+    /*
+      Coordinates
+    */
+
+    let rankLabel =
+      squareElement.querySelector(
+        ".rank"
+      );
+
+    let fileLabel =
+      squareElement.querySelector(
+        ".file"
+      );
+
+
+    if (file === 0) {
+
+      if (!rankLabel) {
+
+        rankLabel =
+          document.createElement("span");
+
+        rankLabel.className =
+          "coord rank";
+
+        squareElement.appendChild(
+          rankLabel
+        );
+      }
+
+      rankLabel.textContent =
+        rank;
+
+    } else if (rankLabel) {
+
+      rankLabel.remove();
+
+    }
+
+
+    if (rank === 1) {
+
+      if (!fileLabel) {
+
+        fileLabel =
+          document.createElement("span");
+
+        fileLabel.className =
+          "coord file";
+
+        squareElement.appendChild(
+          fileLabel
+        );
+      }
+
+      fileLabel.textContent =
+        file;
+
+    } else if (fileLabel) {
+
+      fileLabel.remove();
+
+    }
+
+  }
+
+}
+
+
+/* =========================================================
+   CLICK SQUARE
+   ========================================================= */
+
+function handleSquareClick(square) {
+
+  /*
+    Player is always White.
+  */
+
+  if (game.game_over()) {
+    return;
+  }
+
+  if (game.turn() !== "w") {
+    return;
+  }
+
+  if (engineThinking) {
+    return;
+  }
+
+
+  const piece =
+    game.get(square);
+
+
+  /*
+    If a piece is already selected,
+    try to move it.
+  */
+
+  if (selectedSquare) {
+
+    if (
+      legalTargets.includes(square)
+    ) {
+
+      attemptPlayerMove(
+        selectedSquare,
+        square
+      );
+
+      return;
+    }
+
+
+    /*
+      Clicking another white piece changes selection.
+    */
+
+    if (
+      piece &&
+      piece.color === "w"
+    ) {
+
+      selectSquare(square);
+
+      return;
+    }
+
+
+    clearSelection();
+
+    return;
+  }
+
+
+  /*
+    Select white piece.
+  */
+
+  if (
+    piece &&
+    piece.color === "w"
+  ) {
+
+    selectSquare(square);
+
+  }
+
+}
+
+
+/* =========================================================
+   SELECT
+   ========================================================= */
+
+function selectSquare(square) {
+
+  selectedSquare = square;
+
+  legalTargets =
+    game.moves({
+      square: square,
+      verbose: true
+    }).map(
+      move => move.to
     );
 
-
-    /*
-       Add pieces.
-    */
-
-    const board =
-        game.board();
-
-    for(let r=0;r<8;r++){
-
-        for(let f=0;f<8;f++){
-
-            const piece =
-                board[r][f];
-
-            if(!piece) continue;
-
-            const squareName =
-                String.fromCharCode(97 + f)
-                + (8-r);
-
-            const square =
-                squareMap[squareName];
-
-            const pieceEl =
-                document.createElement("span");
-
-            pieceEl.className =
-                "piece " +
-                (
-                    piece.color === "w"
-                    ? "white-piece"
-                    : "black-piece"
-                );
-
-            pieceEl.textContent =
-                pieceSymbols[
-                    piece.color
-                ][piece.type];
-
-            square.appendChild(pieceEl);
-        }
-    }
-
-
-    /*
-       Selected square.
-    */
-
-    if(
-        selectedSquare &&
-        squareMap[selectedSquare]
-    ){
-
-        squareMap[selectedSquare]
-            .classList.add("selected");
-    }
-
-
-    /*
-       Legal moves.
-    */
-
-    for(const target of legalTargets){
-
-        const square =
-            squareMap[target];
-
-        if(!square) continue;
-
-        const piece =
-            game.get(target);
-
-        square.classList.add(
-            piece
-            ? "capture"
-            : "legal"
-        );
-    }
-
-
-    /*
-       Last move.
-    */
-
-    if(lastMove){
-
-        if(squareMap[lastMove.from])
-            squareMap[lastMove.from]
-                .classList.add("last");
-
-        if(squareMap[lastMove.to])
-            squareMap[lastMove.to]
-                .classList.add("last");
-    }
-
-
-    /*
-       Check indicator.
-    */
-
-    if(game.in_check()){
-
-        const turn =
-            game.turn();
-
-        const board =
-            game.board();
-
-        for(let r=0;r<8;r++){
-
-            for(let f=0;f<8;f++){
-
-                const piece =
-                    board[r][f];
-
-                if(
-                    piece &&
-                    piece.type === "k" &&
-                    piece.color === turn
-                ){
-
-                    const name =
-                        String.fromCharCode(97 + f)
-                        + (8-r);
-
-                    squareMap[name]
-                        .classList.add("check");
-                }
-            }
-        }
-    }
+  renderBoard();
 }
 
 
 /* =========================================================
-   PLAYER INPUT
-========================================================= */
+   CLEAR
+   ========================================================= */
 
-function onSquareClick(event){
+function clearSelection() {
 
-    if(gameFinished) return;
+  selectedSquare = null;
+  legalTargets = [];
 
-    if(engineThinking) return;
+  renderBoard();
 
-    if(game.turn() !== "w") return;
-
-    const square =
-        event.currentTarget.dataset.square;
-
-
-    if(selectedSquare){
-
-        if(legalTargets.includes(square)){
-
-            attemptMove(
-                selectedSquare,
-                square
-            );
-
-            return;
-        }
-    }
-
-
-    const piece =
-        game.get(square);
-
-    if(
-        piece &&
-        piece.color === "w"
-    ){
-
-        selectedSquare = square;
-
-        legalTargets =
-            game.moves({
-                square:square,
-                verbose:true
-            }).map(
-                move => move.to
-            );
-
-        renderBoard();
-
-        return;
-    }
-
-
-    selectedSquare = null;
-
-    legalTargets = [];
-
-    renderBoard();
-}
-
-
-/* =========================================================
-   MOVE
-========================================================= */
-
-function attemptMove(from,to){
-
-    const piece =
-        game.get(from);
-
-    if(!piece) return;
-
-
-    if(
-        piece.type === "p" &&
-        to[1] === "8"
-    ){
-
-        pendingPromotion = {
-            from:from,
-            to:to
-        };
-
-        document
-            .getElementById("promotionOverlay")
-            .classList.add("show");
-
-        return;
-    }
-
-
-    makePlayerMove({
-        from:from,
-        to:to
-    });
 }
 
 
 /* =========================================================
    PLAYER MOVE
-========================================================= */
+   ========================================================= */
 
-function makePlayerMove(move){
+function attemptPlayerMove(
+  from,
+  to
+) {
 
-    const result =
-        game.move(move);
+  const piece =
+    game.get(from);
 
-    if(!result) return;
 
-    lastMove = {
-        from:result.from,
-        to:result.to
+  /*
+    Promotion?
+  */
+
+  if (
+    piece &&
+    piece.type === "p" &&
+    to[1] === "8"
+  ) {
+
+    pendingPromotion = {
+      from: from,
+      to: to
     };
 
-    selectedSquare = null;
-    legalTargets = [];
-
-    playMoveSound(result);
-
-    if(!gameStarted){
-
-        gameStarted = true;
-
-        startClock();
-    }
-
-    currentTurn =
-        game.turn();
-
-    /*
-       Increment belongs to the player
-       who just moved.
-    */
-
-    whiteSeconds += incrementSeconds;
-
-    renderBoard();
-
-    updateMoves();
-
-    updateTurnUI();
-
-    updateEvaluationFromPosition();
-
-    checkGameState();
-
-
-    if(
-        !gameFinished &&
-        game.turn() === "b"
-    ){
-
-        requestEngineMove();
-    }
-}
-
-
-/* =========================================================
-   ENGINE START
-========================================================= */
-
-function startEngine(){
-
-    if(engine) return;
-
-    engineInitializing = true;
-
-    setEngineStatus(
-        "loading",
-        "Starting Stockfish…"
+    promotionModal.classList.add(
+      "show"
     );
 
-    diagnosticEl.classList.remove("show");
+    return;
+  }
 
 
-    try{
+  makePlayerMove(
+    from,
+    to,
+    "q"
+  );
 
-        engine =
-            new Worker(ENGINE_FILE);
-
-    }catch(error){
-
-        failEngine(
-            "The Stockfish worker could not start."
-        );
-
-        return;
-    }
-
-
-    engine.onmessage =
-        function(event){
-
-            const line =
-                String(event.data).trim();
-
-            if(!line) return;
-
-
-            /*
-               UCI IDENTIFICATION
-            */
-
-            if(line === "uciok"){
-
-                engine.postMessage(
-                    "setoption name Hash value 16"
-                );
-
-                engine.postMessage(
-                    "isready"
-                );
-
-                return;
-            }
-
-
-            /*
-               ENGINE READY
-            */
-
-            if(line === "readyok"){
-
-                clearTimeout(engineTimeout);
-
-                engineReady = true;
-
-                engineInitializing = false;
-
-                setEngineStatus(
-                    "ready",
-                    "Stockfish 18 ready"
-                );
-
-
-                if(
-                    pendingEngineMove &&
-                    game.turn() === "b" &&
-                    !gameFinished
-                ){
-
-                    pendingEngineMove = false;
-
-                    requestEngineMove();
-                }
-
-                return;
-            }
-
-
-            /*
-               EVALUATION
-            */
-
-            if(line.startsWith("info ")){
-
-                parseEvaluation(line);
-
-                return;
-            }
-
-
-            /*
-               ENGINE MOVE
-            */
-
-            if(line.startsWith("bestmove ")){
-
-                if(!engineThinking)
-                    return;
-
-
-                const generation =
-                    activeSearchGeneration;
-
-
-                if(
-                    generation === null ||
-                    generation !== searchGeneration
-                ){
-
-                    return;
-                }
-
-
-                const moveText =
-                    line.split(/\s+/)[1];
-
-
-                engineThinking = false;
-
-                activeSearchGeneration = null;
-
-                thinkingEl.classList.remove("show");
-
-
-                if(
-                    !moveText ||
-                    moveText === "(none)"
-                ){
-
-                    checkGameState();
-
-                    return;
-                }
-
-
-                makeEngineMove(moveText);
-            }
-        };
-
-
-    engine.onerror =
-        function(){
-
-            failEngine(
-                "Stockfish could not load. Make sure stockfish-18-asm.js is in the same folder as index.html."
-            );
-        };
-
-
-    engine.onmessageerror =
-        function(){
-
-            failEngine(
-                "Stockfish stopped responding."
-            );
-        };
-
-
-    engineTimeout =
-        setTimeout(
-            function(){
-
-                if(!engineReady){
-
-                    failEngine(
-                        "Stockfish timed out. Make sure stockfish-18-asm.js is beside index.html."
-                    );
-                }
-
-            },
-            20000
-        );
-
-
-    /*
-       Start UCI.
-    */
-
-    try{
-
-        engine.postMessage("uci");
-
-    }catch(error){
-
-        failEngine(
-            "Could not send commands to Stockfish."
-        );
-    }
 }
 
 
 /* =========================================================
-   ENGINE ERROR
-========================================================= */
+   MAKE PLAYER MOVE
+   ========================================================= */
 
-function failEngine(message){
+function makePlayerMove(
+  from,
+  to,
+  promotion
+) {
 
-    clearTimeout(engineTimeout);
+  const move =
+    game.move({
+      from: from,
+      to: to,
+      promotion: promotion
+    });
 
-    engineReady = false;
+  if (!move) {
 
-    engineInitializing = false;
+    clearSelection();
 
-    engineThinking = false;
+    return;
+  }
 
-    activeSearchGeneration = null;
 
-    thinkingEl.classList.remove("show");
+  clearSelection();
 
-    setEngineStatus(
-        "error",
-        "Stockfish unavailable"
-    );
+  whiteSeconds +=
+    incrementSeconds;
 
-    diagnosticEl.textContent =
-        message;
+  gameStarted = true;
 
-    diagnosticEl.classList.add("show");
+  renderBoard();
+  renderMoves();
+  updateClocks();
 
+  checkGameEnd();
 
-    if(engine){
+  if (!game.game_over()) {
 
-        try{
-            engine.terminate();
-        }catch(e){}
+    startClock();
 
-        engine = null;
-    }
-}
+    requestEngineMove();
 
+  }
 
-/* =========================================================
-   ENGINE MOVE REQUEST
-========================================================= */
-
-function requestEngineMove(){
-
-    if(gameFinished) return;
-
-    if(game.turn() !== "b") return;
-
-
-    if(!engine){
-
-        pendingEngineMove = true;
-
-        startEngine();
-
-        return;
-    }
-
-
-    if(!engineReady){
-
-        pendingEngineMove = true;
-
-        return;
-    }
-
-
-    if(engineThinking) return;
-
-
-    pendingEngineMove = false;
-
-    engineThinking = true;
-
-    thinkingEl.classList.add("show");
-
-    setEngineStatus(
-        "ready",
-        "Stockfish calculating…"
-    );
-
-    updateTurnUI();
-
-
-    const generation =
-        ++searchGeneration;
-
-    activeSearchGeneration =
-        generation;
-
-
-    try{
-
-        engine.postMessage(
-            "position fen " + game.fen()
-        );
-
-        engine.postMessage(
-            "go movetime " +
-            engineThinkTime
-        );
-
-    }catch(error){
-
-        engineThinking = false;
-
-        activeSearchGeneration = null;
-
-        thinkingEl.classList.remove("show");
-
-        failEngine(
-            "Stockfish could not start calculating."
-        );
-    }
-}
-
-
-/* =========================================================
-   ENGINE MOVE
-========================================================= */
-
-function makeEngineMove(moveText){
-
-    if(gameFinished) return;
-
-    if(game.turn() !== "b") return;
-
-
-    const from =
-        moveText.substring(0,2);
-
-    const to =
-        moveText.substring(2,4);
-
-    const promotion =
-        moveText.length >= 5
-        ? moveText.substring(4,5)
-        : undefined;
-
-
-    const move = {
-        from:from,
-        to:to
-    };
-
-
-    if(promotion)
-        move.promotion = promotion;
-
-
-    const result =
-        game.move(move);
-
-
-    if(!result){
-
-        setEngineStatus(
-            "error",
-            "Stockfish returned an invalid move."
-        );
-
-        return;
-    }
-
-
-    lastMove = {
-        from:result.from,
-        to:result.to
-    };
-
-
-    /*
-       Black's increment.
-    */
-
-    blackSeconds += incrementSeconds;
-
-
-    currentTurn =
-        game.turn();
-
-
-    playMoveSound(result);
-
-    renderBoard();
-
-    updateMoves();
-
-    updateTurnUI();
-
-    updateEvaluationFromPosition();
-
-    checkGameState();
-}
-
-
-/* =========================================================
-   CANCEL ENGINE
-========================================================= */
-
-function cancelEngineSearch(){
-
-    searchGeneration++;
-
-    activeSearchGeneration = null;
-
-    engineThinking = false;
-
-    pendingEngineMove = false;
-
-    thinkingEl.classList.remove("show");
-
-
-    if(engine){
-
-        try{
-            engine.postMessage("stop");
-        }catch(e){}
-    }
-}
-
-
-/* =========================================================
-   ENGINE STATUS
-========================================================= */
-
-function setEngineStatus(type,text){
-
-    engineStatusEl.textContent = text;
-
-    statusDot.className =
-        "status-dot " + type;
-}
-
-
-/* =========================================================
-   EVALUATION
-========================================================= */
-
-function parseEvaluation(line){
-
-    if(!engineThinking) return;
-
-
-    const match =
-        line.match(
-            /score (cp|mate) (-?\d+)/
-        );
-
-    if(!match) return;
-
-
-    const type =
-        match[1];
-
-    const value =
-        parseInt(match[2],10);
-
-
-    let score = 0;
-
-
-    if(type === "cp"){
-
-        score = value / 100;
-
-    }else{
-
-        score =
-            value > 0
-            ? 10
-            : -10;
-    }
-
-
-    /*
-       Stockfish is calculating Black's position.
-       Positive display = White advantage.
-    */
-
-    score *= -1;
-
-    score =
-        Math.max(
-            -10,
-            Math.min(10,score)
-        );
-
-
-    const percentage =
-        50 + score * 4.5;
-
-
-    evalFill.style.width =
-        percentage + "%";
-
-
-    evalNumber.textContent =
-        (score >= 0 ? "+" : "") +
-        score.toFixed(2);
-}
-
-
-function updateEvaluationFromPosition(){
-
-    if(engineThinking) return;
-
-    evalFill.style.width = "50%";
-
-    evalNumber.textContent = "+0.00";
-}
-
-
-/* =========================================================
-   MOVES
-========================================================= */
-
-function updateMoves(){
-
-    const history =
-        game.history();
-
-    moveCountEl.textContent =
-        history.length;
-
-
-    if(history.length === 0){
-
-        movesEl.innerHTML =
-            '<div class="empty">No moves yet</div>';
-
-        return;
-    }
-
-
-    movesEl.innerHTML = "";
-
-
-    for(
-        let i=0;
-        i<history.length;
-        i+=2
-    ){
-
-        const row =
-            document.createElement("div");
-
-        row.className = "move-row";
-
-
-        const number =
-            document.createElement("span");
-
-        number.className = "move-number";
-
-        number.textContent =
-            (Math.floor(i/2)+1) + ".";
-
-
-        const white =
-            document.createElement("span");
-
-        white.className = "move";
-
-        white.textContent =
-            history[i] || "";
-
-
-        const black =
-            document.createElement("span");
-
-        black.className = "move";
-
-        black.textContent =
-            history[i+1] || "";
-
-
-        row.appendChild(number);
-        row.appendChild(white);
-        row.appendChild(black);
-
-        movesEl.appendChild(row);
-    }
-
-
-    movesEl.scrollTop =
-        movesEl.scrollHeight;
-}
-
-
-/* =========================================================
-   TURN UI
-========================================================= */
-
-function updateTurnUI(){
-
-    if(gameFinished) return;
-
-
-    if(game.turn() === "w"){
-
-        turnLabel.textContent =
-            "Your move";
-
-    }else{
-
-        turnLabel.textContent =
-            engineThinking
-            ? "Stockfish thinking…"
-            : "Black to move";
-    }
-
-
-    whiteClockEl.classList.toggle(
-        "active",
-        game.turn() === "w"
-    );
-
-    blackClockEl.classList.toggle(
-        "active",
-        game.turn() === "b"
-    );
-}
-
-
-/* =========================================================
-   GAME STATE
-========================================================= */
-
-function checkGameState(){
-
-    if(game.is_checkmate()){
-
-        finishGame(
-            game.turn() === "w"
-            ? "Black wins"
-            : "White wins",
-            "Checkmate."
-        );
-
-        return;
-    }
-
-
-    if(game.is_stalemate()){
-
-        finishGame(
-            "Draw",
-            "Stalemate."
-        );
-
-        return;
-    }
-
-
-    if(game.is_insufficient_material()){
-
-        finishGame(
-            "Draw",
-            "Insufficient material."
-        );
-
-        return;
-    }
-
-
-    if(game.is_threefold_repetition()){
-
-        finishGame(
-            "Draw",
-            "Threefold repetition."
-        );
-
-        return;
-    }
-
-
-    if(game.is_draw()){
-
-        finishGame(
-            "Draw",
-            "The game is drawn."
-        );
-
-        return;
-    }
-
-
-    updateTurnUI();
-}
-
-
-/* =========================================================
-   GAME OVER
-========================================================= */
-
-function finishGame(title,text){
-
-    gameFinished = true;
-
-    cancelEngineSearch();
-
-    stopClock();
-
-
-    document.getElementById(
-        "gameOverTitle"
-    ).textContent = title;
-
-
-    document.getElementById(
-        "gameOverText"
-    ).textContent = text;
-
-
-    document.getElementById(
-        "gameOverOverlay"
-    ).classList.add("show");
-}
-
-
-/* =========================================================
-   CLOCK
-========================================================= */
-
-function parseMode(value){
-
-    const parts =
-        value.split("+");
-
-    return {
-        initial:parseInt(parts[0],10),
-        increment:parseInt(parts[1],10)
-    };
-}
-
-
-function formatTime(seconds){
-
-    seconds =
-        Math.max(0,Math.floor(seconds));
-
-    const minutes =
-        Math.floor(seconds / 60);
-
-    const secs =
-        seconds % 60;
-
-    return (
-        minutes +
-        ":" +
-        String(secs).padStart(2,"0")
-    );
-}
-
-
-function updateClockUI(){
-
-    whiteTimeEl.textContent =
-        formatTime(whiteSeconds);
-
-    blackTimeEl.textContent =
-        formatTime(blackSeconds);
-
-
-    whiteClockEl.classList.toggle(
-        "low",
-        whiteSeconds <= 10
-    );
-
-    blackClockEl.classList.toggle(
-        "low",
-        blackSeconds <= 10
-    );
-}
-
-
-function startClock(){
-
-    if(clockInterval)
-        return;
-
-    clockInterval =
-        setInterval(
-            tickClock,
-            1000
-        );
-}
-
-
-function stopClock(){
-
-    if(clockInterval){
-
-        clearInterval(clockInterval);
-
-        clockInterval = null;
-    }
-}
-
-
-function tickClock(){
-
-    if(!gameStarted) return;
-
-    if(gameFinished) return;
-
-
-    if(currentTurn === "w"){
-
-        whiteSeconds--;
-
-        if(whiteSeconds <= 0){
-
-            whiteSeconds = 0;
-
-            updateClockUI();
-
-            finishGame(
-                "Black wins",
-                "White ran out of time."
-            );
-
-            return;
-        }
-
-    }else{
-
-        blackSeconds--;
-
-        if(blackSeconds <= 0){
-
-            blackSeconds = 0;
-
-            updateClockUI();
-
-            finishGame(
-                "White wins",
-                "Black ran out of time."
-            );
-
-            return;
-        }
-    }
-
-
-    updateClockUI();
-}
-
-
-/* =========================================================
-   NEW GAME
-========================================================= */
-
-function newGame(){
-
-    cancelEngineSearch();
-
-    stopClock();
-
-    game = new Chess();
-
-    selectedSquare = null;
-
-    legalTargets = [];
-
-    lastMove = null;
-
-    pendingPromotion = null;
-
-    gameFinished = false;
-
-    gameStarted = false;
-
-    currentTurn = "w";
-
-
-    const mode =
-        parseMode(currentMode);
-
-
-    whiteSeconds =
-        mode.initial;
-
-    blackSeconds =
-        mode.initial;
-
-    incrementSeconds =
-        mode.increment;
-
-
-    updateClockUI();
-
-    updateMoves();
-
-    updateTurnUI();
-
-    updateEvaluationFromPosition();
-
-    renderBoard();
-
-
-    document
-        .getElementById("gameOverOverlay")
-        .classList
-        .remove("show");
-
-
-    /*
-       Reset the existing engine.
-    */
-
-    if(engine){
-
-        engineReady = false;
-
-        setEngineStatus(
-            "loading",
-            "Resetting Stockfish…"
-        );
-
-
-        try{
-
-            engine.postMessage(
-                "ucinewgame"
-            );
-
-            engine.postMessage(
-                "isready"
-            );
-
-        }catch(error){
-
-            failEngine(
-                "Stockfish stopped responding."
-            );
-        }
-
-    }else{
-
-        startEngine();
-    }
-}
-
-
-/* =========================================================
-   UNDO
-========================================================= */
-
-function undoMove(){
-
-    if(gameFinished) return;
-
-    cancelEngineSearch();
-
-
-    /*
-       Usually the position is:
-
-       White move
-       Black move
-
-       So remove both.
-    */
-
-    if(game.history().length >= 2){
-
-        game.undo();
-        game.undo();
-
-    }else if(game.history().length === 1){
-
-        game.undo();
-    }
-
-
-    lastMove = null;
-
-    selectedSquare = null;
-
-    legalTargets = [];
-
-
-    const mode =
-        parseMode(currentMode);
-
-
-    whiteSeconds =
-        mode.initial;
-
-    blackSeconds =
-        mode.initial;
-
-
-    gameStarted =
-        game.history().length > 0;
-
-    currentTurn =
-        game.turn();
-
-
-    updateClockUI();
-
-    updateMoves();
-
-    updateTurnUI();
-
-    renderBoard();
-
-    updateEvaluationFromPosition();
-}
-
-
-/* =========================================================
-   FLIP
-========================================================= */
-
-function flipBoard(){
-
-    orientation =
-        orientation === "w"
-        ? "b"
-        : "w";
-
-    renderBoard();
 }
 
 
 /* =========================================================
    PROMOTION
-========================================================= */
+   ========================================================= */
 
 document
-    .querySelectorAll(".promo")
-    .forEach(
-        button => {
+  .querySelectorAll(
+    ".promotion-buttons button"
+  )
+  .forEach(button => {
 
-            button.addEventListener(
-                "click",
-                function(){
+    button.addEventListener(
+      "click",
+      function() {
 
-                    if(!pendingPromotion)
-                        return;
+        const promotion =
+          this.dataset.piece;
 
-
-                    const promotion =
-                        button.dataset.piece;
-
-
-                    document
-                        .getElementById(
-                            "promotionOverlay"
-                        )
-                        .classList
-                        .remove("show");
-
-
-                    makePlayerMove({
-
-                        from:
-                            pendingPromotion.from,
-
-                        to:
-                            pendingPromotion.to,
-
-                        promotion:
-                            promotion
-                    });
-
-
-                    pendingPromotion = null;
-                }
-            );
+        if (!pendingPromotion) {
+          return;
         }
+
+        const move =
+          pendingPromotion;
+
+        pendingPromotion = null;
+
+        promotionModal.classList.remove(
+          "show"
+        );
+
+        makePlayerMove(
+          move.from,
+          move.to,
+          promotion
+        );
+
+      }
     );
+
+  });
 
 
 /* =========================================================
-   SOUND
-========================================================= */
+   ENGINE MOVE
+   ========================================================= */
 
-function playMoveSound(move){
+function requestEngineMove() {
 
-    if(!soundEnabled) return;
+  if (!engineReady) {
+
+    setEngineStatus(
+      "Waiting for Stockfish…"
+    );
+
+    return;
+  }
+
+  if (game.game_over()) {
+    return;
+  }
+
+  engineThinking = true;
+
+  thinkingOverlay.classList.add(
+    "show"
+  );
+
+  enginePill.className =
+    "engine-pill thinking";
+
+  engineText.textContent =
+    "Nova is thinking";
+
+  engineStatus.textContent =
+    "Nova is calculating a move…";
 
 
-    try{
+  /*
+    Stop old move timeout.
+  */
 
-        if(!audioContext){
+  clearTimeout(engineMoveTimer);
 
-            audioContext =
-                new (
-                    window.AudioContext ||
-                    window.webkitAudioContext
-                )();
+
+  /*
+    Get current FEN.
+  */
+
+  const fen =
+    game.fen();
+
+
+  try {
+
+    engine.postMessage(
+      "stop"
+    );
+
+    engine.postMessage(
+      "position fen " + fen
+    );
+
+    engine.postMessage(
+      "go movetime " +
+      engineThinkTime
+    );
+
+  } catch (error) {
+
+    finishEngineThinking();
+
+    engineError(
+      "Could not send position: " +
+      error.message
+    );
+
+    return;
+  }
+
+
+  /*
+    Safety timeout.
+
+    If ASM somehow doesn't return bestmove,
+    the UI won't stay frozen forever.
+  */
+
+  engineMoveTimer =
+    setTimeout(
+      function() {
+
+        if (engineThinking) {
+
+          try {
+            engine.postMessage("stop");
+          } catch (_) {}
+
+          finishEngineThinking();
+
+          engineError(
+            "Stockfish timed out before returning bestmove."
+          );
+
+        }
+
+      },
+      Math.max(
+        engineThinkTime + 15000,
+        20000
+      )
+    );
+
+}
+
+
+/* =========================================================
+   BEST MOVE
+   ========================================================= */
+
+function handleBestMove(line) {
+
+  if (!engineThinking) {
+    return;
+  }
+
+  clearTimeout(engineMoveTimer);
+
+
+  const parts =
+    line.split(/\s+/);
+
+  const bestMove =
+    parts[1];
+
+
+  if (
+    !bestMove ||
+    bestMove === "(none)"
+  ) {
+
+    finishEngineThinking();
+
+    checkGameEnd();
+
+    return;
+  }
+
+
+  /*
+    UCI move:
+      e7e5
+      e7e8q
+  */
+
+  const from =
+    bestMove.slice(0,2);
+
+  const to =
+    bestMove.slice(2,4);
+
+  const promotion =
+    bestMove.length >= 5
+      ? bestMove[4]
+      : undefined;
+
+
+  const move =
+    game.move({
+      from: from,
+      to: to,
+      promotion: promotion
+    });
+
+
+  if (!move) {
+
+    finishEngineThinking();
+
+    engineError(
+      "Stockfish returned illegal move: " +
+      bestMove
+    );
+
+    return;
+  }
+
+
+  blackSeconds +=
+    incrementSeconds;
+
+
+  finishEngineThinking();
+
+  renderBoard();
+  renderMoves();
+  updateClocks();
+
+  checkGameEnd();
+
+  if (!game.game_over()) {
+
+    startClock();
+
+    setEngineStatus(
+      "Stockfish ready",
+      "ready"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   FINISH ENGINE
+   ========================================================= */
+
+function finishEngineThinking() {
+
+  engineThinking = false;
+
+  thinkingOverlay.classList.remove(
+    "show"
+  );
+
+  enginePill.className =
+    "engine-pill ready";
+
+  engineText.textContent =
+    "Stockfish ready";
+
+}
+
+
+/* =========================================================
+   MOVE LIST
+   ========================================================= */
+
+function renderMoves() {
+
+  const history =
+    game.history();
+
+
+  moveCount.textContent =
+    history.length;
+
+
+  if (!history.length) {
+
+    movesElement.innerHTML =
+      '<div class="empty">Make your first move.</div>';
+
+    return;
+  }
+
+
+  let html = "";
+
+
+  for (
+    let i = 0;
+    i < history.length;
+    i += 2
+  ) {
+
+    const moveNumber =
+      Math.floor(i / 2) + 1;
+
+    const white =
+      history[i] || "";
+
+    const black =
+      history[i + 1] || "";
+
+    const whiteCurrent =
+      i === history.length - 1;
+
+    const blackCurrent =
+      i + 1 === history.length - 1;
+
+
+    html += `
+      <div class="move-row">
+        <div class="move-number">${moveNumber}.</div>
+
+        <div class="move ${whiteCurrent ? "current" : ""}">
+          ${white}
+        </div>
+
+        <div class="move ${blackCurrent ? "current" : ""}">
+          ${black}
+        </div>
+      </div>
+    `;
+
+  }
+
+
+  movesElement.innerHTML =
+    html;
+
+  movesElement.scrollTop =
+    movesElement.scrollHeight;
+
+}
+
+
+/* =========================================================
+   CLOCK
+   ========================================================= */
+
+function formatTime(seconds) {
+
+  seconds =
+    Math.max(
+      0,
+      Math.ceil(seconds)
+    );
+
+  const minutes =
+    Math.floor(seconds / 60);
+
+  const secs =
+    seconds % 60;
+
+  return (
+    minutes +
+    ":" +
+    String(secs).padStart(2,"0")
+  );
+
+}
+
+
+function updateClocks() {
+
+  whiteClock.textContent =
+    formatTime(whiteSeconds);
+
+  blackClock.textContent =
+    formatTime(blackSeconds);
+
+
+  whiteClock.classList.toggle(
+    "active",
+    game.turn() === "w" &&
+    !game.game_over()
+  );
+
+  blackClock.classList.toggle(
+    "active",
+    game.turn() === "b" &&
+    !game.game_over()
+  );
+
+}
+
+
+function startClock() {
+
+  clearInterval(clockTimer);
+
+
+  if (game.game_over()) {
+    return;
+  }
+
+
+  clockTimer =
+    setInterval(
+      function() {
+
+        if (
+          !gameStarted ||
+          engineThinking
+        ) {
+          return;
         }
 
 
-        const oscillator =
-            audioContext.createOscillator();
+        if (game.turn() === "w") {
 
-        const gain =
-            audioContext.createGain();
+          whiteSeconds =
+            Math.max(
+              0,
+              whiteSeconds - .1
+            );
 
+        } else {
 
-        oscillator.type =
-            move.captured
-            ? "square"
-            : "sine";
+          blackSeconds =
+            Math.max(
+              0,
+              blackSeconds - .1
+            );
 
-
-        oscillator.frequency.value =
-            move.captured
-            ? 180
-            : 320;
-
-
-        gain.gain.setValueAtTime(
-            .04,
-            audioContext.currentTime
-        );
+        }
 
 
-        gain.gain.exponentialRampToValueAtTime(
-            .001,
-            audioContext.currentTime + .08
-        );
+        updateClocks();
 
 
-        oscillator.connect(gain);
+        if (
+          whiteSeconds <= 0 ||
+          blackSeconds <= 0
+        ) {
 
-        gain.connect(
-            audioContext.destination
-        );
+          clearInterval(clockTimer);
+
+          const winner =
+            whiteSeconds <= 0
+              ? "Black wins on time."
+              : "White wins on time.";
+
+          endGame(
+            winner
+          );
+
+        }
+
+      },
+      100
+    );
+
+}
 
 
-        oscillator.start();
+/* =========================================================
+   GAME END
+   ========================================================= */
 
-        oscillator.stop(
-            audioContext.currentTime + .08
-        );
+function checkGameEnd() {
 
-    }catch(error){}
+  if (game.is_checkmate()) {
+
+    const winner =
+      game.turn() === "w"
+        ? "Nova wins by checkmate."
+        : "You win by checkmate.";
+
+    endGame(winner);
+
+    return true;
+  }
+
+
+  if (game.is_draw()) {
+
+    endGame(
+      "Draw."
+    );
+
+    return true;
+  }
+
+
+  return false;
+
+}
+
+
+function endGame(message) {
+
+  clearInterval(clockTimer);
+
+  engineThinking = false;
+
+  thinkingOverlay.classList.remove(
+    "show"
+  );
+
+  engineText.textContent =
+    message;
+
+  engineStatus.textContent =
+    message;
+
+  enginePill.className =
+    "engine-pill";
+
+}
+
+
+/* =========================================================
+   NEW GAME
+   ========================================================= */
+
+function newGame() {
+
+  clearInterval(clockTimer);
+  clearTimeout(engineMoveTimer);
+
+  engineThinking = false;
+
+  pendingPromotion = null;
+
+  promotionModal.classList.remove(
+    "show"
+  );
+
+
+  game =
+    new Chess();
+
+
+  selectedSquare = null;
+  legalTargets = [];
+
+
+  const seconds =
+    Number(
+      timeControl.value
+    );
+
+  initialSeconds =
+    seconds;
+
+  whiteSeconds =
+    seconds;
+
+  blackSeconds =
+    seconds;
+
+
+  lastEvaluation = 0;
+  lastDepth = 0;
+
+
+  evalNumber.textContent =
+    "0.0";
+
+  evalLabel.textContent =
+    "Starting position";
+
+  depthLabel.textContent =
+    "Depth —";
+
+
+  gameStarted = false;
+
+
+  updateClocks();
+  renderMoves();
+  createBoard();
+
+
+  if (engine) {
+
+    try {
+
+      engine.postMessage(
+        "stop"
+      );
+
+      engine.postMessage(
+        "ucinewgame"
+      );
+
+      engine.postMessage(
+        "isready"
+      );
+
+    } catch (_) {}
+
+  }
+
+
+  if (engineReady) {
+
+    setEngineStatus(
+      "Stockfish ready",
+      "ready"
+    );
+
+  } else {
+
+    setEngineStatus(
+      "Waiting for Stockfish…"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   UNDO
+   ========================================================= */
+
+function undoMove() {
+
+  if (engineThinking) {
+
+    try {
+      engine.postMessage("stop");
+    } catch (_) {}
+
+    clearTimeout(
+      engineMoveTimer
+    );
+
+    engineThinking = false;
+
+    thinkingOverlay.classList.remove(
+      "show"
+    );
+
+  }
+
+
+  /*
+    Always undo the engine move + your move
+    when possible.
+  */
+
+  if (game.history().length >= 2) {
+
+    game.undo();
+    game.undo();
+
+  } else if (
+    game.history().length === 1
+  ) {
+
+    game.undo();
+
+  } else {
+
+    return;
+  }
+
+
+  selectedSquare = null;
+  legalTargets = [];
+
+
+  whiteSeconds =
+    initialSeconds;
+
+  blackSeconds =
+    initialSeconds;
+
+
+  gameStarted = false;
+
+
+  updateClocks();
+  renderBoard();
+  renderMoves();
+
+
+  if (engineReady) {
+
+    setEngineStatus(
+      "Stockfish ready",
+      "ready"
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   RESIGN
+   ========================================================= */
+
+function resign() {
+
+  if (game.game_over()) {
+    return;
+  }
+
+  endGame(
+    "You resigned. Nova wins."
+  );
+
+}
+
+
+/* =========================================================
+   FLIP BOARD
+   ========================================================= */
+
+function flipBoard() {
+
+  flipped =
+    !flipped;
+
+  createBoard();
+
 }
 
 
 /* =========================================================
    SETTINGS
-========================================================= */
+   ========================================================= */
 
-document
-    .getElementById("difficultySelect")
-    .addEventListener(
-        "change",
-        function(){
+difficulty.addEventListener(
+  "change",
+  function() {
 
-            engineThinkTime =
-                parseInt(
-                    this.value,
-                    10
-                );
-        }
-    );
+    engineThinkTime =
+      Number(
+        this.value
+      );
+
+  }
+);
 
 
-document
-    .getElementById("modeSelect")
-    .addEventListener(
-        "change",
-        function(){
+timeControl.addEventListener(
+  "change",
+  function() {
 
-            currentMode =
-                this.value;
+    /*
+      Only change clocks before
+      a game has started.
+    */
 
-            modeLabelEl.textContent =
-                modeNames[currentMode];
+    if (
+      game.history().length === 0
+    ) {
 
-            newGame();
-        }
-    );
+      const seconds =
+        Number(
+          this.value
+        );
 
+      initialSeconds =
+        seconds;
 
-document
-    .getElementById("themeSelect")
-    .addEventListener(
-        "change",
-        function(){
+      whiteSeconds =
+        seconds;
 
-            if(this.value === "blue"){
+      blackSeconds =
+        seconds;
 
-                document.documentElement
-                    .style.setProperty(
-                        "--light",
-                        "#dcecff"
-                    );
+      updateClocks();
 
-                document.documentElement
-                    .style.setProperty(
-                        "--dark",
-                        "#4f72a4"
-                    );
+    }
 
-            }else{
-
-                document.documentElement
-                    .style.setProperty(
-                        "--light",
-                        "#e8edf5"
-                    );
-
-                document.documentElement
-                    .style.setProperty(
-                        "--dark",
-                        "#62718d"
-                    );
-            }
-        }
-    );
+  }
+);
 
 
 /* =========================================================
    BUTTONS
-========================================================= */
+   ========================================================= */
 
 document
-    .getElementById("newGameBtn")
-    .addEventListener(
-        "click",
-        newGame
-    );
-
-
-document
-    .getElementById("gameOverNewBtn")
-    .addEventListener(
-        "click",
-        newGame
-    );
+  .getElementById("newGameBtn")
+  .addEventListener(
+    "click",
+    newGame
+  );
 
 
 document
-    .getElementById("undoBtn")
-    .addEventListener(
-        "click",
-        undoMove
-    );
+  .getElementById("undoBtn")
+  .addEventListener(
+    "click",
+    undoMove
+  );
 
 
 document
-    .getElementById("flipBtn")
-    .addEventListener(
-        "click",
-        flipBoard
-    );
+  .getElementById("resignBtn")
+  .addEventListener(
+    "click",
+    resign
+  );
 
 
 document
-    .getElementById("soundBtn")
-    .addEventListener(
-        "click",
-        function(){
-
-            soundEnabled =
-                !soundEnabled;
-
-            this.textContent =
-                soundEnabled
-                ? "🔊 Sound"
-                : "🔇 Sound";
-        }
-    );
-
-
-document
-    .getElementById("resignBtn")
-    .addEventListener(
-        "click",
-        function(){
-
-            if(gameFinished) return;
-
-            finishGame(
-                "Black wins",
-                "You resigned."
-            );
-        }
-    );
-
-
-/* =========================================================
-   SETTINGS BUTTON
-========================================================= */
-
-document
-    .getElementById("settingsBtn")
-    .addEventListener(
-        "click",
-        function(){
-
-            document
-                .getElementById("difficultySelect")
-                .focus();
-        }
-    );
+  .getElementById("flipBtn")
+  .addEventListener(
+    "click",
+    flipBoard
+  );
 
 
 /* =========================================================
    INITIALIZE
-========================================================= */
+   ========================================================= */
 
-createBoard();
+function initialize() {
 
-updateClockUI();
+  const seconds =
+    Number(
+      timeControl.value
+    );
 
-updateMoves();
+  initialSeconds =
+    seconds;
 
-updateTurnUI();
+  whiteSeconds =
+    seconds;
 
-startEngine();
+  blackSeconds =
+    seconds;
+
+
+  updateClocks();
+
+  createBoard();
+
+  renderMoves();
+
+  updateEvalBar();
+
+  startEngine();
+
+}
+
+
+initialize();
 
 </script>
 
