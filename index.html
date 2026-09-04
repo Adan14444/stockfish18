@@ -36,9 +36,9 @@
   --red: #ff6262;
 
   --board-max: min(
-    72vh,
-    calc(100vw - 390px),
-    680px
+    calc(100vh - 145px),
+    calc(100vw - 315px),
+    720px
   );
 }
 
@@ -188,7 +188,7 @@ body {
   padding: 18px;
 
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-columns: minmax(0, 1fr) 270px;
   gap: 18px;
 
   align-items: start;
@@ -379,8 +379,8 @@ body {
 .piece {
   position: relative;
 
-  width: 82%;
-  height: 82%;
+  width: 72%;
+  height: 72%;
 
   display: grid;
   place-items: center;
@@ -391,7 +391,7 @@ body {
     "Noto Sans Symbols 2",
     serif;
 
-  font-size: clamp(29px, 6.5vw, 63px);
+  font-size: clamp(25px, 5.2vw, 56px);
 
   line-height: 1;
 
@@ -1291,6 +1291,7 @@ let blackSeconds = 300;
 let incrementSeconds = 0;
 
 let clockTimer = null;
+let lastClockTick = 0;
 
 let gameStarted = false;
 
@@ -2693,70 +2694,40 @@ function startClock() {
 
   clearInterval(clockTimer);
 
+  if (game.game_over()) return;
 
-  if (game.game_over()) {
-    return;
-  }
+  lastClockTick = performance.now();
 
+  clockTimer = setInterval(function() {
 
-  clockTimer =
-    setInterval(
-      function() {
+    if (!gameStarted || game.game_over()) return;
 
-        if (
-          !gameStarted ||
-          engineThinking
-        ) {
-          return;
-        }
+    const now = performance.now();
+    const elapsed = (now - lastClockTick) / 1000;
+    lastClockTick = now;
 
+    // The clock keeps running while Stockfish thinks.
+    if (game.turn() === "w") {
+      whiteSeconds = Math.max(0, whiteSeconds - elapsed);
+    } else {
+      blackSeconds = Math.max(0, blackSeconds - elapsed);
+    }
 
-        if (game.turn() === "w") {
+    updateClocks();
 
-          whiteSeconds =
-            Math.max(
-              0,
-              whiteSeconds - .1
-            );
+    if (whiteSeconds <= 0) {
+      clearInterval(clockTimer);
+      endGame("Nova wins on time.");
+      return;
+    }
 
-        } else {
+    if (blackSeconds <= 0) {
+      clearInterval(clockTimer);
+      endGame("You win on time.");
+    }
 
-          blackSeconds =
-            Math.max(
-              0,
-              blackSeconds - .1
-            );
-
-        }
-
-
-        updateClocks();
-
-
-        if (
-          whiteSeconds <= 0 ||
-          blackSeconds <= 0
-        ) {
-
-          clearInterval(clockTimer);
-
-          const winner =
-            whiteSeconds <= 0
-              ? "Black wins on time."
-              : "White wins on time.";
-
-          endGame(
-            winner
-          );
-
-        }
-
-      },
-      100
-    );
-
+  }, 50);
 }
-
 
 /* =========================================================
    GAME END
@@ -3118,6 +3089,14 @@ document
    ========================================================= */
 
 function initialize() {
+
+  if (typeof Chess !== "function") {
+    setEngineStatus(
+      "CHESS ERROR: chess.js did not load. Your school network may be blocking the CDN.",
+      "error"
+    );
+    return;
+  }
 
   const seconds =
     Number(
