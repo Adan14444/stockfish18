@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Nova Chess V50 — Ocean Intelligence Edition</title>
+<title>Nova Chess V100 — Atlantis Ultimate Edition</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
@@ -2170,6 +2170,418 @@ body.v50Zen .boardShell{
     .v50BoardHud,.v50BoardFooter{display:none;}
 }
 
+
+/* =========================================================
+   NOVA CHESS V100 — ATLANTIS ULTIMATE EDITION
+   Crazy-clean, GPU-friendly, no canvas loops.
+   ========================================================= */
+
+:root{
+    --v100-aqua:#63f6ff;
+    --v100-deep:#03131a;
+    --v100-gold:#f5d77a;
+    --v100-green:#39d6a6;
+    --v100-coral:#ff9c86;
+}
+
+.v100Badge{
+    border-color:rgba(111,251,255,.42);
+    background:linear-gradient(135deg,rgba(63,239,251,.26),rgba(32,123,180,.18));
+    color:#eaffff;
+    box-shadow:0 0 0 1px rgba(255,255,255,.03),0 0 20px rgba(54,229,244,.12);
+}
+
+.v100CommandBtn{
+    width:36px;
+    height:36px;
+    display:grid;
+    place-items:center;
+    border:1px solid rgba(100,242,251,.14);
+    border-radius:11px;
+    background:rgba(7,39,47,.68);
+    color:#b7faff;
+    font-size:16px;
+    cursor:pointer;
+}
+
+.v100CommandBtn:hover{
+    background:rgba(12,63,73,.82);
+}
+
+.v100QuickGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.v100StatusStrip{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    margin:12px 0 2px;
+}
+
+.v100StatusStrip div{
+    padding:9px 7px;
+    border:1px solid rgba(103,239,249,.08);
+    border-radius:10px;
+    background:rgba(3,26,33,.48);
+    text-align:center;
+}
+
+.v100StatusStrip span{
+    display:block;
+    color:#658f96;
+    font-size:7px;
+    font-weight:900;
+    letter-spacing:.7px;
+    text-transform:uppercase;
+}
+
+.v100StatusStrip strong{
+    display:block;
+    margin-top:4px;
+    color:#dfffff;
+    font-size:9px;
+}
+
+.v100IntelHero{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:13px;
+    border:1px solid rgba(105,239,249,.10);
+    border-radius:14px;
+    background:
+        radial-gradient(circle at 90% 10%,rgba(77,239,247,.09),transparent 40%),
+        rgba(3,27,34,.54);
+}
+
+.v100IntelIcon{
+    width:42px;
+    height:42px;
+    flex:0 0 42px;
+    display:grid;
+    place-items:center;
+    border:1px solid rgba(94,242,251,.15);
+    border-radius:13px;
+    background:linear-gradient(145deg,rgba(45,195,210,.18),rgba(8,66,78,.38));
+    color:var(--v100-gold);
+    font-size:22px;
+}
+
+.v100IntelHero span{
+    display:block;
+    color:#68a2a9;
+    font-size:7px;
+    font-weight:900;
+    letter-spacing:.8px;
+    text-transform:uppercase;
+}
+
+.v100IntelHero strong{
+    display:block;
+    margin-top:3px;
+    color:#edffff;
+    font-size:13px;
+}
+
+.v100IntelHero small{
+    display:block;
+    margin-top:3px;
+    color:#7da8ae;
+    font-size:9px;
+    line-height:1.35;
+}
+
+.v100MeterRow{
+    display:grid;
+    grid-template-columns:58px 1fr 54px;
+    align-items:center;
+    gap:8px;
+    margin-top:11px;
+    color:#7faeb4;
+    font-size:9px;
+}
+
+.v100MeterRow > strong{
+    color:#dffcff;
+    font-size:9px;
+    text-align:right;
+}
+
+.v100Meter{
+    height:7px;
+    overflow:hidden;
+    border-radius:999px;
+    background:rgba(2,19,25,.75);
+}
+
+.v100Meter i{
+    display:block;
+    width:50%;
+    height:100%;
+    border-radius:inherit;
+    background:linear-gradient(90deg,#1ab3c6,#65f4ef);
+    transition:width .2s ease;
+}
+
+/* Atlantean / Aquaman-like ocean-hero piece treatment */
+.piece{
+    transition:transform .12s ease,filter .12s ease;
+    will-change:transform;
+}
+
+.atlanteanLight{
+    color:#dffcff;
+    background:linear-gradient(180deg,#f6ffff 0%,#83f6ff 38%,#3dd4b0 67%,#f4d273 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 2px 1px rgba(0,20,26,.55));
+    text-shadow:none;
+}
+
+.atlanteanDark{
+    color:#062f3a;
+    background:linear-gradient(180deg,#184e62 0%,#08313f 45%,#0a745f 72%,#b18d3f 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+    filter:drop-shadow(0 2px 1px rgba(0,0,0,.68));
+    text-shadow:none;
+}
+
+/* little trident-like glint without extra DOM */
+.atlanteanLight::after,
+.atlanteanDark::after{
+    content:"";
+    position:absolute;
+    left:50%;
+    top:8%;
+    width:18%;
+    height:3px;
+    border-radius:999px;
+    transform:translateX(-50%);
+    background:rgba(248,219,121,.46);
+    opacity:.75;
+}
+
+@keyframes v100Land{
+    0%{transform:translateY(-7px) scale(1.06)}
+    70%{transform:translateY(1px) scale(.99)}
+    100%{transform:translateY(-2px) scale(1)}
+}
+
+body:not(.v50NoMotion):not(.v100Performance) .v100Landed{
+    animation:v100Land .18s ease-out;
+}
+
+/* Clean animated sea light: transform/opacity only */
+@keyframes v100Caustic{
+    0%{transform:translate3d(-3%,0,0);opacity:.28}
+    50%{transform:translate3d(3%,-1%,0);opacity:.42}
+    100%{transform:translate3d(-3%,0,0);opacity:.28}
+}
+
+body::before{
+    content:"";
+    position:fixed;
+    inset:62px 0 0 0;
+    pointer-events:none;
+    z-index:0;
+    background:
+        repeating-linear-gradient(
+            113deg,
+            transparent 0 70px,
+            rgba(96,244,255,.025) 72px 74px,
+            transparent 76px 145px
+        );
+    opacity:.3;
+}
+
+body:not(.v50NoMotion):not(.v100Performance)::before{
+    animation:v100Caustic 12s ease-in-out infinite;
+}
+
+.v50OceanScene{
+    opacity:.72;
+}
+
+body.v100Performance .v50OceanScene,
+body.v100Performance .v4OceanArt{
+    display:none !important;
+}
+
+body.v100Performance .card,
+body.v100Performance .v4Dock{
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+}
+
+body.v100Performance .boardShell{
+    box-shadow:0 0 0 1px rgba(100,243,255,.12),0 18px 42px rgba(0,0,0,.40) !important;
+}
+
+body.v100Cinema .sidebar,
+body.v100Cinema .topbar{
+    opacity:.16;
+    transition:opacity .2s ease;
+}
+
+body.v100Cinema .sidebar:hover,
+body.v100Cinema .topbar:hover{
+    opacity:1;
+}
+
+body.v100Cinema .boardColumn{
+    transform:scale(1.02);
+    transform-origin:center;
+}
+
+/* Command palette */
+.v100Overlay{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    display:none;
+    align-items:flex-start;
+    justify-content:center;
+    padding:10vh 18px 20px;
+    background:rgba(0,10,14,.66);
+}
+
+.v100Overlay.open{
+    display:flex;
+}
+
+.v100Palette,
+.v100ShortcutPanel{
+    width:min(560px,100%);
+    overflow:hidden;
+    border:1px solid rgba(106,242,250,.18);
+    border-radius:18px;
+    background:linear-gradient(180deg,#082a33,#041b22);
+    box-shadow:0 28px 90px rgba(0,0,0,.52);
+}
+
+.v100PaletteHead{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:15px 16px;
+    border-bottom:1px solid rgba(103,239,249,.08);
+}
+
+.v100PaletteHead span{
+    display:block;
+    color:#60a7ae;
+    font-size:7px;
+    font-weight:900;
+    letter-spacing:1.1px;
+}
+
+.v100PaletteHead strong{
+    display:block;
+    margin-top:3px;
+    color:#ecffff;
+    font-size:14px;
+}
+
+.v100PaletteHead button{
+    width:34px;
+    height:34px;
+    border:0;
+    border-radius:10px;
+    background:rgba(86,235,246,.08);
+    color:#bdfcff;
+    font-size:22px;
+}
+
+.v100PaletteSearch{
+    width:calc(100% - 28px);
+    min-height:44px;
+    margin:14px;
+    padding:0 13px;
+    border:1px solid rgba(106,239,249,.12);
+    border-radius:11px;
+    outline:none;
+    background:#03171d;
+    color:#eaffff;
+}
+
+.v100CommandList{
+    max-height:390px;
+    overflow:auto;
+    padding:0 10px 12px;
+}
+
+.v100CommandList button{
+    width:100%;
+    min-height:44px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:9px 11px;
+    border:0;
+    border-radius:10px;
+    background:transparent;
+    color:#bfe7ea;
+    text-align:left;
+}
+
+.v100CommandList button:hover{
+    background:rgba(78,231,241,.07);
+    color:#f0ffff;
+}
+
+kbd{
+    min-width:28px;
+    padding:3px 6px;
+    border:1px solid rgba(109,240,250,.12);
+    border-bottom-color:rgba(109,240,250,.22);
+    border-radius:6px;
+    background:rgba(0,15,20,.42);
+    color:#78b9bf;
+    font:700 8px ui-monospace,SFMono-Regular,Menlo,monospace;
+    text-align:center;
+}
+
+.v100ShortcutGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    padding:14px;
+}
+
+.v100ShortcutGrid div{
+    min-height:46px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:9px 10px;
+    border:1px solid rgba(105,239,249,.08);
+    border-radius:10px;
+    background:rgba(2,22,28,.45);
+    color:#9ec8cc;
+    font-size:10px;
+}
+
+#v100ThreatBadge{
+    color:#99f5d8;
+}
+
+.square.selected .piece{
+    transform:translateY(-3px) scale(1.045);
+}
+
+@media(max-width:980px){
+    .v100ShortcutGrid{grid-template-columns:1fr;}
+    .v100Overlay{padding-top:40px;}
+}
+
 </style>
 </head>
 
@@ -2228,7 +2640,7 @@ body.v50Zen .boardShell{
 
     <div class="logo">
         <div class="logoIcon">♞</div>
-        <span>Nova Chess <b class="v4Badge v50Badge">V50</b></span>
+        <span>Nova Chess <b class="v4Badge v50Badge v100Badge">V100</b></span>
     </div>
 
 
@@ -2246,6 +2658,8 @@ body.v50Zen .boardShell{
             <strong id="v50TopDepth">D—</strong>
         </div>
     </div>
+
+    <button id="commandBtn" class="v100CommandBtn" type="button" title="Command palette (Ctrl+K)">⌘</button>
 
     <div id="enginePill" class="enginePill">
         <span class="engineDot"></span>
@@ -2281,6 +2695,7 @@ body.v50Zen .boardShell{
         <div id="board"></div>
         <div class="v50BoardFooter">
             <span id="v50LastMove">READY</span>
+            <span id="v100ThreatBadge">CALM WATERS</span>
             <span id="v50EnginePulse">STOCKFISH 18</span>
         </div>
     </div>
@@ -2306,7 +2721,7 @@ body.v50Zen .boardShell{
 <div class="v4Dock">
     <div class="v4DockTop">
         <div>
-            <span class="v4Eyebrow">NOVA V50 COMMAND DECK</span>
+            <span class="v4Eyebrow">NOVA V100 ATLANTIS DECK</span>
             <strong id="v4ModeTitle">Vs Nova</strong>
         </div>
         <span id="v4TurnChip" class="v4TurnChip">WHITE</span>
@@ -2320,7 +2735,9 @@ body.v50Zen .boardShell{
         <button type="button" data-jump="movesSection">Moves</button>
         <button type="button" data-jump="toolsSection">Tools</button>
         <button type="button" data-jump="insightSection">Intel</button>
-        <button type="button" data-jump="v50LabSection">V50 Lab</button>
+        <button type="button" data-jump="v100QuickSection">Quick</button>
+        <button type="button" data-jump="v100IntelSection">Intel+</button>
+        <button type="button" data-jump="v50LabSection">Lab</button>
     </div>
 </div>
 
@@ -2615,6 +3032,41 @@ body.v50Zen .boardShell{
 </section>
 
 
+
+<section id="v100IntelSection" class="card v100IntelCard">
+<div class="cardHeader">Atlantean Intelligence</div>
+<div class="cardBody">
+
+    <div class="v100IntelHero">
+        <div class="v100IntelIcon">♆</div>
+        <div>
+            <span>Position Read</span>
+            <strong id="v100PositionRead">Balanced waters</strong>
+            <small id="v100PositionNote">Develop pieces and contest the center.</small>
+        </div>
+    </div>
+
+    <div class="v100MeterRow">
+        <span>Mobility</span>
+        <div class="v100Meter"><i id="mobilityMeter"></i></div>
+        <strong id="mobilityText">20</strong>
+    </div>
+
+    <div class="v100MeterRow">
+        <span>Pressure</span>
+        <div class="v100Meter"><i id="pressureMeter"></i></div>
+        <strong id="pressureText">Low</strong>
+    </div>
+
+    <div class="v100MeterRow">
+        <span>Material</span>
+        <div class="v100Meter"><i id="materialMeter"></i></div>
+        <strong id="materialTextV100">Equal</strong>
+    </div>
+
+</div>
+</section>
+
 <!-- V4 POSITION INTELLIGENCE -->
 
 <section id="insightSection" class="card v4InsightCard">
@@ -2699,6 +3151,52 @@ body.v50Zen .boardShell{
 </div>
 </section>
 
+
+
+<section id="v100QuickSection" class="card v100QuickCard">
+<div class="cardHeader">V100 Quick Deck</div>
+<div class="cardBody">
+
+    <div class="v100QuickGrid">
+        <button id="saveGameBtn" type="button" class="btn">💾 Save Game</button>
+        <button id="loadGameBtn" type="button" class="btn">↥ Load Game</button>
+        <button id="shortcutsBtn" type="button" class="btn">⌨ Shortcuts</button>
+        <button id="cinemaBtn" type="button" class="btn">◐ Cinema</button>
+    </div>
+
+    <div class="v100StatusStrip">
+        <div>
+            <span>Autosave</span>
+            <strong id="autosaveState">ON</strong>
+        </div>
+        <div>
+            <span>Performance</span>
+            <strong id="perfState">FULL</strong>
+        </div>
+        <div>
+            <span>Pieces</span>
+            <strong>ATLANTEAN</strong>
+        </div>
+    </div>
+
+    <label class="featureToggle">
+        <span>
+            <strong>Performance Mode</strong>
+            <small>Reduce motion and visual effects on slower devices</small>
+        </span>
+        <input id="performanceToggle" type="checkbox">
+    </label>
+
+    <label class="featureToggle">
+        <span>
+            <strong>Auto Save</strong>
+            <small>Remember the current game after each move</small>
+        </span>
+        <input id="autosaveToggle" type="checkbox" checked>
+    </label>
+
+</div>
+</section>
 
 <!-- V50 SESSION LAB -->
 
@@ -3843,10 +4341,19 @@ function renderBoard(){
                 pieceEl.className =
                     "piece " +
                     (
-                        piece.color === game.turn()
-                            ? "whitePiece"
-                            : "blackPiece"
+                        piece.color === "w"
+                            ? "whitePiece atlanteanLight"
+                            : "blackPiece atlanteanDark"
                     );
+
+                if(
+                    lastMove &&
+                    lastMove.to === square
+                ){
+                    pieceEl.classList.add(
+                        "v100Landed"
+                    );
+                }
 
                 pieceEl.textContent =
                     PIECES[
@@ -5737,6 +6244,698 @@ document
     );
 
 
+
+/* =========================================================
+   NOVA CHESS V100 — ATLANTIS EXPERIENCE LAYER
+   ========================================================= */
+
+let v100Autosave = true;
+let v100Performance = false;
+
+const commandPalette =
+    document.getElementById("commandPalette");
+
+const shortcutOverlay =
+    document.getElementById("shortcutOverlay");
+
+const commandSearch =
+    document.getElementById("commandSearch");
+
+function openOverlay(overlay){
+
+    overlay.classList.add("open");
+    overlay.setAttribute("aria-hidden","false");
+}
+
+function closeOverlay(overlay){
+
+    overlay.classList.remove("open");
+    overlay.setAttribute("aria-hidden","true");
+}
+
+function openCommandPalette(){
+
+    openOverlay(commandPalette);
+
+    setTimeout(
+        () => {
+            commandSearch.value = "";
+            commandSearch.focus();
+
+            document
+                .querySelectorAll("#commandList button")
+                .forEach(
+                    button =>
+                        button.style.display = ""
+                );
+        },
+        0
+    );
+}
+
+document
+    .getElementById("commandBtn")
+    .addEventListener(
+        "click",
+        openCommandPalette
+    );
+
+document
+    .getElementById("closeCommandBtn")
+    .addEventListener(
+        "click",
+        () => closeOverlay(commandPalette)
+    );
+
+document
+    .getElementById("shortcutsBtn")
+    .addEventListener(
+        "click",
+        () => openOverlay(shortcutOverlay)
+    );
+
+document
+    .getElementById("closeShortcutsBtn")
+    .addEventListener(
+        "click",
+        () => closeOverlay(shortcutOverlay)
+    );
+
+[commandPalette,shortcutOverlay]
+    .forEach(
+        overlay => {
+
+            overlay.addEventListener(
+                "click",
+                event => {
+
+                    if(event.target === overlay){
+                        closeOverlay(overlay);
+                    }
+                }
+            );
+        }
+    );
+
+commandSearch.addEventListener(
+    "input",
+    function(){
+
+        const query =
+            this.value
+                .trim()
+                .toLowerCase();
+
+        document
+            .querySelectorAll("#commandList button")
+            .forEach(
+                button => {
+
+                    button.style.display =
+                        !query ||
+                        button.textContent
+                            .toLowerCase()
+                            .includes(query)
+                            ? ""
+                            : "none";
+                }
+            );
+    }
+);
+
+function saveV100Game(showMessage=true){
+
+    try{
+
+        const state = {
+            pgn:game.pgn(),
+            mode:gameMode,
+            side:chosenSide,
+            flipped,
+            whiteSeconds,
+            blackSeconds,
+            clocksEnabled,
+            timeControl:
+                document.getElementById(
+                    "timeControl"
+                ).value,
+            difficulty:
+                document.getElementById(
+                    "difficulty"
+                ).value
+        };
+
+        localStorage.setItem(
+            "novaChessV100Save",
+            JSON.stringify(state)
+        );
+
+        if(showMessage && hintBox){
+            hintBox.textContent =
+                "Game saved to this browser.";
+        }
+
+    }catch(error){
+
+        if(showMessage && hintBox){
+            hintBox.textContent =
+                "Could not save game in this browser.";
+        }
+    }
+}
+
+function loadV100Game(){
+
+    try{
+
+        const raw =
+            localStorage.getItem(
+                "novaChessV100Save"
+            );
+
+        if(!raw){
+
+            hintBox.textContent =
+                "No V100 saved game found.";
+
+            return;
+        }
+
+        const state =
+            JSON.parse(raw);
+
+        stopClock();
+        clearTimeout(watchTimer);
+
+        game.reset();
+
+        if(
+            state.pgn &&
+            !game.load_pgn(state.pgn)
+        ){
+            throw new Error("Invalid saved PGN");
+        }
+
+        gameMode =
+            state.mode || "computer";
+
+        chosenSide =
+            state.side || "w";
+
+        playerColor =
+            chosenSide === "b"
+                ? "b"
+                : "w";
+
+        engineColor =
+            playerColor === "w"
+                ? "b"
+                : "w";
+
+        flipped =
+            Boolean(state.flipped);
+
+        whiteSeconds =
+            Number.isFinite(state.whiteSeconds)
+                ? state.whiteSeconds
+                : 300;
+
+        blackSeconds =
+            Number.isFinite(state.blackSeconds)
+                ? state.blackSeconds
+                : 300;
+
+        clocksEnabled =
+            state.clocksEnabled !== false;
+
+        if(state.timeControl){
+            document.getElementById(
+                "timeControl"
+            ).value =
+                state.timeControl;
+        }
+
+        if(state.difficulty){
+            document.getElementById(
+                "difficulty"
+            ).value =
+                state.difficulty;
+        }
+
+        const hist =
+            game.history({
+                verbose:true
+            });
+
+        if(hist.length){
+
+            const latest =
+                hist[hist.length - 1];
+
+            lastMove = {
+                from:latest.from,
+                to:latest.to
+            };
+
+        }else{
+
+            lastMove = null;
+        }
+
+        selected = null;
+        legalMoves = [];
+        gameEnded = false;
+        gameStarted = true;
+
+        render();
+        startClock();
+
+        hintBox.textContent =
+            "Saved V100 game loaded.";
+
+        if(
+            ["computer","bullet","blitz","rapid","classical","boss","zen","training","random"]
+                .includes(gameMode) &&
+            engineReady &&
+            game.turn() === engineColor
+        ){
+            setTimeout(
+                requestEngineMove,
+                100
+            );
+        }
+
+    }catch(error){
+
+        hintBox.textContent =
+            "Saved game could not be loaded.";
+    }
+}
+
+document
+    .getElementById("saveGameBtn")
+    .addEventListener(
+        "click",
+        () => saveV100Game(true)
+    );
+
+document
+    .getElementById("loadGameBtn")
+    .addEventListener(
+        "click",
+        loadV100Game
+    );
+
+document
+    .getElementById("autosaveToggle")
+    .addEventListener(
+        "change",
+        function(){
+
+            v100Autosave =
+                this.checked;
+
+            document.getElementById(
+                "autosaveState"
+            ).textContent =
+                v100Autosave
+                    ? "ON"
+                    : "OFF";
+        }
+    );
+
+document
+    .getElementById("performanceToggle")
+    .addEventListener(
+        "change",
+        function(){
+
+            v100Performance =
+                this.checked;
+
+            document.body.classList.toggle(
+                "v100Performance",
+                v100Performance
+            );
+
+            document.getElementById(
+                "perfState"
+            ).textContent =
+                v100Performance
+                    ? "LITE"
+                    : "FULL";
+        }
+    );
+
+document
+    .getElementById("cinemaBtn")
+    .addEventListener(
+        "click",
+        function(){
+
+            document.body.classList.toggle(
+                "v100Cinema"
+            );
+
+            this.textContent =
+                document.body.classList.contains(
+                    "v100Cinema"
+                )
+                    ? "◑ Exit Cinema"
+                    : "◐ Cinema";
+        }
+    );
+
+function runV100Command(command){
+
+    closeOverlay(commandPalette);
+
+    if(command === "new"){
+        newGame();
+    }
+
+    if(command === "hint"){
+        document
+            .getElementById("hintBtn")
+            .click();
+    }
+
+    if(command === "flip"){
+        flipped = !flipped;
+        renderBoard();
+    }
+
+    if(command === "undo"){
+        document
+            .getElementById("undoBtn")
+            .click();
+    }
+
+    if(command === "focus"){
+        document
+            .getElementById("focusBtn")
+            .click();
+    }
+
+    if(command === "save"){
+        saveV100Game(true);
+    }
+
+    if(command === "load"){
+        loadV100Game();
+    }
+
+    if(command === "modes"){
+        document
+            .getElementById("modeSection")
+            .scrollIntoView({
+                behavior:"smooth",
+                block:"start"
+            });
+    }
+
+    if(command === "performance"){
+        const toggle =
+            document.getElementById(
+                "performanceToggle"
+            );
+
+        toggle.checked =
+            !toggle.checked;
+
+        toggle.dispatchEvent(
+            new Event("change")
+        );
+    }
+}
+
+document
+    .querySelectorAll("#commandList button")
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                () =>
+                    runV100Command(
+                        button.dataset.command
+                    )
+            );
+        }
+    );
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        const tag =
+            document.activeElement &&
+            document.activeElement.tagName
+                ? document.activeElement.tagName
+                : "";
+
+        const editing =
+            tag === "INPUT" ||
+            tag === "TEXTAREA" ||
+            tag === "SELECT";
+
+        if(
+            (event.ctrlKey || event.metaKey) &&
+            event.key.toLowerCase() === "k"
+        ){
+            event.preventDefault();
+            openCommandPalette();
+            return;
+        }
+
+        if(event.key === "Escape"){
+
+            closeOverlay(commandPalette);
+            closeOverlay(shortcutOverlay);
+
+            return;
+        }
+
+        if(editing) return;
+
+        const key =
+            event.key.toLowerCase();
+
+        if(key === "g"){
+            document
+                .getElementById("focusBtn")
+                .click();
+        }
+
+        if(key === "s"){
+            saveV100Game(true);
+        }
+
+        if(key === "l"){
+            loadV100Game();
+        }
+    }
+);
+
+function updateV100Intelligence(){
+
+    const legal =
+        game.moves().length;
+
+    const mobilityPct =
+        Math.max(
+            8,
+            Math.min(
+                100,
+                legal / 40 * 100
+            )
+        );
+
+    document.getElementById(
+        "mobilityMeter"
+    ).style.width =
+        mobilityPct + "%";
+
+    document.getElementById(
+        "mobilityText"
+    ).textContent =
+        String(legal);
+
+    let pressureText =
+        "Low";
+
+    let pressureWidth =
+        28;
+
+    let read =
+        "Balanced waters";
+
+    let note =
+        "Develop pieces and contest the center.";
+
+    if(game.in_check()){
+
+        pressureText =
+            "Critical";
+
+        pressureWidth =
+            100;
+
+        read =
+            "King under attack";
+
+        note =
+            "Your king is in check. Respond immediately.";
+
+    }else if(legal <= 12){
+
+        pressureText =
+            "High";
+
+        pressureWidth =
+            78;
+
+        read =
+            "Position is tightening";
+
+        note =
+            "Mobility is restricted. Look for forcing moves or exchanges.";
+
+    }else if(legal <= 20){
+
+        pressureText =
+            "Medium";
+
+        pressureWidth =
+            52;
+
+        read =
+            "Tactical currents";
+
+        note =
+            "The position has limited space. Check captures and threats.";
+    }
+
+    document.getElementById(
+        "pressureMeter"
+    ).style.width =
+        pressureWidth + "%";
+
+    document.getElementById(
+        "pressureText"
+    ).textContent =
+        pressureText;
+
+    document.getElementById(
+        "v100PositionRead"
+    ).textContent =
+        read;
+
+    document.getElementById(
+        "v100PositionNote"
+    ).textContent =
+        note;
+
+    const material =
+        v3Material
+            ? v3Material.textContent
+            : "Equal";
+
+    document.getElementById(
+        "materialTextV100"
+    ).textContent =
+        material;
+
+    let materialWidth =
+        50;
+
+    const match =
+        material.match(
+            /([+-]?\d+)/
+        );
+
+    if(match){
+
+        const value =
+            Math.min(
+                9,
+                Math.abs(
+                    parseInt(
+                        match[1],
+                        10
+                    )
+                )
+            );
+
+        materialWidth =
+            50 +
+            (
+                material.startsWith(
+                    "White"
+                )
+                    ? value * 5
+                    : -value * 5
+            );
+    }
+
+    document.getElementById(
+        "materialMeter"
+    ).style.width =
+        Math.max(
+            5,
+            Math.min(
+                95,
+                materialWidth
+            )
+        ) + "%";
+
+    const threat =
+        document.getElementById(
+            "v100ThreatBadge"
+        );
+
+    if(threat){
+
+        if(game.in_check()){
+            threat.textContent =
+                "KING IN CHECK";
+            threat.style.color =
+                "#ffb39e";
+        }else if(legal <= 12){
+            threat.textContent =
+                "HIGH PRESSURE";
+            threat.style.color =
+                "#f3d67a";
+        }else{
+            threat.textContent =
+                "CALM WATERS";
+            threat.style.color =
+                "#99f5d8";
+        }
+    }
+}
+
+const originalV100Render =
+    render;
+
+render =
+    function(){
+
+        originalV100Render();
+
+        updateV100Intelligence();
+
+        if(
+            v100Autosave &&
+            game.history().length
+        ){
+            saveV100Game(false);
+        }
+    };
+
+updateV100Intelligence();
+
+
 /* =========================================================
    V3 QUICK TOOLS
    ========================================================= */
@@ -5959,6 +7158,56 @@ render();
 startEngine();
 
 </script>
+
+
+<div id="commandPalette" class="v100Overlay" aria-hidden="true">
+    <div class="v100Palette" role="dialog" aria-modal="true" aria-label="Nova V100 command palette">
+        <div class="v100PaletteHead">
+            <div>
+                <span>NOVA V100</span>
+                <strong>Command Palette</strong>
+            </div>
+            <button id="closeCommandBtn" type="button" aria-label="Close">×</button>
+        </div>
+
+        <input id="commandSearch" class="v100PaletteSearch" type="search"
+               placeholder="Type a command…" autocomplete="off">
+
+        <div id="commandList" class="v100CommandList">
+            <button type="button" data-command="new"><span>New game</span><kbd>N</kbd></button>
+            <button type="button" data-command="hint"><span>Hint</span><kbd>H</kbd></button>
+            <button type="button" data-command="flip"><span>Flip board</span><kbd>F</kbd></button>
+            <button type="button" data-command="undo"><span>Undo</span><kbd>U</kbd></button>
+            <button type="button" data-command="focus"><span>Focus mode</span><kbd>G</kbd></button>
+            <button type="button" data-command="save"><span>Save game</span><kbd>S</kbd></button>
+            <button type="button" data-command="load"><span>Load saved game</span><kbd>L</kbd></button>
+            <button type="button" data-command="modes"><span>Jump to game modes</span><kbd>M</kbd></button>
+            <button type="button" data-command="performance"><span>Toggle performance mode</span><kbd>P</kbd></button>
+        </div>
+    </div>
+</div>
+
+<div id="shortcutOverlay" class="v100Overlay" aria-hidden="true">
+    <div class="v100ShortcutPanel" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts">
+        <div class="v100PaletteHead">
+            <div>
+                <span>NOVA V100</span>
+                <strong>Keyboard Shortcuts</strong>
+            </div>
+            <button id="closeShortcutsBtn" type="button" aria-label="Close">×</button>
+        </div>
+        <div class="v100ShortcutGrid">
+            <div><kbd>Ctrl K</kbd><span>Command palette</span></div>
+            <div><kbd>N</kbd><span>New game</span></div>
+            <div><kbd>H</kbd><span>Hint</span></div>
+            <div><kbd>F</kbd><span>Flip board</span></div>
+            <div><kbd>U</kbd><span>Undo move</span></div>
+            <div><kbd>G</kbd><span>Focus mode</span></div>
+            <div><kbd>S</kbd><span>Save game</span></div>
+            <div><kbd>L</kbd><span>Load game</span></div>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
