@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Nova Chess V3 — Spacious Aqua</title>
+<title>Nova Chess V3 — Game Modes</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
@@ -1303,6 +1303,115 @@ body::after{
     .sidebar{ width:100%; gap:14px; padding:0; }
 }
 
+
+/* =========================================================
+   GAME MODE CONTROLS
+   ========================================================= */
+
+.sidebar{
+    overflow-y:auto;
+    overflow-x:hidden;
+    scrollbar-width:thin;
+    scrollbar-color:rgba(87,235,245,.22) transparent;
+}
+
+.sidebar::-webkit-scrollbar{ width:7px; }
+.sidebar::-webkit-scrollbar-track{ background:transparent; }
+.sidebar::-webkit-scrollbar-thumb{
+    background:rgba(87,235,245,.18);
+    border-radius:10px;
+}
+
+.modeChoices{
+    display:grid;
+    gap:10px;
+}
+
+.modeChoice{
+    width:100%;
+    min-height:58px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:10px 12px;
+    text-align:left;
+    border:1px solid rgba(106,238,249,.11);
+    border-radius:13px;
+    background:rgba(7,37,45,.72);
+    color:#eaffff;
+    transition:.16s ease;
+}
+
+.modeChoice:hover{
+    background:rgba(12,55,65,.86);
+    border-color:rgba(100,243,255,.23);
+}
+
+.modeChoice.active{
+    border-color:rgba(84,244,255,.50);
+    background:linear-gradient(135deg,rgba(22,107,117,.70),rgba(9,62,72,.78));
+    box-shadow:inset 0 0 0 1px rgba(110,248,255,.08);
+}
+
+.modeIcon{
+    width:34px;
+    height:34px;
+    flex:0 0 34px;
+    display:grid;
+    place-items:center;
+    border-radius:10px;
+    background:rgba(91,239,249,.10);
+    font-size:19px;
+}
+
+.modeChoice strong{
+    display:block;
+    font-size:12px;
+}
+
+.modeChoice small{
+    display:block;
+    margin-top:2px;
+    color:#7faeb5;
+    font-size:10px;
+    font-weight:500;
+}
+
+.modeSubsection{
+    margin-top:15px;
+}
+
+.modeLabel{
+    margin-bottom:7px;
+    color:#89cfd5;
+    font-size:10px;
+    font-weight:800;
+    letter-spacing:.8px;
+    text-transform:uppercase;
+}
+
+.sideChoices{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+}
+
+.sideChoice{
+    min-height:39px;
+    border:1px solid rgba(106,238,249,.11);
+    border-radius:10px;
+    background:#0b303a;
+    color:#b9e7ea;
+    font-size:11px;
+}
+
+.sideChoice.active{
+    background:linear-gradient(135deg,#24c9d8,#58f2ee);
+    color:#042329;
+    border-color:transparent;
+    font-weight:800;
+}
+
 </style>
 </head>
 
@@ -1334,7 +1443,7 @@ body::after{
 
         <div class="playerName">
             <span class="playerPiece">♟</span>
-            <span>Nova</span>
+            <span id="topPlayerName">Nova</span>
         </div>
 
         <div id="blackClock" class="clock">
@@ -1350,7 +1459,7 @@ body::after{
     <div class="bottomPlayer">
 
         <div class="you">
-            ♙ You
+            <span id="bottomPlayerName">♙ You</span>
         </div>
 
         <div id="whiteClock" class="clock active">
@@ -1364,6 +1473,66 @@ body::after{
 </section>
 
 <aside class="sidebar">
+
+
+<!-- GAME MODE -->
+
+<section class="card modeCard">
+
+<div class="cardHeader">
+    Game Mode
+</div>
+
+<div class="cardBody">
+
+    <div class="modeChoices">
+        <button type="button" class="modeChoice active" data-mode="computer">
+            <span class="modeIcon">♞</span>
+            <span>
+                <strong>Vs Nova</strong>
+                <small>Play against Stockfish</small>
+            </span>
+        </button>
+
+        <button type="button" class="modeChoice" data-mode="local">
+            <span class="modeIcon">♟</span>
+            <span>
+                <strong>2 Player</strong>
+                <small>Local pass & play</small>
+            </span>
+        </button>
+
+        <button type="button" class="modeChoice" data-mode="analysis">
+            <span class="modeIcon">◇</span>
+            <span>
+                <strong>Free Play</strong>
+                <small>Move both sides freely</small>
+            </span>
+        </button>
+    </div>
+
+    <div id="sideOptions" class="modeSubsection">
+        <div class="modeLabel">Play as</div>
+        <div class="sideChoices">
+            <button type="button" class="sideChoice active" data-side="w">White</button>
+            <button type="button" class="sideChoice" data-side="b">Black</button>
+            <button type="button" class="sideChoice" data-side="random">Random</button>
+        </div>
+    </div>
+
+    <div class="modeSubsection">
+        <div class="modeLabel">Time Control</div>
+        <select id="timeControl">
+            <option value="180">3 minutes</option>
+            <option value="300" selected>5 minutes</option>
+            <option value="600">10 minutes</option>
+            <option value="900">15 minutes</option>
+            <option value="0">No clock</option>
+        </select>
+    </div>
+
+</div>
+</section>
 
 <!-- GAME -->
 
@@ -1574,6 +1743,17 @@ let legalMoves = [];
 let lastMove = null;
 
 let flipped = false;
+
+/* =========================================================
+   GAME MODE
+   ========================================================= */
+
+let gameMode = "computer";
+let chosenSide = "w";
+let playerColor = "w";
+let engineColor = "b";
+let clocksEnabled = true;
+
 
 /* =========================================================
    CLOCK
@@ -1952,7 +2132,9 @@ function requestEngineMove(){
 
     if(game.game_over()) return;
 
-    if(game.turn() !== "b") return;
+    if(gameMode !== "computer") return;
+
+    if(game.turn() !== engineColor) return;
 
     engineThinking = true;
 
@@ -2362,7 +2544,7 @@ function renderBoard(){
                 pieceEl.className =
                     "piece " +
                     (
-                        piece.color === "w"
+                        piece.color === game.turn()
                             ? "whitePiece"
                             : "blackPiece"
                     );
@@ -2437,9 +2619,9 @@ function squareClicked(square){
 
     if(gameEnded) return;
 
-    if(game.turn() !== "w") return;
+    if(gameMode === "computer" && game.turn() !== playerColor) return;
 
-    if(engineThinking) return;
+    if(gameMode === "computer" && engineThinking) return;
 
     const piece =
         game.get(square);
@@ -2476,7 +2658,7 @@ function squareClicked(square){
 
         if(
             piece &&
-            piece.color === "w"
+            piece.color === game.turn()
         ){
 
             selectSquare(square);
@@ -2547,7 +2729,10 @@ function attemptMove(from,to){
     if(
         piece &&
         piece.type === "p" &&
-        to[1] === "8"
+        (
+            (piece.color === "w" && to[1] === "8") ||
+            (piece.color === "b" && to[1] === "1")
+        )
     ){
 
         pendingPromotion = {
@@ -2610,10 +2795,17 @@ function makePlayerMove(
     if(checkGameEnd()) return;
 
     /*
-       Now Black is to move.
+       In Vs Nova mode, ask the engine when
+       the turn belongs to Nova. Local and
+       Free Play modes simply continue.
     */
 
-    requestEngineMove();
+    if(
+        gameMode === "computer" &&
+        game.turn() === engineColor
+    ){
+        requestEngineMove();
+    }
 }
 
 /* =========================================================
@@ -2746,21 +2938,28 @@ function formatClock(seconds){
 
 function updateClocks(){
 
-    whiteClock.textContent =
-        formatClock(
-            whiteSeconds
-        );
+    if(!clocksEnabled){
+        whiteClock.textContent = "∞";
+        blackClock.textContent = "∞";
+    }else{
+        whiteClock.textContent =
+            formatClock(
+                whiteSeconds
+            );
 
-    blackClock.textContent =
-        formatClock(
-            blackSeconds
-        );
+        blackClock.textContent =
+            formatClock(
+                blackSeconds
+            );
+    }
 
     whiteClock.classList.toggle(
         "active",
         game.turn() === "w" &&
         !gameEnded
     );
+
+    }
 
     blackClock.classList.toggle(
         "active",
@@ -2792,7 +2991,8 @@ function startClock(){
 
                 if(
                     !gameStarted ||
-                    gameEnded
+                    gameEnded ||
+                    !clocksEnabled
                 ){
                     return;
                 }
@@ -2955,8 +3155,42 @@ function newGame(){
     gameStarted = false;
     gameEnded = false;
 
-    whiteSeconds = 300;
-    blackSeconds = 300;
+    const timeValue =
+        parseInt(
+            document.getElementById("timeControl").value,
+            10
+        );
+
+    clocksEnabled =
+        timeValue > 0;
+
+    whiteSeconds =
+        clocksEnabled ? timeValue : 0;
+
+    blackSeconds =
+        clocksEnabled ? timeValue : 0;
+
+    if(gameMode === "computer"){
+
+        playerColor =
+            chosenSide === "random"
+                ? (Math.random() < .5 ? "w" : "b")
+                : chosenSide;
+
+        engineColor =
+            playerColor === "w"
+                ? "b"
+                : "w";
+
+        flipped =
+            playerColor === "b";
+
+    }else{
+
+        playerColor = "w";
+        engineColor = "b";
+        flipped = false;
+    }
 
     stopClock();
 
@@ -2987,6 +3221,21 @@ function newGame(){
         setStatus(
             "Resetting Stockfish…"
         );
+    }
+
+    if(
+        gameMode === "computer" &&
+        engineReady &&
+        game.turn() === engineColor
+    ){
+        setTimeout(
+            requestEngineMove,
+            80
+        );
+    }else if(gameMode === "local"){
+        setStatus("White to move","ready");
+    }else if(gameMode === "analysis"){
+        setStatus("Free Play","ready");
     }
 }
 
@@ -3078,6 +3327,7 @@ function render(){
     renderMoves();
     updateClocks();
     updateV3Position();
+    updateModeLabels();
 }
 
 /* =========================================================
@@ -3117,6 +3367,128 @@ document
     .addEventListener(
         "click",
         testEngine
+    );
+
+
+
+/* =========================================================
+   GAME MODE UI
+   ========================================================= */
+
+const modeButtons =
+    document.querySelectorAll(
+        ".modeChoice"
+    );
+
+const sideButtons =
+    document.querySelectorAll(
+        ".sideChoice"
+    );
+
+const sideOptions =
+    document.getElementById(
+        "sideOptions"
+    );
+
+const topPlayerName =
+    document.getElementById(
+        "topPlayerName"
+    );
+
+const bottomPlayerName =
+    document.getElementById(
+        "bottomPlayerName"
+    );
+
+function updateModeLabels(){
+
+    if(gameMode === "computer"){
+
+        sideOptions.style.display = "";
+
+        if(playerColor === "w"){
+            topPlayerName.textContent = "Nova";
+            bottomPlayerName.textContent = "♙ You";
+        }else{
+            topPlayerName.textContent = "You";
+            bottomPlayerName.textContent = "♙ Nova";
+        }
+
+    }else if(gameMode === "local"){
+
+        sideOptions.style.display = "none";
+        topPlayerName.textContent = "Black";
+        bottomPlayerName.textContent = "♙ White";
+
+    }else{
+
+        sideOptions.style.display = "none";
+        topPlayerName.textContent = "Black";
+        bottomPlayerName.textContent = "♙ White";
+    }
+}
+
+modeButtons.forEach(
+    button => {
+
+        button.addEventListener(
+            "click",
+            function(){
+
+                gameMode =
+                    this.dataset.mode;
+
+                modeButtons.forEach(
+                    item =>
+                        item.classList.remove(
+                            "active"
+                        )
+                );
+
+                this.classList.add(
+                    "active"
+                );
+
+                updateModeLabels();
+                newGame();
+            }
+        );
+    }
+);
+
+sideButtons.forEach(
+    button => {
+
+        button.addEventListener(
+            "click",
+            function(){
+
+                chosenSide =
+                    this.dataset.side;
+
+                sideButtons.forEach(
+                    item =>
+                        item.classList.remove(
+                            "active"
+                        )
+                );
+
+                this.classList.add(
+                    "active"
+                );
+
+                newGame();
+                updateModeLabels();
+            }
+        );
+    }
+);
+
+document
+    .getElementById("timeControl")
+    .addEventListener(
+        "change",
+        newGame
     );
 
 
