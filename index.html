@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Nova Chess V3.1 — Scroll Modes+</title>
+<title>Nova Chess V4 — Aqua Command Center</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
@@ -1554,10 +1554,297 @@ body.hideEval .engineCard{
     }
 }
 
+
+/* =========================================================
+   NOVA CHESS V4 — AQUA COMMAND CENTER
+   ========================================================= */
+
+.v4Badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    margin-left:7px;
+    padding:3px 7px;
+    border-radius:999px;
+    border:1px solid rgba(100,245,255,.25);
+    background:rgba(73,236,247,.10);
+    color:#83f7ff;
+    font-size:9px;
+    letter-spacing:1.1px;
+    vertical-align:middle;
+}
+
+.v4Dock{
+    position:sticky;
+    top:0;
+    z-index:12;
+    margin-bottom:18px;
+    padding:13px 13px 12px;
+    border:1px solid rgba(103,241,251,.16);
+    border-radius:17px;
+    background:
+        linear-gradient(180deg,rgba(3,30,38,.97),rgba(4,24,31,.94));
+    box-shadow:0 12px 28px rgba(0,0,0,.20);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+}
+
+.v4DockTop{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    padding:1px 2px 10px;
+}
+
+.v4DockTop strong{
+    display:block;
+    margin-top:3px;
+    color:#efffff;
+    font-size:14px;
+}
+
+.v4Eyebrow{
+    color:#65cbd4;
+    font-size:8px;
+    font-weight:900;
+    letter-spacing:1.35px;
+}
+
+.v4TurnChip{
+    flex:0 0 auto;
+    padding:6px 9px;
+    border-radius:999px;
+    background:rgba(70,232,242,.12);
+    border:1px solid rgba(92,241,250,.18);
+    color:#a9fbff;
+    font-size:8px;
+    font-weight:900;
+    letter-spacing:1px;
+}
+
+.v4Nav{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:7px;
+}
+
+.v4Nav button{
+    min-height:34px;
+    padding:6px;
+    border:1px solid rgba(105,238,249,.09);
+    border-radius:9px;
+    background:rgba(8,48,57,.62);
+    color:#9fcfd4;
+    font-size:9px;
+    font-weight:800;
+}
+
+.v4Nav button:hover{
+    color:#edffff;
+    background:rgba(15,68,79,.80);
+    border-color:rgba(100,241,251,.20);
+}
+
+.v4InsightHero{
+    padding:14px;
+    border-radius:14px;
+    border:1px solid rgba(105,240,250,.11);
+    background:
+        radial-gradient(circle at 90% 10%,rgba(73,236,247,.11),transparent 42%),
+        rgba(4,28,35,.62);
+}
+
+.v4InsightLabel{
+    display:block;
+    margin-bottom:5px;
+    color:#72cbd3;
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:1.1px;
+    text-transform:uppercase;
+}
+
+.v4InsightHero strong{
+    display:block;
+    color:#eeffff;
+    font-size:15px;
+    line-height:1.3;
+}
+
+.v4InsightHero small{
+    display:block;
+    margin-top:5px;
+    color:#7faab0;
+    font-size:10px;
+    line-height:1.4;
+}
+
+.v4StatGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+    margin-top:11px;
+}
+
+.v4Stat{
+    min-height:58px;
+    padding:10px 11px;
+    border:1px solid rgba(101,239,249,.09);
+    border-radius:12px;
+    background:rgba(4,27,34,.48);
+}
+
+.v4Stat span{
+    display:block;
+    color:#719fa5;
+    font-size:8px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.7px;
+}
+
+.v4Stat strong{
+    display:block;
+    margin-top:6px;
+    color:#eaffff;
+    font-size:12px;
+}
+
+.v4ActionRow{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+    margin-top:11px;
+}
+
+.v4ThemeGrid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:8px;
+    margin-bottom:11px;
+}
+
+.v4Theme{
+    min-height:55px;
+    padding:8px 6px;
+    border:1px solid rgba(105,239,249,.10);
+    border-radius:11px;
+    background:rgba(5,31,38,.62);
+    color:#a9d4d8;
+    font-size:9px;
+    font-weight:800;
+}
+
+.v4Theme.active{
+    border-color:rgba(86,244,255,.45);
+    color:#efffff;
+    background:rgba(14,61,71,.80);
+}
+
+.v4ThemeSwatch{
+    display:block;
+    width:26px;
+    height:14px;
+    margin:0 auto 6px;
+    border-radius:999px;
+}
+
+.v4ThemeSwatch.aqua{
+    background:linear-gradient(90deg,#35d4e1,#74f8f2);
+}
+.v4ThemeSwatch.abyss{
+    background:linear-gradient(90deg,#052b3c,#1883a4);
+}
+.v4ThemeSwatch.reef{
+    background:linear-gradient(90deg,#2bd5c6,#ff9a86);
+}
+
+/* Theme variants */
+body.theme-abyss{
+    --bg:#020b13;
+    --panel:#071d2a;
+    --panel2:#092838;
+    --dark:#196f91;
+    --accent:#49cbff;
+    background-color:#010b12;
+}
+
+body.theme-abyss .square.dark{
+    background:linear-gradient(135deg,#237997,#14536d);
+}
+body.theme-abyss .square.light{
+    background:linear-gradient(135deg,#d1f3f7,#aedce4);
+}
+
+body.theme-reef{
+    --panel:#0b2b30;
+    --panel2:#10383c;
+    --dark:#328b85;
+    --accent:#68f3dd;
+}
+body.theme-reef .square.dark{
+    background:linear-gradient(135deg,#409995,#287d7d);
+}
+body.theme-reef .square.light{
+    background:linear-gradient(135deg,#d8f6eb,#c4e9df);
+}
+body.theme-reef .btn.primary{
+    background:linear-gradient(135deg,#40d8c8,#ffab96);
+}
+
+body.noArtwork::before,
+body.noArtwork::after,
+body.noArtwork .app::before,
+body.noArtwork .app::after{
+    display:none !important;
+}
+
+body.noArtwork{
+    background-image:
+        radial-gradient(circle at 15% 10%,rgba(56,238,250,.18),transparent 29%),
+        linear-gradient(145deg,#020c11 0%,#041b22 48%,#03262c 100%) !important;
+}
+
+body.noBoardGlow .boardShell{
+    box-shadow:0 0 0 1px rgba(100,243,255,.15),0 24px 65px rgba(0,0,0,.48) !important;
+}
+
+/* Stronger decorative underwater silhouette for V4 */
+.v4OceanArt{
+    position:fixed;
+    left:26px;
+    bottom:24px;
+    width:210px;
+    height:155px;
+    opacity:.18;
+    pointer-events:none;
+    z-index:0;
+}
+
+@media(max-width:1180px){
+    .v4OceanArt{display:none;}
+}
+
 </style>
 </head>
 
 <body>
+
+
+<svg class="v4OceanArt" viewBox="0 0 240 170" aria-hidden="true">
+    <g fill="none" stroke="rgba(105,245,255,.9)" stroke-width="2">
+        <path d="M5 138 C42 112 59 151 94 129 S153 107 181 129 S218 142 238 123"/>
+        <path d="M8 151 C43 130 70 161 104 142 S163 125 192 145 S221 153 239 142"/>
+        <path d="M42 132 C40 109 47 91 58 75 C62 98 68 112 81 126"/>
+        <path d="M151 122 C152 99 162 79 175 61 C174 91 180 109 194 129"/>
+        <circle cx="27" cy="75" r="7"/>
+        <circle cx="202" cy="44" r="10"/>
+        <circle cx="220" cy="23" r="4"/>
+        <circle cx="97" cy="47" r="5"/>
+        <path d="M107 110 c14-28 31-42 50-40 c-16 9-23 20-21 34 c2 13 11 24 26 33 h-65 c2-12 5-20 10-27z"/>
+    </g>
+</svg>
 
 <div class="app">
 
@@ -1565,7 +1852,7 @@ body.hideEval .engineCard{
 
     <div class="logo">
         <div class="logoIcon">♞</div>
-        <span>Nova Chess</span>
+        <span>Nova Chess <b class="v4Badge">V4</b></span>
     </div>
 
     <div id="enginePill" class="enginePill">
@@ -1616,10 +1903,30 @@ body.hideEval .engineCard{
 
 <aside class="sidebar">
 
+<div class="v4Dock">
+    <div class="v4DockTop">
+        <div>
+            <span class="v4Eyebrow">NOVA CONTROL CENTER</span>
+            <strong id="v4ModeTitle">Vs Nova</strong>
+        </div>
+        <span id="v4TurnChip" class="v4TurnChip">WHITE</span>
+    </div>
+
+    <div class="v4Nav">
+        <button type="button" data-jump="modeSection">Modes</button>
+        <button type="button" data-jump="gameSection">Game</button>
+        <button type="button" data-jump="engineSection">Engine</button>
+        <button type="button" data-jump="featureSection">Features</button>
+        <button type="button" data-jump="movesSection">Moves</button>
+        <button type="button" data-jump="toolsSection">Tools</button>
+    </div>
+</div>
+
+
 
 <!-- GAME MODE -->
 
-<section class="card modeCard">
+<section id="modeSection" class="card modeCard">
 
 <div class="cardHeader">
     Game Mode
@@ -1710,7 +2017,7 @@ body.hideEval .engineCard{
 
 <!-- GAME -->
 
-<section class="card">
+<section id="gameSection" class="card">
 
 <div class="cardHeader">
     Game
@@ -1749,7 +2056,7 @@ body.hideEval .engineCard{
 
 <!-- ENGINE -->
 
-<section class="card engineCard">
+<section id="engineSection" class="card engineCard">
 
 <div class="cardHeader">
     Stockfish
@@ -1783,7 +2090,7 @@ body.hideEval .engineCard{
 
 <!-- FEATURES -->
 
-<section class="card featureCard">
+<section id="featureSection" class="card featureCard">
 
 <div class="cardHeader">
     Game Features
@@ -1832,9 +2139,94 @@ body.hideEval .engineCard{
 </div>
 </section>
 
+
+<!-- V4 POSITION INTELLIGENCE -->
+
+<section id="insightSection" class="card v4InsightCard">
+<div class="cardHeader">
+    Position Intelligence
+</div>
+<div class="cardBody">
+
+    <div class="v4InsightHero">
+        <span class="v4InsightLabel">Opening</span>
+        <strong id="openingName">Starting Position</strong>
+        <small id="openingLine">Make a move to identify the opening.</small>
+    </div>
+
+    <div class="v4StatGrid">
+        <div class="v4Stat">
+            <span>Phase</span>
+            <strong id="phaseText">Opening</strong>
+        </div>
+        <div class="v4Stat">
+            <span>Legal moves</span>
+            <strong id="legalCount">20</strong>
+        </div>
+        <div class="v4Stat">
+            <span>Last move</span>
+            <strong id="lastMoveText">—</strong>
+        </div>
+        <div class="v4Stat">
+            <span>Ply</span>
+            <strong id="plyText">0</strong>
+        </div>
+    </div>
+
+    <div class="v4ActionRow">
+        <button id="swapSideBtn" type="button" class="btn">⇄ Swap Side</button>
+        <button id="restartModeBtn" type="button" class="btn">↻ Restart Mode</button>
+    </div>
+
+</div>
+</section>
+
+<!-- V4 APPEARANCE -->
+
+<section id="appearanceSection" class="card v4AppearanceCard">
+<div class="cardHeader">
+    Aqua Appearance
+</div>
+<div class="cardBody">
+
+    <div class="modeLabel">Ocean style</div>
+    <div class="v4ThemeGrid">
+        <button type="button" class="v4Theme active" data-theme="aqua">
+            <span class="v4ThemeSwatch aqua"></span>
+            Aqua
+        </button>
+        <button type="button" class="v4Theme" data-theme="abyss">
+            <span class="v4ThemeSwatch abyss"></span>
+            Abyss
+        </button>
+        <button type="button" class="v4Theme" data-theme="reef">
+            <span class="v4ThemeSwatch reef"></span>
+            Reef
+        </button>
+    </div>
+
+    <label class="featureToggle">
+        <span>
+            <strong>Background Artwork</strong>
+            <small>Show waves, bubbles and chess artwork</small>
+        </span>
+        <input id="artToggle" type="checkbox" checked>
+    </label>
+
+    <label class="featureToggle">
+        <span>
+            <strong>Board Glow</strong>
+            <small>Soft aqua light around the chessboard</small>
+        </span>
+        <input id="glowToggle" type="checkbox" checked>
+    </label>
+
+</div>
+</section>
+
 <!-- MOVES -->
 
-<section class="card">
+<section id="movesSection" class="card">
 
 <div class="cardHeader">
     Moves
@@ -1853,8 +2245,8 @@ body.hideEval .engineCard{
 
 
 
-<section class="card v3ToolsCard">
-<div class="cardHeader">Quick Tools</div>
+<section id="toolsSection" class="card v3ToolsCard">
+<div class="cardHeader">Nova Tools</div>
 <div class="cardBody">
 
     <div class="v3ToolGrid">
@@ -3705,6 +4097,7 @@ function render(){
     updateClocks();
     updateV3Position();
     updateModeLabels();
+    updateV4Insights();
 }
 
 /* =========================================================
@@ -4007,6 +4400,261 @@ document
 
             hintBox.textContent =
                 "PGN file downloaded.";
+        }
+    );
+
+
+
+/* =========================================================
+   NOVA CHESS V4
+   ========================================================= */
+
+const OPENINGS = [
+    {prefix:"e4 e5 Nf3 Nc6 Bb5", name:"Ruy Lopez", note:"A classical fight for the center and the e5 pawn."},
+    {prefix:"e4 e5 Nf3 Nc6 Bc4", name:"Italian Game", note:"Fast development with pressure on f7."},
+    {prefix:"e4 c5", name:"Sicilian Defense", note:"An unbalanced defense creating active counterplay."},
+    {prefix:"e4 e6", name:"French Defense", note:"A solid structure with a strategic pawn battle."},
+    {prefix:"e4 c6", name:"Caro-Kann Defense", note:"A durable defense aiming for a sound structure."},
+    {prefix:"e4 d5", name:"Scandinavian Defense", note:"Immediate pressure against White's center."},
+    {prefix:"d4 d5 c4", name:"Queen's Gambit", note:"White challenges Black's central d5 pawn."},
+    {prefix:"d4 Nf6 c4 g6", name:"King's Indian Defense", note:"Black allows space and prepares a kingside counterattack."},
+    {prefix:"d4 Nf6 c4 e6 Nc3 Bb4", name:"Nimzo-Indian Defense", note:"Active piece pressure and structural tension."},
+    {prefix:"c4", name:"English Opening", note:"A flexible flank opening controlling d5."},
+    {prefix:"Nf3", name:"Réti Opening", note:"Flexible development that delays the central pawn commitment."},
+    {prefix:"e4", name:"King's Pawn Opening", note:"White claims central space and opens lines quickly."},
+    {prefix:"d4", name:"Queen's Pawn Opening", note:"A strategic central opening with strong positional options."}
+];
+
+const MODE_NAMES = {
+    computer:"Vs Nova",
+    blitz:"Blitz",
+    training:"Training",
+    random:"Random Opening",
+    local:"2 Player",
+    analysis:"Free Play",
+    watch:"Watch Nova"
+};
+
+function updateV4Insights(){
+
+    const history =
+        game.history();
+
+    const sanLine =
+        history.join(" ");
+
+    let opening =
+        OPENINGS.find(
+            item =>
+                sanLine.startsWith(
+                    item.prefix
+                )
+        );
+
+    if(!opening && history.length){
+        opening = {
+            name:"Custom Position",
+            note:"The game has moved outside Nova's built-in opening labels."
+        };
+    }
+
+    document.getElementById("openingName").textContent =
+        opening
+            ? opening.name
+            : "Starting Position";
+
+    document.getElementById("openingLine").textContent =
+        opening
+            ? opening.note
+            : "Make a move to identify the opening.";
+
+    const ply =
+        history.length;
+
+    const queensPresent =
+        Boolean(game.get("d1")) ||
+        Boolean(game.get("d8"));
+
+    let phase =
+        "Opening";
+
+    if(ply >= 16){
+        phase = queensPresent
+            ? "Middlegame"
+            : "Endgame";
+    }
+
+    if(ply >= 34){
+        phase = "Endgame";
+    }
+
+    document.getElementById("phaseText").textContent =
+        phase;
+
+    document.getElementById("legalCount").textContent =
+        game.moves().length;
+
+    document.getElementById("lastMoveText").textContent =
+        history.length
+            ? history[history.length - 1]
+            : "—";
+
+    document.getElementById("plyText").textContent =
+        String(ply);
+
+    document.getElementById("v4ModeTitle").textContent =
+        MODE_NAMES[gameMode] ||
+        "Nova";
+
+    document.getElementById("v4TurnChip").textContent =
+        game.turn() === "w"
+            ? "WHITE"
+            : "BLACK";
+}
+
+document
+    .querySelectorAll(".v4Nav button")
+    .forEach(
+        button => {
+            button.addEventListener(
+                "click",
+                function(){
+
+                    const target =
+                        document.getElementById(
+                            this.dataset.jump
+                        );
+
+                    if(target){
+                        target.scrollIntoView({
+                            behavior:"smooth",
+                            block:"start"
+                        });
+                    }
+                }
+            );
+        }
+    );
+
+document
+    .getElementById("swapSideBtn")
+    .addEventListener(
+        "click",
+        function(){
+
+            const versus =
+                ["computer","blitz","training","random"]
+                .includes(gameMode);
+
+            if(!versus){
+
+                hintBox.textContent =
+                    "Swap Side is available in Nova game modes.";
+
+                return;
+            }
+
+            if(chosenSide === "random"){
+                chosenSide =
+                    playerColor === "w"
+                        ? "b"
+                        : "w";
+            }else{
+                chosenSide =
+                    chosenSide === "w"
+                        ? "b"
+                        : "w";
+            }
+
+            sideButtons.forEach(
+                button => {
+                    button.classList.toggle(
+                        "active",
+                        button.dataset.side === chosenSide
+                    );
+                }
+            );
+
+            newGame();
+        }
+    );
+
+document
+    .getElementById("restartModeBtn")
+    .addEventListener(
+        "click",
+        newGame
+    );
+
+document
+    .querySelectorAll(".v4Theme")
+    .forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                function(){
+
+                    const theme =
+                        this.dataset.theme;
+
+                    document.body.classList.remove(
+                        "theme-abyss",
+                        "theme-reef"
+                    );
+
+                    if(theme === "abyss"){
+                        document.body.classList.add(
+                            "theme-abyss"
+                        );
+                    }
+
+                    if(theme === "reef"){
+                        document.body.classList.add(
+                            "theme-reef"
+                        );
+                    }
+
+                    document
+                        .querySelectorAll(".v4Theme")
+                        .forEach(
+                            item =>
+                                item.classList.remove(
+                                    "active"
+                                )
+                        );
+
+                    this.classList.add(
+                        "active"
+                    );
+                }
+            );
+        }
+    );
+
+document
+    .getElementById("artToggle")
+    .addEventListener(
+        "change",
+        function(){
+
+            document.body.classList.toggle(
+                "noArtwork",
+                !this.checked
+            );
+        }
+    );
+
+document
+    .getElementById("glowToggle")
+    .addEventListener(
+        "change",
+        function(){
+
+            document.body.classList.toggle(
+                "noBoardGlow",
+                !this.checked
+            );
         }
     );
 
