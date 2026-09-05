@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Nova Chess V3 — Game Modes</title>
+<title>Nova Chess V3.1 — Scroll Modes+</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
@@ -1412,6 +1412,148 @@ body::after{
     font-weight:800;
 }
 
+
+/* =========================================================
+   V3.1 — INDEPENDENT SCROLLING SIDEBAR + MORE MODES
+   ========================================================= */
+
+.main{
+    min-height:0;
+    overflow:hidden;
+}
+
+.sidebar{
+    min-height:0 !important;
+    height:100%;
+    max-height:100%;
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
+    overscroll-behavior:contain;
+    scroll-behavior:smooth;
+    padding-right:10px !important;
+    padding-bottom:28px !important;
+}
+
+.sidebar .card{
+    flex:0 0 auto;
+}
+
+.sidebar::-webkit-scrollbar{
+    width:10px;
+}
+
+.sidebar::-webkit-scrollbar-track{
+    background:rgba(0,20,27,.25);
+    border-radius:20px;
+}
+
+.sidebar::-webkit-scrollbar-thumb{
+    background:linear-gradient(180deg,rgba(74,238,247,.38),rgba(30,163,177,.28));
+    border:2px solid rgba(1,19,25,.65);
+    border-radius:20px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover{
+    background:linear-gradient(180deg,rgba(91,247,255,.55),rgba(37,187,202,.42));
+}
+
+.modeChoices{
+    grid-template-columns:1fr;
+    gap:11px;
+}
+
+.modeChoice{
+    min-height:68px;
+    padding:12px 14px;
+}
+
+.modeIcon{
+    width:40px;
+    height:40px;
+    flex-basis:40px;
+    font-size:21px;
+}
+
+.modeChoice strong{
+    font-size:13px;
+}
+
+.modeChoice small{
+    font-size:10.5px;
+    line-height:1.35;
+}
+
+.featureGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-bottom:12px;
+}
+
+.featureToggle{
+    min-height:56px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding:10px 12px;
+    margin-top:9px;
+    border:1px solid rgba(106,238,249,.10);
+    border-radius:12px;
+    background:rgba(6,31,38,.55);
+    cursor:pointer;
+}
+
+.featureToggle span{
+    min-width:0;
+}
+
+.featureToggle strong{
+    display:block;
+    color:#dffcff;
+    font-size:11px;
+    text-transform:none;
+    letter-spacing:.15px;
+}
+
+.featureToggle small{
+    display:block;
+    margin-top:3px;
+    color:#7ba9b0;
+    font-size:9.5px;
+    line-height:1.35;
+    text-transform:none;
+    letter-spacing:0;
+}
+
+.featureToggle input{
+    width:18px;
+    height:18px;
+    accent-color:#55eaf1;
+    flex:0 0 auto;
+}
+
+body.hideCoords .coord{
+    display:none !important;
+}
+
+body.hideEval .engineCard{
+    display:none !important;
+}
+
+.modeChoice[data-mode="watch"].active{
+    border-color:rgba(107,252,215,.55);
+}
+
+@media(max-width:980px){
+    .sidebar{
+        height:auto !important;
+        max-height:none !important;
+        overflow:visible !important;
+        padding-right:0 !important;
+    }
+}
+
 </style>
 </head>
 
@@ -1490,7 +1632,31 @@ body::after{
             <span class="modeIcon">♞</span>
             <span>
                 <strong>Vs Nova</strong>
-                <small>Play against Stockfish</small>
+                <small>Classic game against Stockfish</small>
+            </span>
+        </button>
+
+        <button type="button" class="modeChoice" data-mode="blitz">
+            <span class="modeIcon">⚡</span>
+            <span>
+                <strong>Blitz</strong>
+                <small>Fast 3-minute battle vs Nova</small>
+            </span>
+        </button>
+
+        <button type="button" class="modeChoice" data-mode="training">
+            <span class="modeIcon">◎</span>
+            <span>
+                <strong>Training</strong>
+                <small>No clock, easier engine, hints encouraged</small>
+            </span>
+        </button>
+
+        <button type="button" class="modeChoice" data-mode="random">
+            <span class="modeIcon">✦</span>
+            <span>
+                <strong>Random Opening</strong>
+                <small>Start from a fresh randomized opening</small>
             </span>
         </button>
 
@@ -1498,7 +1664,7 @@ body::after{
             <span class="modeIcon">♟</span>
             <span>
                 <strong>2 Player</strong>
-                <small>Local pass & play</small>
+                <small>Local pass & play on one board</small>
             </span>
         </button>
 
@@ -1506,7 +1672,15 @@ body::after{
             <span class="modeIcon">◇</span>
             <span>
                 <strong>Free Play</strong>
-                <small>Move both sides freely</small>
+                <small>Move both colors without Nova responding</small>
+            </span>
+        </button>
+
+        <button type="button" class="modeChoice" data-mode="watch">
+            <span class="modeIcon">◉</span>
+            <span>
+                <strong>Watch Nova</strong>
+                <small>Stockfish plays both sides automatically</small>
             </span>
         </button>
     </div>
@@ -1575,7 +1749,7 @@ body::after{
 
 <!-- ENGINE -->
 
-<section class="card">
+<section class="card engineCard">
 
 <div class="cardHeader">
     Stockfish
@@ -1604,6 +1778,58 @@ body::after{
 
 </div>
 
+</section>
+
+
+<!-- FEATURES -->
+
+<section class="card featureCard">
+
+<div class="cardHeader">
+    Game Features
+</div>
+
+<div class="cardBody">
+
+    <div class="featureGrid">
+        <button id="pauseBtn" type="button" class="btn">⏸ Pause Clock</button>
+        <button id="downloadPgnBtn" type="button" class="btn">⬇ PGN File</button>
+    </div>
+
+    <label class="featureToggle">
+        <span>
+            <strong>Auto Flip</strong>
+            <small>Rotate board after each move in 2 Player mode</small>
+        </span>
+        <input id="autoFlipToggle" type="checkbox">
+    </label>
+
+    <label class="featureToggle">
+        <span>
+            <strong>Coordinates</strong>
+            <small>Show board rank and file labels</small>
+        </span>
+        <input id="coordsToggle" type="checkbox" checked>
+    </label>
+
+    <label class="featureToggle">
+        <span>
+            <strong>Evaluation</strong>
+            <small>Show Stockfish evaluation panel</small>
+        </span>
+        <input id="evalToggle" type="checkbox" checked>
+    </label>
+
+    <div class="modeSubsection">
+        <div class="modeLabel">Watch Nova speed</div>
+        <select id="watchSpeed">
+            <option value="250">Fast</option>
+            <option value="700" selected>Normal</option>
+            <option value="1400">Slow</option>
+        </select>
+    </div>
+
+</div>
 </section>
 
 <!-- MOVES -->
@@ -1753,6 +1979,9 @@ let chosenSide = "w";
 let playerColor = "w";
 let engineColor = "b";
 let clocksEnabled = true;
+let clockPaused = false;
+let autoFlipEnabled = false;
+let watchTimer = null;
 
 
 /* =========================================================
@@ -2132,9 +2361,15 @@ function requestEngineMove(){
 
     if(game.game_over()) return;
 
-    if(gameMode !== "computer") return;
+    const engineModes =
+        ["computer","blitz","training","random","watch"];
 
-    if(game.turn() !== engineColor) return;
+    if(!engineModes.includes(gameMode)) return;
+
+    if(
+        gameMode !== "watch" &&
+        game.turn() !== engineColor
+    ) return;
 
     engineThinking = true;
 
@@ -2173,12 +2408,16 @@ function requestEngineMove(){
     send(position);
 
     const depth =
-        parseInt(
-            document.getElementById(
-                "difficulty"
-            ).value,
-            10
-        ) || 7;
+        gameMode === "watch"
+            ? 9
+            : (
+                parseInt(
+                    document.getElementById(
+                        "difficulty"
+                    ).value,
+                    10
+                ) || 7
+            );
 
     send(
         "go depth " +
@@ -2341,14 +2580,40 @@ function handleBestMove(line){
     selected = null;
     legalMoves = [];
 
-    setStatus(
-        "Your move",
-        "ready"
-    );
+    if(gameMode === "watch"){
+        setStatus(
+            game.turn() === "w"
+                ? "Nova White thinking…"
+                : "Nova Black thinking…",
+            "thinking"
+        );
+    }else{
+        setStatus(
+            "Your move",
+            "ready"
+        );
+    }
 
     render();
 
-    checkGameEnd();
+    if(checkGameEnd()) return;
+
+    if(gameMode === "watch"){
+
+        clearTimeout(watchTimer);
+
+        const delay =
+            parseInt(
+                document.getElementById("watchSpeed").value,
+                10
+            ) || 700;
+
+        watchTimer =
+            setTimeout(
+                requestEngineMove,
+                delay
+            );
+    }
 }
 
 /* =========================================================
@@ -2619,9 +2884,21 @@ function squareClicked(square){
 
     if(gameEnded) return;
 
-    if(gameMode === "computer" && game.turn() !== playerColor) return;
+    if(gameMode === "watch") return;
 
-    if(gameMode === "computer" && engineThinking) return;
+    const versusNova =
+        ["computer","blitz","training","random"]
+        .includes(gameMode);
+
+    if(
+        versusNova &&
+        game.turn() !== playerColor
+    ) return;
+
+    if(
+        versusNova &&
+        engineThinking
+    ) return;
 
     const piece =
         game.get(square);
@@ -2677,7 +2954,7 @@ function squareClicked(square){
 
     if(
         piece &&
-        piece.color === "w"
+        piece.color === game.turn()
     ){
 
         selectSquare(square);
@@ -2801,7 +3078,16 @@ function makePlayerMove(
     */
 
     if(
-        gameMode === "computer" &&
+        gameMode === "local" &&
+        autoFlipEnabled
+    ){
+        flipped = !flipped;
+        renderBoard();
+    }
+
+    if(
+        ["computer","blitz","training","random"]
+        .includes(gameMode) &&
         game.turn() === engineColor
     ){
         requestEngineMove();
@@ -2959,8 +3245,6 @@ function updateClocks(){
         !gameEnded
     );
 
-    }
-
     blackClock.classList.toggle(
         "active",
         game.turn() === "b" &&
@@ -2992,7 +3276,8 @@ function startClock(){
                 if(
                     !gameStarted ||
                     gameEnded ||
-                    !clocksEnabled
+                    !clocksEnabled ||
+                    clockPaused
                 ){
                     return;
                 }
@@ -3155,6 +3440,23 @@ function newGame(){
     gameStarted = false;
     gameEnded = false;
 
+    clearTimeout(watchTimer);
+    clockPaused = false;
+
+    if(gameMode === "blitz"){
+        document.getElementById("timeControl").value = "180";
+        document.getElementById("difficulty").value = "10";
+    }
+
+    if(gameMode === "training"){
+        document.getElementById("timeControl").value = "0";
+        document.getElementById("difficulty").value = "5";
+    }
+
+    if(gameMode === "watch"){
+        document.getElementById("timeControl").value = "0";
+    }
+
     const timeValue =
         parseInt(
             document.getElementById("timeControl").value,
@@ -3170,7 +3472,10 @@ function newGame(){
     blackSeconds =
         clocksEnabled ? timeValue : 0;
 
-    if(gameMode === "computer"){
+    if(
+        ["computer","blitz","training","random"]
+        .includes(gameMode)
+    ){
 
         playerColor =
             chosenSide === "random"
@@ -3208,6 +3513,50 @@ function newGame(){
     evalFill.style.width =
         "50%";
 
+    if(gameMode === "random"){
+
+        for(let i=0;i<4;i++){
+
+            const candidates =
+                game.moves({
+                    verbose:true
+                });
+
+            if(!candidates.length) break;
+
+            const picked =
+                candidates[
+                    Math.floor(
+                        Math.random() *
+                        candidates.length
+                    )
+                ];
+
+            game.move({
+                from:picked.from,
+                to:picked.to,
+                promotion:picked.promotion
+            });
+        }
+
+        const history =
+            game.history({
+                verbose:true
+            });
+
+        if(history.length){
+            const latest =
+                history[
+                    history.length - 1
+                ];
+
+            lastMove = {
+                from:latest.from,
+                to:latest.to
+            };
+        }
+    }
+
     render();
 
     updateClocks();
@@ -3224,7 +3573,8 @@ function newGame(){
     }
 
     if(
-        gameMode === "computer" &&
+        ["computer","blitz","training","random"]
+        .includes(gameMode) &&
         engineReady &&
         game.turn() === engineColor
     ){
@@ -3232,10 +3582,37 @@ function newGame(){
             requestEngineMove,
             80
         );
+
+    }else if(gameMode === "watch"){
+
+        setStatus("Nova vs Nova","ready");
+
+        if(engineReady){
+            setTimeout(
+                requestEngineMove,
+                180
+            );
+        }
+
     }else if(gameMode === "local"){
+
         setStatus("White to move","ready");
+
     }else if(gameMode === "analysis"){
+
         setStatus("Free Play","ready");
+
+    }else{
+
+        setStatus("Your move","ready");
+    }
+
+    const pauseButton =
+        document.getElementById("pauseBtn");
+
+    if(pauseButton){
+        pauseButton.textContent =
+            "⏸ Pause Clock";
     }
 }
 
@@ -3402,7 +3779,11 @@ const bottomPlayerName =
 
 function updateModeLabels(){
 
-    if(gameMode === "computer"){
+    const versusNova =
+        ["computer","blitz","training","random"]
+        .includes(gameMode);
+
+    if(versusNova){
 
         sideOptions.style.display = "";
 
@@ -3414,11 +3795,11 @@ function updateModeLabels(){
             bottomPlayerName.textContent = "♙ Nova";
         }
 
-    }else if(gameMode === "local"){
+    }else if(gameMode === "watch"){
 
         sideOptions.style.display = "none";
-        topPlayerName.textContent = "Black";
-        bottomPlayerName.textContent = "♙ White";
+        topPlayerName.textContent = "Nova Black";
+        bottomPlayerName.textContent = "♙ Nova White";
 
     }else{
 
@@ -3448,6 +3829,11 @@ modeButtons.forEach(
                 this.classList.add(
                     "active"
                 );
+
+                this.scrollIntoView({
+                    behavior:"smooth",
+                    block:"nearest"
+                });
 
                 updateModeLabels();
                 newGame();
@@ -3489,6 +3875,139 @@ document
     .addEventListener(
         "change",
         newGame
+    );
+
+
+
+/* =========================================================
+   EXTRA GAME FEATURES
+   ========================================================= */
+
+const pauseBtn =
+    document.getElementById("pauseBtn");
+
+const autoFlipToggle =
+    document.getElementById("autoFlipToggle");
+
+const coordsToggle =
+    document.getElementById("coordsToggle");
+
+const evalToggle =
+    document.getElementById("evalToggle");
+
+pauseBtn.addEventListener(
+    "click",
+    function(){
+
+        if(!clocksEnabled){
+
+            hintBox.textContent =
+                "This mode has no clock.";
+
+            return;
+        }
+
+        clockPaused =
+            !clockPaused;
+
+        this.textContent =
+            clockPaused
+                ? "▶ Resume Clock"
+                : "⏸ Pause Clock";
+
+        if(!clockPaused){
+            lastClockTime =
+                performance.now();
+        }
+    }
+);
+
+autoFlipToggle.addEventListener(
+    "change",
+    function(){
+
+        autoFlipEnabled =
+            this.checked;
+
+        hintBox.textContent =
+            autoFlipEnabled
+                ? "Auto Flip enabled for 2 Player mode."
+                : "Auto Flip disabled.";
+    }
+);
+
+coordsToggle.addEventListener(
+    "change",
+    function(){
+
+        document.body
+            .classList
+            .toggle(
+                "hideCoords",
+                !this.checked
+            );
+    }
+);
+
+evalToggle.addEventListener(
+    "change",
+    function(){
+
+        document.body
+            .classList
+            .toggle(
+                "hideEval",
+                !this.checked
+            );
+    }
+);
+
+document
+    .getElementById("downloadPgnBtn")
+    .addEventListener(
+        "click",
+        function(){
+
+            const pgn =
+                game.pgn() ||
+                '[Event "Nova Chess"]\n\n*';
+
+            const blob =
+                new Blob(
+                    [pgn],
+                    {
+                        type:
+                            "application/x-chess-pgn"
+                    }
+                );
+
+            const url =
+                URL.createObjectURL(
+                    blob
+                );
+
+            const link =
+                document.createElement(
+                    "a"
+                );
+
+            link.href = url;
+            link.download =
+                "nova-game.pgn";
+
+            document.body
+                .appendChild(link);
+
+            link.click();
+            link.remove();
+
+            URL.revokeObjectURL(
+                url
+            );
+
+            hintBox.textContent =
+                "PGN file downloaded.";
+        }
     );
 
 
