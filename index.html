@@ -2,541 +2,868 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+
 <title>Nova Chess</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
 <style>
-* {
-    box-sizing: border-box;
+:root{
+    --bg:#070a10;
+    --panel:#101522;
+    --panel2:#151c2b;
+    --line:rgba(255,255,255,.08);
+    --text:#f4f7ff;
+    --muted:#8792a8;
+
+    --light:#dce5ef;
+    --dark:#61758d;
+
+    --accent:#64b5ff;
+    --accent2:#8068ff;
+
+    --board:
+        min(
+            calc(100vh - 150px),
+            calc(100vw - 380px),
+            650px
+        );
 }
 
-html, body {
-    margin: 0;
-    width: 100%;
-    min-height: 100%;
-    font-family: Arial, Helvetica, sans-serif;
+*{
+    box-sizing:border-box;
+}
+
+html,body{
+    width:100%;
+    height:100%;
+    margin:0;
+    overflow:hidden;
+}
+
+body{
     background:
-        radial-gradient(circle at 20% 10%, rgba(70,100,255,.16), transparent 30%),
-        radial-gradient(circle at 80% 90%, rgba(0,220,255,.10), transparent 30%),
-        #070a12;
-    color: #f4f7ff;
+        radial-gradient(
+            circle at 15% 15%,
+            rgba(70,110,255,.14),
+            transparent 30%
+        ),
+        radial-gradient(
+            circle at 90% 90%,
+            rgba(40,210,255,.08),
+            transparent 30%
+        ),
+        var(--bg);
+
+    color:var(--text);
+
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
 }
 
-body {
-    min-height: 100vh;
-    overflow-x: hidden;
+/* =========================================================
+   APP
+   ========================================================= */
+
+.app{
+    width:100%;
+    height:100vh;
+
+    display:flex;
+    flex-direction:column;
+
+    overflow:hidden;
 }
 
-button, select {
-    font: inherit;
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+
+.topbar{
+    height:58px;
+    min-height:58px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:0 18px;
+
+    border-bottom:1px solid var(--line);
+
+    background:rgba(7,10,16,.82);
+
+    backdrop-filter:blur(18px);
 }
 
-button {
-    cursor: pointer;
+.logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    font-size:19px;
+    font-weight:800;
 }
 
-.app {
-    width: min(1400px, 100%);
-    margin: 0 auto;
-    padding: 14px;
-}
+.logoIcon{
+    width:34px;
+    height:34px;
 
-/* HEADER */
+    display:grid;
+    place-items:center;
 
-.topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 14px;
-    margin-bottom: 12px;
-}
+    border-radius:10px;
 
-.brand {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
+    background:
+        linear-gradient(
+            135deg,
+            var(--accent),
+            var(--accent2)
+        );
 
-.logo {
-    width: 44px;
-    height: 44px;
-    border-radius: 13px;
-    display: grid;
-    place-items: center;
-    background: linear-gradient(135deg, #6677ff, #26d9ff);
-    color: white;
-    font-size: 25px;
-    box-shadow: 0 0 28px rgba(76,150,255,.25);
-}
-
-.title {
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: .4px;
-}
-
-.subtitle {
-    font-size: 12px;
-    color: #8d97ad;
-    margin-top: 2px;
-}
-
-.version {
-    font-size: 11px;
-    color: #7f8ba5;
-    padding: 7px 10px;
-    border: 1px solid rgba(255,255,255,.08);
-    border-radius: 999px;
-}
-
-/* LAYOUT */
-
-.layout {
-    display: grid;
-    grid-template-columns: minmax(400px, 1fr) 330px;
-    gap: 14px;
-    align-items: start;
-}
-
-/* BOARD */
-
-.board-panel {
-    background: rgba(13,17,29,.82);
-    border: 1px solid rgba(255,255,255,.08);
-    border-radius: 18px;
-    padding: 12px;
-    box-shadow: 0 20px 60px rgba(0,0,0,.28);
-}
-
-.board-wrap {
-    width: min(78vh, 760px, calc(100vw - 390px));
-    min-width: 400px;
-    max-width: 100%;
-    margin: 0 auto;
-}
-
-.board {
-    width: 100%;
-    aspect-ratio: 1;
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    border-radius: 10px;
-    overflow: hidden;
     box-shadow:
-        0 0 0 1px rgba(255,255,255,.10),
-        0 18px 50px rgba(0,0,0,.45);
-    user-select: none;
+        0 0 25px rgba(90,150,255,.25);
+
+    font-size:19px;
 }
 
-.square {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    aspect-ratio: 1;
-    border: 0;
-    padding: 0;
+.enginePill{
+    display:flex;
+    align-items:center;
+    gap:7px;
+
+    padding:7px 11px;
+
+    border:1px solid var(--line);
+    border-radius:999px;
+
+    background:rgba(255,255,255,.035);
+
+    font-size:11px;
+    color:var(--muted);
 }
 
-.light {
-    background: #dce4f0;
+.engineDot{
+    width:8px;
+    height:8px;
+
+    border-radius:50%;
+
+    background:#ff5967;
 }
 
-.dark {
-    background: #65748d;
+.enginePill.ready .engineDot{
+    background:#4fe19a;
+    box-shadow:0 0 10px rgba(79,225,154,.6);
 }
 
-.square.last-move {
-    box-shadow: inset 0 0 0 999px rgba(255,220,80,.22);
+.enginePill.thinking .engineDot{
+    background:#55caff;
+    box-shadow:0 0 12px rgba(85,202,255,.7);
+
+    animation:pulse 1s infinite;
 }
 
-.square.selected {
-    box-shadow: inset 0 0 0 5px rgba(65,210,255,.85);
+@keyframes pulse{
+    50%{opacity:.35}
 }
 
-.square.check {
-    box-shadow: inset 0 0 0 999px rgba(255,70,80,.42);
+/* =========================================================
+   MAIN
+   ========================================================= */
+
+.main{
+    flex:1;
+
+    min-height:0;
+
+    display:grid;
+
+    grid-template-columns:
+        minmax(0,1fr)
+        300px;
+
+    gap:12px;
+
+    padding:10px 14px 12px;
+
+    overflow:hidden;
 }
 
-.piece {
-    position: relative;
-    z-index: 2;
-    font-family: "DejaVu Sans", "Arial Unicode MS", sans-serif;
-    font-size: clamp(31px, 7vw, 70px);
-    line-height: 1;
-    transform: translateY(-2%);
+/* =========================================================
+   BOARD AREA
+   ========================================================= */
+
+.boardArea{
+    min-width:0;
+    min-height:0;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.boardColumn{
+    width:var(--board);
+
+    max-width:100%;
+}
+
+.playerStrip{
+    height:32px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    margin-bottom:6px;
+}
+
+.playerName{
+    display:flex;
+    align-items:center;
+    gap:7px;
+
+    font-size:12px;
+    font-weight:700;
+}
+
+.playerPiece{
+    font-size:17px;
+}
+
+.clock{
+    min-width:65px;
+
+    text-align:right;
+
+    font-size:18px;
+    font-weight:800;
+
+    font-variant-numeric:tabular-nums;
+
+    color:#858fa4;
+}
+
+.clock.active{
+    color:#f5f8ff;
+
     text-shadow:
-        0 2px 2px rgba(0,0,0,.42),
-        0 4px 8px rgba(0,0,0,.22);
+        0 0 15px rgba(100,190,255,.25);
 }
 
-.white-piece {
-    color: #ffffff;
+/* =========================================================
+   BOARD
+   ========================================================= */
+
+.boardShell{
+    width:100%;
+
+    aspect-ratio:1;
+
+    padding:4px;
+
+    border-radius:13px;
+
+    background:#0c111b;
+
+    box-shadow:
+        0 0 0 1px rgba(255,255,255,.08),
+        0 18px 50px rgba(0,0,0,.45);
 }
 
-.black-piece {
-    color: #11151e;
+#board{
+    width:100%;
+    height:100%;
+
+    display:grid;
+    grid-template-columns:repeat(8,1fr);
+
+    overflow:hidden;
+
+    border-radius:9px;
+
+    user-select:none;
+}
+
+.square{
+    position:relative;
+
+    border:0;
+    padding:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    aspect-ratio:1;
+
+    cursor:pointer;
+}
+
+.square.light{
+    background:var(--light);
+}
+
+.square.dark{
+    background:var(--dark);
+}
+
+.square.last{
+    box-shadow:
+        inset 0 0 0 999px
+        rgba(255,220,70,.23);
+}
+
+.square.selected{
+    box-shadow:
+        inset 0 0 0 4px
+        rgba(70,210,255,.9);
+}
+
+.square.check{
+    box-shadow:
+        inset 0 0 0 999px
+        rgba(255,60,70,.43);
+}
+
+.piece{
+    position:relative;
+
+    z-index:3;
+
+    font-family:
+        "DejaVu Sans",
+        "Arial Unicode MS",
+        sans-serif;
+
+    font-size:
+        clamp(
+            28px,
+            calc(var(--board) / 11),
+            65px
+        );
+
+    line-height:1;
+
+    pointer-events:none;
+
+    transform:translateY(-2px);
+
+    text-shadow:
+        0 2px 2px rgba(0,0,0,.35),
+        0 5px 8px rgba(0,0,0,.18);
+}
+
+.whitePiece{
+    color:#fff;
+}
+
+.blackPiece{
+    color:#11151d;
+
     text-shadow:
         0 2px 1px rgba(255,255,255,.18),
-        0 4px 8px rgba(0,0,0,.4);
+        0 5px 8px rgba(0,0,0,.4);
 }
 
-.move-dot {
-    position: absolute;
-    width: 20%;
-    height: 20%;
-    border-radius: 50%;
-    background: rgba(20,35,50,.34);
-    z-index: 1;
+.moveDot{
+    position:absolute;
+
+    width:19%;
+    height:19%;
+
+    border-radius:50%;
+
+    background:rgba(15,30,45,.35);
+
+    z-index:2;
 }
 
-.capture-ring {
-    position: absolute;
-    inset: 8%;
-    border: 5px solid rgba(25,35,45,.30);
-    border-radius: 50%;
-    z-index: 1;
+.capture{
+    position:absolute;
+
+    inset:8%;
+
+    border:4px solid rgba(20,35,48,.3);
+
+    border-radius:50%;
+
+    z-index:2;
 }
 
-.coord-file,
-.coord-rank {
-    position: absolute;
-    font-size: 10px;
-    font-weight: 700;
-    opacity: .72;
-    z-index: 3;
+.coord{
+    position:absolute;
+
+    z-index:5;
+
+    font-size:9px;
+    font-weight:800;
+
+    opacity:.7;
+
+    pointer-events:none;
 }
 
-.coord-file {
-    right: 5px;
-    bottom: 3px;
+.fileCoord{
+    right:4px;
+    bottom:2px;
 }
 
-.coord-rank {
-    left: 5px;
-    top: 3px;
+.rankCoord{
+    left:4px;
+    top:2px;
 }
 
-.light .coord-file,
-.light .coord-rank {
-    color: #59677b;
+.light .coord{
+    color:#596779;
 }
 
-.dark .coord-file,
-.dark .coord-rank {
-    color: #e3e9f2;
+.dark .coord{
+    color:#edf2f8;
 }
 
-/* CLOCKS */
+/* =========================================================
+   BOTTOM PLAYER STRIP
+   ========================================================= */
 
-.clock-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 10px;
+.bottomPlayer{
+    height:32px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    margin-top:6px;
 }
 
-.clock {
-    background: #111624;
-    border: 1px solid rgba(255,255,255,.08);
-    border-radius: 12px;
-    padding: 9px 12px;
+.you{
+    font-size:12px;
+    font-weight:700;
 }
 
-.clock.active {
-    border-color: rgba(77,215,255,.7);
-    box-shadow: 0 0 18px rgba(30,190,255,.12);
+/* =========================================================
+   SIDEBAR
+   ========================================================= */
+
+.sidebar{
+    min-height:0;
+
+    display:flex;
+    flex-direction:column;
+
+    gap:9px;
+
+    overflow:hidden;
 }
 
-.clock-label {
-    color: #8490a7;
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+.card{
+    background:
+        linear-gradient(
+            180deg,
+            rgba(19,25,39,.94),
+            rgba(13,18,29,.94)
+        );
+
+    border:1px solid var(--line);
+
+    border-radius:13px;
+
+    overflow:hidden;
 }
 
-.clock-time {
-    margin-top: 2px;
-    font-size: 24px;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
+.cardHeader{
+    padding:9px 12px 7px;
+
+    font-size:10px;
+    font-weight:800;
+
+    text-transform:uppercase;
+
+    letter-spacing:1px;
+
+    color:#8792a8;
+
+    border-bottom:1px solid rgba(255,255,255,.045);
 }
 
-/* SIDE PANEL */
-
-.side {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+.cardBody{
+    padding:9px 11px;
 }
 
-.card {
-    background: rgba(13,17,29,.86);
-    border: 1px solid rgba(255,255,255,.08);
-    border-radius: 16px;
-    padding: 13px;
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+
+.buttons{
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    gap:7px;
 }
 
-.card-title {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #8995ad;
-    margin-bottom: 10px;
+button,
+select{
+    font:inherit;
 }
 
-.controls {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+button{
+    cursor:pointer;
 }
 
-.btn {
-    min-height: 40px;
-    border: 1px solid rgba(255,255,255,.09);
-    border-radius: 10px;
-    background: #151b2b;
-    color: #eef3ff;
-    transition: .15s;
+.btn{
+    min-height:34px;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:8px;
+
+    background:#171e2d;
+
+    color:#edf2ff;
+
+    font-size:11px;
+
+    transition:.12s;
 }
 
-.btn:hover {
-    background: #1c2538;
-    transform: translateY(-1px);
+.btn:hover{
+    background:#202a3e;
 }
 
-.btn.primary {
-    background: linear-gradient(135deg, #5667ff, #2abde8);
-    border: 0;
-    font-weight: 800;
+.btn:active{
+    transform:scale(.98);
 }
 
-.btn.danger {
-    background: #27151b;
-    color: #ff9ba6;
+.btn.primary{
+    border:0;
+
+    background:
+        linear-gradient(
+            135deg,
+            #5d72ff,
+            #31bce5
+        );
+
+    font-weight:800;
 }
 
-.full {
-    grid-column: 1 / -1;
+select{
+    width:100%;
+
+    min-height:34px;
+
+    border-radius:8px;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    background:#171e2d;
+
+    color:#edf2ff;
+
+    padding:0 8px;
+
+    font-size:11px;
 }
 
-select {
-    width: 100%;
-    min-height: 40px;
-    padding: 0 10px;
-    border-radius: 10px;
-    background: #151b2b;
-    color: white;
-    border: 1px solid rgba(255,255,255,.09);
+.full{
+    grid-column:1/-1;
 }
 
-/* STATUS */
+/* =========================================================
+   STATUS
+   ========================================================= */
 
-.engine-status {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px;
-    border-radius: 10px;
-    background: #0b101b;
-    border: 1px solid rgba(255,255,255,.07);
+.status{
+    padding:8px 9px;
+
+    border-radius:8px;
+
+    background:#0a0f18;
+
+    border:1px solid rgba(255,255,255,.06);
+
+    font-size:11px;
+
+    color:#aeb9cc;
 }
 
-.status-dot {
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: #ff5264;
-    flex: none;
+.status.good{
+    color:#78e8ae;
 }
 
-.status-dot.ready {
-    background: #52e89b;
-    box-shadow: 0 0 10px rgba(82,232,155,.6);
+.status.bad{
+    color:#ff818b;
 }
 
-.status-dot.thinking {
-    background: #52c8ff;
-    box-shadow: 0 0 12px rgba(82,200,255,.7);
-    animation: pulse 1s infinite;
+/* =========================================================
+   EVAL
+   ========================================================= */
+
+.evalRow{
+    display:flex;
+    justify-content:space-between;
+
+    margin-top:7px;
+
+    color:#7e8ba2;
+
+    font-size:10px;
 }
 
-@keyframes pulse {
-    50% {
-        opacity: .35;
+.evalBar{
+    height:8px;
+
+    margin-top:6px;
+
+    overflow:hidden;
+
+    border-radius:999px;
+
+    background:#090d14;
+}
+
+.evalFill{
+    width:50%;
+    height:100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            #68768d,
+            #edf1f7
+        );
+
+    transition:width .3s;
+}
+
+/* =========================================================
+   MOVES
+   ========================================================= */
+
+.moves{
+    height:150px;
+
+    overflow:auto;
+
+    border-radius:8px;
+
+    background:#090e16;
+
+    padding:4px;
+}
+
+.moveRow{
+    display:grid;
+
+    grid-template-columns:
+        32px
+        1fr
+        1fr;
+
+    min-height:24px;
+
+    align-items:center;
+
+    padding:2px 5px;
+
+    border-radius:5px;
+
+    font-size:11px;
+}
+
+.moveRow:nth-child(even){
+    background:rgba(255,255,255,.025);
+}
+
+.moveNumber{
+    color:#68748a;
+}
+
+.current{
+    font-weight:800;
+    color:#fff;
+}
+
+/* =========================================================
+   DEBUG
+   ========================================================= */
+
+.debug{
+    font-family:monospace;
+
+    font-size:9px;
+
+    line-height:1.45;
+
+    color:#7f8ba2;
+
+    overflow-wrap:anywhere;
+}
+
+.debugLine{
+    margin-bottom:4px;
+}
+
+.debugLine strong{
+    color:#cbd5e8;
+}
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+.modal{
+    position:fixed;
+
+    inset:0;
+
+    z-index:100;
+
+    display:none;
+
+    align-items:center;
+    justify-content:center;
+
+    background:rgba(0,0,0,.68);
+
+    padding:20px;
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modalBox{
+    width:min(350px,100%);
+
+    padding:18px;
+
+    border-radius:15px;
+
+    background:#121927;
+
+    border:1px solid rgba(255,255,255,.1);
+
+    box-shadow:0 25px 70px rgba(0,0,0,.55);
+}
+
+.modalTitle{
+    font-size:19px;
+    font-weight:800;
+
+    margin-bottom:6px;
+}
+
+.modalText{
+    font-size:12px;
+
+    color:#929db2;
+
+    margin-bottom:14px;
+}
+
+.promotionButtons{
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:7px;
+}
+
+.promotionButtons button{
+    height:58px;
+
+    border-radius:9px;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    background:#192134;
+
+    color:white;
+
+    font-size:32px;
+}
+
+/* =========================================================
+   SHORT CHROMEBOOK
+   ========================================================= */
+
+@media(max-height:720px) and (min-width:821px){
+
+    :root{
+        --board:
+            min(
+                calc(100vh - 125px),
+                calc(100vw - 350px),
+                560px
+            );
+    }
+
+    .topbar{
+        height:50px;
+        min-height:50px;
+    }
+
+    .main{
+        padding:7px 10px 8px;
+    }
+
+    .cardHeader{
+        padding:7px 10px 5px;
+    }
+
+    .cardBody{
+        padding:7px 9px;
+    }
+
+    .moves{
+        height:115px;
     }
 }
 
-.status-text {
-    font-size: 12px;
-    color: #c6cede;
-}
+/* =========================================================
+   SMALL WIDTH
+   ========================================================= */
 
-/* MOVES */
+@media(max-width:820px){
 
-.moves {
-    max-height: 220px;
-    overflow-y: auto;
-    background: #0a0e17;
-    border-radius: 10px;
-    padding: 7px;
-}
-
-.move-line {
-    display: grid;
-    grid-template-columns: 35px 1fr 1fr;
-    padding: 6px 7px;
-    border-radius: 7px;
-    font-size: 12px;
-}
-
-.move-line:nth-child(even) {
-    background: rgba(255,255,255,.025);
-}
-
-.move-number {
-    color: #6f7a91;
-}
-
-.move-san {
-    color: #eef3ff;
-}
-
-/* DEBUG */
-
-.debug {
-    font-family: monospace;
-    font-size: 10px;
-    line-height: 1.55;
-    color: #9eabc2;
-    overflow-wrap: anywhere;
-}
-
-.debug strong {
-    color: #dce5f8;
-}
-
-.debug-line {
-    margin-bottom: 5px;
-}
-
-/* EVAL */
-
-.eval {
-    height: 10px;
-    background: #0a0e16;
-    border-radius: 999px;
-    overflow: hidden;
-    margin-top: 9px;
-}
-
-.eval-fill {
-    width: 50%;
-    height: 100%;
-    background: linear-gradient(90deg, #65748d, #e8edf6);
-    transition: width .35s ease;
-}
-
-/* MODAL */
-
-.modal {
-    position: fixed;
-    inset: 0;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background: rgba(0,0,0,.68);
-    z-index: 50;
-}
-
-.modal.show {
-    display: flex;
-}
-
-.modal-box {
-    width: min(390px, 100%);
-    background: #111725;
-    border: 1px solid rgba(255,255,255,.1);
-    border-radius: 18px;
-    padding: 20px;
-    box-shadow: 0 30px 90px rgba(0,0,0,.5);
-}
-
-.modal-title {
-    font-size: 21px;
-    font-weight: 800;
-    margin-bottom: 7px;
-}
-
-.modal-text {
-    color: #9ca8bc;
-    font-size: 13px;
-    margin-bottom: 15px;
-}
-
-.promotion-buttons {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 8px;
-}
-
-.promo {
-    min-height: 62px;
-    font-size: 36px;
-    background: #181f31;
-    border: 1px solid rgba(255,255,255,.08);
-    color: white;
-    border-radius: 10px;
-}
-
-/* MOBILE */
-
-@media (max-width: 900px) {
-    .layout {
-        grid-template-columns: 1fr;
+    html,body{
+        overflow:auto;
     }
 
-    .board-wrap {
-        width: min(92vw, 680px);
-        min-width: 0;
+    .app{
+        height:auto;
+        min-height:100vh;
+        overflow:visible;
     }
 
-    .side {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
+    .main{
+        display:flex;
+        flex-direction:column;
+        overflow:visible;
     }
 
-    .card {
-        min-width: 0;
-    }
-}
-
-@media (max-width: 560px) {
-    .app {
-        padding: 8px;
+    .boardColumn{
+        width:min(
+            94vw,
+            calc(100vh - 150px)
+        );
     }
 
-    .title {
-        font-size: 18px;
+    .sidebar{
+        overflow:visible;
     }
 
-    .version {
-        display: none;
-    }
-
-    .board-panel {
-        padding: 6px;
-    }
-
-    .side {
-        display: flex;
-    }
-
-    .clock-time {
-        font-size: 20px;
+    .moves{
+        height:140px;
     }
 }
 </style>
@@ -546,135 +873,190 @@ select {
 
 <div class="app">
 
-    <header class="topbar">
-        <div class="brand">
-            <div class="logo">♞</div>
-            <div>
-                <div class="title">NOVA CHESS</div>
-                <div class="subtitle">Human vs Stockfish</div>
-            </div>
+<header class="topbar">
+
+    <div class="logo">
+        <div class="logoIcon">♞</div>
+        <span>Nova Chess</span>
+    </div>
+
+    <div id="enginePill" class="enginePill">
+        <span class="engineDot"></span>
+        <span id="engineText">Loading Stockfish…</span>
+    </div>
+
+</header>
+
+<main class="main">
+
+<section class="boardArea">
+
+<div class="boardColumn">
+
+    <div class="playerStrip">
+
+        <div class="playerName">
+            <span class="playerPiece">♟</span>
+            <span>Nova</span>
         </div>
 
-        <div class="version">ENGINE BUILD • 18</div>
-    </header>
+        <div id="blackClock" class="clock">
+            5:00
+        </div>
 
-    <main class="layout">
+    </div>
 
-        <section class="board-panel">
+    <div class="boardShell">
+        <div id="board"></div>
+    </div>
 
-            <div id="board" class="board"></div>
+    <div class="bottomPlayer">
 
-            <div class="clock-row">
+        <div class="you">
+            ♙ You
+        </div>
 
-                <div id="whiteClock" class="clock active">
-                    <div class="clock-label">White</div>
-                    <div id="whiteTime" class="clock-time">05:00</div>
-                </div>
+        <div id="whiteClock" class="clock active">
+            5:00
+        </div>
 
-                <div id="blackClock" class="clock">
-                    <div class="clock-label">Nova</div>
-                    <div id="blackTime" class="clock-time">05:00</div>
-                </div>
+    </div>
 
-            </div>
+</div>
 
-        </section>
+</section>
 
-        <aside class="side">
+<aside class="sidebar">
 
-            <section class="card">
+<!-- GAME -->
 
-                <div class="card-title">Game</div>
+<section class="card">
 
-                <div class="controls">
-                    <button id="newGameBtn" class="btn primary">
-                        New Game
-                    </button>
+<div class="cardHeader">
+    Game
+</div>
 
-                    <button id="flipBtn" class="btn">
-                        Flip Board
-                    </button>
+<div class="cardBody">
 
-                    <select id="difficulty">
-                        <option value="5">Beginner</option>
-                        <option value="7" selected>Easy</option>
-                        <option value="10">Medium</option>
-                        <option value="12">Hard</option>
-                        <option value="14">Expert</option>
-                        <option value="16">Maximum</option>
-                    </select>
+<div class="buttons">
 
-                    <button id="undoBtn" class="btn">
-                        Undo
-                    </button>
-                </div>
+<button id="newGame" class="btn primary">
+    New Game
+</button>
 
-            </section>
+<button id="flip" class="btn">
+    Flip
+</button>
 
-            <section class="card">
+<select id="difficulty">
+    <option value="5">Beginner</option>
+    <option value="7" selected>Easy</option>
+    <option value="10">Medium</option>
+    <option value="12">Hard</option>
+    <option value="14">Expert</option>
+    <option value="16">Maximum</option>
+</select>
 
-                <div class="card-title">Stockfish</div>
+<button id="undo" class="btn">
+    Undo
+</button>
 
-                <div class="engine-status">
-                    <div id="statusDot" class="status-dot"></div>
-                    <div id="engineStatus" class="status-text">
-                        Starting Stockfish…
-                    </div>
-                </div>
+</div>
 
-                <div style="height:8px"></div>
+</div>
 
-                <button id="testBtn" class="btn full">
-                    Test Engine
-                </button>
+</section>
 
-                <div class="eval">
-                    <div id="evalFill" class="eval-fill"></div>
-                </div>
+<!-- ENGINE -->
 
-            </section>
+<section class="card">
 
-            <section class="card">
+<div class="cardHeader">
+    Stockfish
+</div>
 
-                <div class="card-title">Moves</div>
+<div class="cardBody">
 
-                <div id="moves" class="moves"></div>
+<div id="status" class="status">
+    Starting engine…
+</div>
 
-            </section>
+<div class="evalRow">
+    <span>Evaluation</span>
+    <span id="evalText">0.00</span>
+</div>
 
-            <section class="card">
+<div class="evalBar">
+    <div id="evalFill" class="evalFill"></div>
+</div>
 
-                <div class="card-title">Engine Diagnostics</div>
+<div style="height:7px"></div>
 
-                <div class="debug">
+<button id="testEngine" class="btn full">
+    Test Engine
+</button>
 
-                    <div class="debug-line">
-                        <strong>State:</strong>
-                        <span id="debugState">Starting</span>
-                    </div>
+</div>
 
-                    <div class="debug-line">
-                        <strong>Last command:</strong>
-                        <span id="debugCommand">—</span>
-                    </div>
+</section>
 
-                    <div class="debug-line">
-                        <strong>Last output:</strong>
-                        <span id="debugOutput">—</span>
-                    </div>
+<!-- MOVES -->
 
-                    <div class="debug-line">
-                        <strong>Engine:</strong>
-                        <span>./stockfish-18-asm.js</span>
-                    </div>
+<section class="card">
 
-                </div>
+<div class="cardHeader">
+    Moves
+</div>
 
-            </section>
+<div class="cardBody">
 
-        </aside>
+<div id="moves" class="moves"></div>
 
-    </main>
+</div>
+
+</section>
+
+<!-- DEBUG -->
+
+<section class="card">
+
+<div class="cardHeader">
+    Diagnostics
+</div>
+
+<div class="cardBody">
+
+<div class="debug">
+
+<div class="debugLine">
+<strong>State:</strong>
+<span id="debugState">Starting</span>
+</div>
+
+<div class="debugLine">
+<strong>Command:</strong>
+<span id="debugCommand">—</span>
+</div>
+
+<div class="debugLine">
+<strong>Output:</strong>
+<span id="debugOutput">—</span>
+</div>
+
+<div class="debugLine">
+<strong>Engine:</strong>
+stockfish-18-asm.js
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+</aside>
+
+</main>
 
 </div>
 
@@ -682,22 +1064,26 @@ select {
 
 <div id="promotionModal" class="modal">
 
-    <div class="modal-box">
+<div class="modalBox">
 
-        <div class="modal-title">Choose Promotion</div>
+<div class="modalTitle">
+    Promote Pawn
+</div>
 
-        <div class="modal-text">
-            Select the piece for your pawn promotion.
-        </div>
+<div class="modalText">
+    Choose a piece.
+</div>
 
-        <div class="promotion-buttons">
-            <button class="promo" data-piece="q">♕</button>
-            <button class="promo" data-piece="r">♖</button>
-            <button class="promo" data-piece="b">♗</button>
-            <button class="promo" data-piece="n">♘</button>
-        </div>
+<div class="promotionButtons">
 
-    </div>
+<button data-piece="q">♕</button>
+<button data-piece="r">♖</button>
+<button data-piece="b">♗</button>
+<button data-piece="n">♘</button>
+
+</div>
+
+</div>
 
 </div>
 
@@ -705,398 +1091,537 @@ select {
 
 <div id="gameOverModal" class="modal">
 
-    <div class="modal-box">
+<div class="modalBox">
 
-        <div id="gameOverTitle" class="modal-title">
-            Game Over
-        </div>
+<div id="gameOverTitle" class="modalTitle">
+    Game Over
+</div>
 
-        <div id="gameOverText" class="modal-text"></div>
+<div id="gameOverText" class="modalText"></div>
 
-        <button id="gameOverNewBtn" class="btn primary full">
-            New Game
-        </button>
+<button id="gameOverNew" class="btn primary full">
+    New Game
+</button>
 
-    </div>
+</div>
 
 </div>
 
 <script>
 
 /* =========================================================
-   NOVA CHESS
-   STOCKFISH + CHESS.JS
+   ENGINE
    ========================================================= */
 
-const ENGINE_FILE = "./stockfish-18-asm.js";
-
-/* -------------------------
-   PIECES
-   ------------------------- */
-
-const PIECES = {
-    wp: "♙",
-    wr: "♖",
-    wn: "♘",
-    wb: "♗",
-    wq: "♕",
-    wk: "♔",
-
-    bp: "♟",
-    br: "♜",
-    bn: "♞",
-    bb: "♝",
-    bq: "♛",
-    bk: "♚"
-};
-
-/* -------------------------
-   STATE
-   ------------------------- */
-
-let game = new Chess();
+const ENGINE_FILE =
+    "./stockfish-18-asm.js";
 
 let engine = null;
 
 let engineReady = false;
 let engineThinking = false;
 let engineStarting = false;
+let engineTest = false;
 
-let engineTestMode = false;
+/* =========================================================
+   CHESS
+   ========================================================= */
 
-let selectedSquare = null;
+let game = new Chess();
+
+let selected = null;
+
 let legalMoves = [];
 
 let lastMove = null;
 
 let flipped = false;
 
-let pendingPromotion = null;
+/* =========================================================
+   CLOCK
+   ========================================================= */
 
 let whiteSeconds = 300;
 let blackSeconds = 300;
 
-let clockInterval = null;
 let gameStarted = false;
 let gameEnded = false;
 
-let lastClockTick = null;
-
-/* -------------------------
-   DOM
-   ------------------------- */
-
-const boardEl = document.getElementById("board");
-
-const whiteTimeEl = document.getElementById("whiteTime");
-const blackTimeEl = document.getElementById("blackTime");
-
-const whiteClockEl = document.getElementById("whiteClock");
-const blackClockEl = document.getElementById("blackClock");
-
-const movesEl = document.getElementById("moves");
-
-const engineStatusEl = document.getElementById("engineStatus");
-const statusDotEl = document.getElementById("statusDot");
-
-const debugStateEl = document.getElementById("debugState");
-const debugCommandEl = document.getElementById("debugCommand");
-const debugOutputEl = document.getElementById("debugOutput");
-
-const evalFillEl = document.getElementById("evalFill");
-
-const promotionModal = document.getElementById("promotionModal");
-const gameOverModal = document.getElementById("gameOverModal");
-const gameOverTitle = document.getElementById("gameOverTitle");
-const gameOverText = document.getElementById("gameOverText");
+let clockTimer = null;
+let lastClockTime = 0;
 
 /* =========================================================
-   ENGINE STATUS
+   PROMOTION
    ========================================================= */
 
-function setEngineStatus(text, state = "normal") {
+let pendingPromotion = null;
 
-    engineStatusEl.textContent = text;
+/* =========================================================
+   PIECES
+   ========================================================= */
 
-    statusDotEl.className = "status-dot";
+const PIECES = {
 
-    if (state === "ready") {
-        statusDotEl.classList.add("ready");
-    }
+    wp:"♙",
+    wn:"♘",
+    wb:"♗",
+    wr:"♖",
+    wq:"♕",
+    wk:"♔",
 
-    if (state === "thinking") {
-        statusDotEl.classList.add("thinking");
-    }
+    bp:"♟",
+    bn:"♞",
+    bb:"♝",
+    br:"♜",
+    bq:"♛",
+    bk:"♚"
 
-    debugStateEl.textContent = text;
+};
+
+/* =========================================================
+   ELEMENTS
+   ========================================================= */
+
+const board =
+    document.getElementById("board");
+
+const statusEl =
+    document.getElementById("status");
+
+const enginePill =
+    document.getElementById("enginePill");
+
+const engineText =
+    document.getElementById("engineText");
+
+const debugState =
+    document.getElementById("debugState");
+
+const debugCommand =
+    document.getElementById("debugCommand");
+
+const debugOutput =
+    document.getElementById("debugOutput");
+
+const whiteClock =
+    document.getElementById("whiteClock");
+
+const blackClock =
+    document.getElementById("blackClock");
+
+const movesEl =
+    document.getElementById("moves");
+
+const evalText =
+    document.getElementById("evalText");
+
+const evalFill =
+    document.getElementById("evalFill");
+
+const promotionModal =
+    document.getElementById("promotionModal");
+
+const gameOverModal =
+    document.getElementById("gameOverModal");
+
+const gameOverTitle =
+    document.getElementById("gameOverTitle");
+
+const gameOverText =
+    document.getElementById("gameOverText");
+
+/* =========================================================
+   ENGINE UI
+   ========================================================= */
+
+function setStatus(text,type=""){
+
+    statusEl.textContent = text;
+    engineText.textContent = text;
+
+    enginePill.className =
+        "enginePill " + type;
+
+    debugState.textContent = text;
 }
 
-function setDebugCommand(command) {
-    debugCommandEl.textContent = command || "—";
+function command(text){
+
+    debugCommand.textContent =
+        text;
 }
 
-function setDebugOutput(output) {
-    debugOutputEl.textContent = output || "—";
+function output(text){
+
+    debugOutput.textContent =
+        text;
 }
 
 /* =========================================================
-   ENGINE START
+   START ENGINE
    ========================================================= */
 
-function startEngine() {
+function startEngine(){
 
-    if (engine) {
-        try {
-            engine.terminate();
-        } catch (e) {}
-    }
+    if(engineStarting) return;
 
-    engine = null;
-    engineReady = false;
-    engineThinking = false;
     engineStarting = true;
+    engineReady = false;
 
-    setEngineStatus(
-        "Loading Stockfish…",
-        "normal"
-    );
+    setStatus("Loading Stockfish…");
 
-    setDebugCommand("creating Worker");
+    try{
 
-    try {
+        engine =
+            new Worker(ENGINE_FILE);
 
-        engine = new Worker(ENGINE_FILE);
-
-    } catch (error) {
+    }catch(error){
 
         engineStarting = false;
 
-        setEngineStatus(
-            "Could not create Stockfish worker.",
-            "normal"
+        setStatus(
+            "ENGINE ERROR",
+            "error"
         );
 
-        setDebugOutput(
-            error.message || String(error)
-        );
-
-        return;
-    }
-
-    engine.onmessage = function(event) {
-
-        const line = String(event.data || "").trim();
-
-        if (!line) return;
-
-        setDebugOutput(line);
-
-        /* UCI handshake */
-
-        if (line === "uciok") {
-
-            setDebugCommand("isready");
-
-            setEngineStatus(
-                "Checking Stockfish…",
-                "normal"
-            );
-
-            engine.postMessage("isready");
-
-            return;
-        }
-
-        if (line === "readyok") {
-
-            engineReady = true;
-            engineStarting = false;
-
-            setEngineStatus(
-                "Stockfish ready",
-                "ready"
-            );
-
-            setDebugState("READY");
-
-            return;
-        }
-
-        /* Engine move */
-
-        if (line.startsWith("bestmove")) {
-
-            handleBestMove(line);
-
-            return;
-        }
-
-    };
-
-    engine.onerror = function(error) {
-
-        engineReady = false;
-        engineThinking = false;
-        engineStarting = false;
-
-        setEngineStatus(
-            "Stockfish ERROR",
-            "normal"
-        );
-
-        setDebugOutput(
+        output(
             error.message ||
-            "Worker failed to load. Check that stockfish-18-asm.js is beside index.html."
-        );
-    };
-
-    /* Start UCI */
-
-    setDebugCommand("uci");
-
-    engine.postMessage("uci");
-
-}
-
-/* =========================================================
-   ENGINE COMMAND
-   ========================================================= */
-
-function sendEngine(command) {
-
-    if (!engine) return;
-
-    setDebugCommand(command);
-
-    try {
-        engine.postMessage(command);
-    } catch (error) {
-
-        setDebugOutput(
-            error.message || String(error)
-        );
-
-    }
-}
-
-/* =========================================================
-   BUILD UCI HISTORY
-   ========================================================= */
-
-function buildUciHistory() {
-
-    const history = game.history({
-        verbose: true
-    });
-
-    return history.map(move => {
-
-        return move.from + move.to +
-            (move.promotion ? move.promotion : "");
-
-    }).join(" ");
-
-}
-
-/* =========================================================
-   REQUEST STOCKFISH MOVE
-   ========================================================= */
-
-function requestEngineMove() {
-
-    if (!engineReady) {
-
-        setEngineStatus(
-            "Stockfish is not ready.",
-            "normal"
+            String(error)
         );
 
         return;
     }
 
-    if (engineThinking) return;
+    engine.onmessage =
+        function(event){
 
-    if (gameEnded || game.game_over()) return;
+            const line =
+                String(
+                    event.data || ""
+                ).trim();
 
-    /* Must be Black's turn */
+            if(!line) return;
 
-    if (game.turn() !== "b") return;
+            output(line);
+
+            handleEngineLine(line);
+        };
+
+    engine.onerror =
+        function(){
+
+            engineReady = false;
+            engineStarting = false;
+            engineThinking = false;
+
+            setStatus(
+                "ENGINE ERROR: worker failed",
+                "error"
+            );
+
+            output(
+                "Check that stockfish-18-asm.js is beside index.html."
+            );
+        };
+
+    command("uci");
+
+    try{
+
+        engine.postMessage("uci");
+
+    }catch(error){
+
+        setStatus(
+            "ENGINE ERROR",
+            "error"
+        );
+
+        output(
+            error.message ||
+            String(error)
+        );
+    }
+}
+
+/* =========================================================
+   ENGINE OUTPUT
+   ========================================================= */
+
+function handleEngineLine(line){
+
+    if(line === "uciok"){
+
+        setStatus(
+            "Stockfish identified…"
+        );
+
+        command("isready");
+
+        engine.postMessage(
+            "isready"
+        );
+
+        return;
+    }
+
+    if(line === "readyok"){
+
+        engineReady = true;
+        engineStarting = false;
+
+        setStatus(
+            "Stockfish ready",
+            "ready"
+        );
+
+        return;
+    }
+
+    if(line.startsWith("info ")){
+
+        parseInfo(line);
+
+        return;
+    }
+
+    if(line.startsWith("bestmove")){
+
+        handleBestMove(line);
+
+        return;
+    }
+}
+
+/* =========================================================
+   ENGINE INFO
+   ========================================================= */
+
+function parseInfo(line){
+
+    const scoreIndex =
+        line.indexOf("score");
+
+    if(scoreIndex === -1) return;
+
+    const parts =
+        line.split(/\s+/);
+
+    const index =
+        parts.indexOf("score");
+
+    if(index === -1) return;
+
+    const type =
+        parts[index + 1];
+
+    const value =
+        parseInt(
+            parts[index + 2],
+            10
+        );
+
+    if(
+        type !== "cp" ||
+        Number.isNaN(value)
+    ){
+        return;
+    }
+
+    const pawns =
+        value / 100;
+
+    evalText.textContent =
+        (
+            pawns >= 0 ? "+" : ""
+        ) +
+        pawns.toFixed(2);
+
+    /*
+       Convert roughly from
+       -5..+5 to 0..100%.
+    */
+
+    const percent =
+        Math.max(
+            5,
+            Math.min(
+                95,
+                50 + pawns * 8
+            )
+        );
+
+    evalFill.style.width =
+        percent + "%";
+}
+
+/* =========================================================
+   SEND
+   ========================================================= */
+
+function send(commandText){
+
+    command(commandText);
+
+    if(!engine) return;
+
+    try{
+
+        engine.postMessage(
+            commandText
+        );
+
+    }catch(error){
+
+        output(
+            error.message ||
+            String(error)
+        );
+    }
+}
+
+/* =========================================================
+   UCI HISTORY
+   ========================================================= */
+
+function uciHistory(){
+
+    return game
+        .history({
+            verbose:true
+        })
+        .map(
+            move =>
+                move.from +
+                move.to +
+                (
+                    move.promotion ||
+                    ""
+                )
+        )
+        .join(" ");
+}
+
+/* =========================================================
+   REQUEST MOVE
+   ========================================================= */
+
+function requestEngineMove(){
+
+    if(!engineReady){
+
+        setStatus(
+            "Waiting for Stockfish…"
+        );
+
+        return;
+    }
+
+    if(engineThinking) return;
+
+    if(gameEnded) return;
+
+    if(game.game_over()) return;
+
+    if(game.turn() !== "b") return;
 
     engineThinking = true;
 
-    setEngineStatus(
+    setStatus(
         "Nova is thinking…",
         "thinking"
     );
 
-    const history = buildUciHistory();
-
     /*
-       This is deliberately the simple,
-       proven UCI protocol.
+       IMPORTANT:
+       Use the known-good
+       startpos + moves protocol.
     */
 
-    sendEngine("stop");
+    const history =
+        uciHistory();
 
-    sendEngine("ucinewgame");
+    send("stop");
 
-    let positionCommand = "position startpos";
+    send("ucinewgame");
 
-    if (history) {
-        positionCommand += " moves " + history;
+    let position =
+        "position startpos";
+
+    if(history){
+
+        position +=
+            " moves " +
+            history;
     }
 
-    sendEngine(positionCommand);
+    send(position);
 
     const depth =
         parseInt(
-            document.getElementById("difficulty").value,
+            document.getElementById(
+                "difficulty"
+            ).value,
             10
         ) || 7;
 
-    sendEngine("go depth " + depth);
-
+    send(
+        "go depth " +
+        depth
+    );
 }
 
 /* =========================================================
-   HANDLE BESTMOVE
+   BEST MOVE
    ========================================================= */
 
-function handleBestMove(line) {
+function handleBestMove(line){
 
-    const parts = line.trim().split(/\s+/);
+    const parts =
+        line.trim().split(/\s+/);
 
-    const bestMove = parts[1];
+    const bestMove =
+        parts[1];
 
-    /* Engine test */
+    /*
+       Engine test.
+    */
 
-    if (engineTestMode) {
+    if(engineTest){
 
-        engineTestMode = false;
-
+        engineTest = false;
         engineThinking = false;
 
-        setEngineStatus(
-            "Test successful: " + (bestMove || "no move"),
-            "ready"
+        setStatus(
+            bestMove &&
+            bestMove !== "(none)"
+                ? "Engine test passed"
+                : "Engine returned no move",
+            bestMove &&
+            bestMove !== "(none)"
+                ? "ready"
+                : "error"
         );
 
-        setDebugState(
-            "TEST → " + (bestMove || "none")
-        );
+        debugState.textContent =
+            "TEST → " +
+            (bestMove || "none");
 
         return;
     }
 
-    if (!engineThinking) return;
+    if(!engineThinking) return;
 
     engineThinking = false;
 
-    if (!bestMove || bestMove === "(none)") {
+    if(
+        !bestMove ||
+        bestMove === "(none)"
+    ){
 
-        setEngineStatus(
-            "Stockfish returned no move.",
-            "normal"
+        setStatus(
+            "Stockfish returned no move",
+            "error"
         );
 
         checkGameEnd();
@@ -1104,161 +1629,169 @@ function handleBestMove(line) {
         return;
     }
 
-    setDebugState(
-        "BESTMOVE " + bestMove
-    );
+    debugState.textContent =
+        "BESTMOVE → " +
+        bestMove;
 
-    /* Validate UCI */
+    /*
+       UCI:
+       e7e5
+       e7e8q
+    */
 
-    if (!/^[a-h][1-8][a-h][1-8][qrbn]?$/.test(bestMove)) {
+    if(
+        !/^[a-h][1-8][a-h][1-8][qrbn]?$/
+        .test(bestMove)
+    ){
 
-        setEngineStatus(
-            "Invalid Stockfish move.",
-            "normal"
+        setStatus(
+            "Invalid Stockfish move",
+            "error"
         );
 
         return;
     }
 
-    const from = bestMove.substring(0, 2);
-    const to = bestMove.substring(2, 4);
+    const from =
+        bestMove.slice(0,2);
+
+    const to =
+        bestMove.slice(2,4);
 
     const promotion =
-        bestMove.length >= 5
-            ? bestMove.substring(4, 5)
+        bestMove.length === 5
+            ? bestMove[4]
             : undefined;
 
     /*
-       Verify the move against chess.js.
-       This prevents Stockfish output from
-       silently failing.
+       Validate against chess.js
+       before changing the board.
     */
 
-    const possibleMoves = game.moves({
-        verbose: true
-    });
-
-    const legal = possibleMoves.find(move => {
-
-        return (
-            move.from === from &&
-            move.to === to &&
-            (
-                !move.promotion ||
-                move.promotion === promotion
-            )
+    const legal =
+        game.moves({
+            verbose:true
+        }).find(
+            move =>
+                move.from === from &&
+                move.to === to &&
+                (
+                    !move.promotion ||
+                    move.promotion ===
+                    promotion
+                )
         );
 
-    });
+    if(!legal){
 
-    if (!legal) {
-
-        setEngineStatus(
-            "Stockfish returned an illegal move.",
-            "normal"
+        setStatus(
+            "Stockfish move was illegal",
+            "error"
         );
 
-        setDebugOutput(
-            "Illegal move: " +
+        output(
+            "Rejected: " +
             bestMove +
-            " | Turn: " +
-            game.turn()
+            " | FEN: " +
+            game.fen()
         );
 
         return;
     }
 
     const moveObject = {
-        from: from,
-        to: to
+        from:from,
+        to:to
     };
 
-    if (promotion) {
-        moveObject.promotion = promotion;
+    if(promotion){
+        moveObject.promotion =
+            promotion;
     }
 
-    const result = game.move(moveObject);
+    const move =
+        game.move(moveObject);
 
-    if (!result) {
+    if(!move){
 
-        setEngineStatus(
-            "Could not apply Stockfish move.",
-            "normal"
+        setStatus(
+            "Could not apply engine move",
+            "error"
         );
 
         return;
     }
 
     lastMove = {
-        from: from,
-        to: to
+        from:from,
+        to:to
     };
 
-    setEngineStatus(
+    selected = null;
+    legalMoves = [];
+
+    setStatus(
         "Your move",
         "ready"
     );
 
-    renderEverything();
+    render();
 
     checkGameEnd();
-
 }
 
 /* =========================================================
    ENGINE TEST
    ========================================================= */
 
-function testEngine() {
+function testEngine(){
 
-    if (!engineReady) {
+    if(!engineReady){
 
-        setEngineStatus(
-            "Stockfish is still loading.",
-            "normal"
+        setStatus(
+            "Stockfish is not ready"
         );
 
         return;
     }
 
-    if (engineThinking) {
+    if(engineThinking){
 
-        setEngineStatus(
-            "Stockfish is already thinking.",
+        setStatus(
+            "Nova is already thinking",
             "thinking"
         );
 
         return;
     }
 
-    engineTestMode = true;
-
+    engineTest = true;
     engineThinking = true;
 
-    setEngineStatus(
+    setStatus(
         "Testing Stockfish…",
         "thinking"
     );
 
-    sendEngine("stop");
-
-    sendEngine("ucinewgame");
-
-    sendEngine("position startpos");
-
-    sendEngine("go depth 6");
+    send("stop");
+    send("ucinewgame");
+    send("position startpos");
+    send("go depth 6");
 }
 
 /* =========================================================
-   BOARD RENDER
+   BOARD
    ========================================================= */
 
-function renderBoard() {
+function renderBoard(){
 
-    boardEl.innerHTML = "";
+    board.innerHTML = "";
 
-    const files = ["a","b","c","d","e","f","g","h"];
-    const ranks = ["8","7","6","5","4","3","2","1"];
+    const files =
+        ["a","b","c","d","e","f","g","h"];
+
+    const ranks =
+        ["8","7","6","5","4","3","2","1"];
 
     const displayFiles =
         flipped
@@ -1270,151 +1803,199 @@ function renderBoard() {
             ? [...ranks].reverse()
             : ranks;
 
-    for (let row = 0; row < 8; row++) {
+    for(let row=0;row<8;row++){
 
-        for (let col = 0; col < 8; col++) {
+        for(let col=0;col<8;col++){
 
-            const file = displayFiles[col];
-            const rank = displayRanks[row];
+            const file =
+                displayFiles[col];
 
-            const squareName = file + rank;
+            const rank =
+                displayRanks[row];
 
-            const squareEl =
-                document.createElement("button");
+            const square =
+                file + rank;
 
-            squareEl.className = "square";
+            const el =
+                document.createElement(
+                    "button"
+                );
 
-            const fileIndex =
-                files.indexOf(file);
+            el.className =
+                "square " +
+                (
+                    (
+                        files.indexOf(file) +
+                        parseInt(rank,10)
+                    ) % 2 === 0
+                        ? "light"
+                        : "dark"
+                );
 
-            const rankNumber =
-                parseInt(rank, 10);
+            /*
+               Last move.
+            */
 
-            const isLight =
-                (fileIndex + rankNumber) % 2 === 0;
-
-            squareEl.classList.add(
-                isLight ? "light" : "dark"
-            );
-
-            if (
+            if(
                 lastMove &&
                 (
-                    lastMove.from === squareName ||
-                    lastMove.to === squareName
+                    lastMove.from === square ||
+                    lastMove.to === square
                 )
-            ) {
-                squareEl.classList.add("last-move");
+            ){
+                el.classList.add("last");
             }
 
-            if (selectedSquare === squareName) {
-                squareEl.classList.add("selected");
+            /*
+               Selected.
+            */
+
+            if(selected === square){
+
+                el.classList.add(
+                    "selected"
+                );
             }
 
-            /* Check square */
+            /*
+               Check.
+            */
 
-            if (game.in_check()) {
+            if(game.in_check()){
 
-                const kingColor = game.turn();
+                const piece =
+                    game.get(square);
 
-                const piece = game.get(squareName);
-
-                if (
+                if(
                     piece &&
                     piece.type === "k" &&
-                    piece.color === kingColor
-                ) {
-                    squareEl.classList.add("check");
+                    piece.color === game.turn()
+                ){
+
+                    el.classList.add(
+                        "check"
+                    );
                 }
             }
 
-            /* Legal move indicator */
+            /*
+               Legal destination.
+            */
 
             const legal =
                 legalMoves.find(
-                    move => move.to === squareName
+                    move =>
+                        move.to === square
                 );
 
-            if (legal) {
+            if(legal){
 
-                if (game.get(squareName)) {
+                if(game.get(square)){
 
-                    const ring =
-                        document.createElement("div");
+                    const capture =
+                        document.createElement(
+                            "div"
+                        );
 
-                    ring.className = "capture-ring";
+                    capture.className =
+                        "capture";
 
-                    squareEl.appendChild(ring);
+                    el.appendChild(capture);
 
-                } else {
+                }else{
 
                     const dot =
-                        document.createElement("div");
+                        document.createElement(
+                            "div"
+                        );
 
-                    dot.className = "move-dot";
+                    dot.className =
+                        "moveDot";
 
-                    squareEl.appendChild(dot);
-
+                    el.appendChild(dot);
                 }
             }
 
-            const piece =
-                game.get(squareName);
+            /*
+               Piece.
+            */
 
-            if (piece) {
+            const piece =
+                game.get(square);
+
+            if(piece){
 
                 const pieceEl =
-                    document.createElement("div");
+                    document.createElement(
+                        "div"
+                    );
 
                 pieceEl.className =
                     "piece " +
                     (
                         piece.color === "w"
-                            ? "white-piece"
-                            : "black-piece"
+                            ? "whitePiece"
+                            : "blackPiece"
                     );
 
                 pieceEl.textContent =
                     PIECES[
-                        piece.color + piece.type
+                        piece.color +
+                        piece.type
                     ];
 
-                squareEl.appendChild(pieceEl);
+                el.appendChild(
+                    pieceEl
+                );
             }
 
-            /* Coordinates */
+            /*
+               Coordinates.
+            */
 
-            if (
-                (!flipped && row === 7) ||
-                (flipped && row === 7)
-            ) {
+            if(col === 0){
 
-                const coord =
-                    document.createElement("span");
+                const rankEl =
+                    document.createElement(
+                        "span"
+                    );
 
-                coord.className = "coord-file";
-                coord.textContent = file;
+                rankEl.className =
+                    "coord rankCoord";
 
-                squareEl.appendChild(coord);
+                rankEl.textContent =
+                    rank;
+
+                el.appendChild(
+                    rankEl
+                );
             }
 
-            if (col === 0) {
+            if(row === 7){
 
-                const coord =
-                    document.createElement("span");
+                const fileEl =
+                    document.createElement(
+                        "span"
+                    );
 
-                coord.className = "coord-rank";
-                coord.textContent = rank;
+                fileEl.className =
+                    "coord fileCoord";
 
-                squareEl.appendChild(coord);
+                fileEl.textContent =
+                    file;
+
+                el.appendChild(
+                    fileEl
+                );
             }
 
-            squareEl.addEventListener(
+            el.addEventListener(
                 "click",
-                () => handleSquareClick(squareName)
+                () =>
+                    squareClicked(square)
             );
 
-            boardEl.appendChild(squareEl);
+            board.appendChild(el);
         }
     }
 }
@@ -1423,263 +2004,287 @@ function renderBoard() {
    SQUARE CLICK
    ========================================================= */
 
-function handleSquareClick(square) {
+function squareClicked(square){
 
-    if (gameEnded) return;
+    if(gameEnded) return;
+
+    if(game.turn() !== "w") return;
+
+    if(engineThinking) return;
+
+    const piece =
+        game.get(square);
 
     /*
-       User is White.
-       Never allow the player to move Black pieces.
+       Already selected.
     */
 
-    if (game.turn() !== "w") return;
+    if(selected){
 
-    if (engineThinking) return;
+        /*
+           Legal destination.
+        */
 
-    const piece = game.get(square);
+        const legal =
+            legalMoves.find(
+                move =>
+                    move.to === square
+            );
 
-    /* Select a piece */
+        if(legal){
 
-    if (!selectedSquare) {
+            attemptMove(
+                selected,
+                square
+            );
 
-        if (
-            piece &&
-            piece.color === "w"
-        ) {
-
-            selectedSquare = square;
-
-            legalMoves =
-                game.moves({
-                    square: square,
-                    verbose: true
-                });
-
-            renderBoard();
+            return;
         }
 
+        /*
+           Select another white piece.
+        */
+
+        if(
+            piece &&
+            piece.color === "w"
+        ){
+
+            selectSquare(square);
+
+            return;
+        }
+
+        clearSelection();
+
         return;
     }
 
-    /* Clicking selected square again */
+    /*
+       Select white piece.
+    */
 
-    if (square === selectedSquare) {
-
-        selectedSquare = null;
-        legalMoves = [];
-
-        renderBoard();
-
-        return;
-    }
-
-    /* Another own piece */
-
-    if (
+    if(
         piece &&
         piece.color === "w"
-    ) {
+    ){
 
-        selectedSquare = square;
-
-        legalMoves =
-            game.moves({
-                square: square,
-                verbose: true
-            });
-
-        renderBoard();
-
-        return;
+        selectSquare(square);
     }
+}
 
-    /* Is destination legal? */
+/* =========================================================
+   SELECT
+   ========================================================= */
 
-    const move =
-        legalMoves.find(
-            m => m.to === square
-        );
+function selectSquare(square){
 
-    if (!move) {
+    selected = square;
 
-        selectedSquare = null;
-        legalMoves = [];
+    legalMoves =
+        game.moves({
+            square:square,
+            verbose:true
+        });
 
-        renderBoard();
+    renderBoard();
+}
 
-        return;
-    }
+/* =========================================================
+   CLEAR
+   ========================================================= */
 
-    /* Promotion */
+function clearSelection(){
 
-    if (
-        move.promotion === "q" ||
-        move.promotion === "r" ||
-        move.promotion === "b" ||
-        move.promotion === "n"
-    ) {
+    selected = null;
+    legalMoves = [];
 
-        pendingPromotion = {
-            from: selectedSquare,
-            to: square
-        };
-
-        promotionModal.classList.add("show");
-
-        return;
-    }
-
-    makePlayerMove(
-        selectedSquare,
-        square
-    );
+    renderBoard();
 }
 
 /* =========================================================
    PLAYER MOVE
    ========================================================= */
 
+function attemptMove(from,to){
+
+    const piece =
+        game.get(from);
+
+    /*
+       Promotion.
+    */
+
+    if(
+        piece &&
+        piece.type === "p" &&
+        to[1] === "8"
+    ){
+
+        pendingPromotion = {
+            from:from,
+            to:to
+        };
+
+        promotionModal.classList.add(
+            "show"
+        );
+
+        return;
+    }
+
+    makePlayerMove(
+        from,
+        to,
+        "q"
+    );
+}
+
+/* =========================================================
+   MAKE PLAYER MOVE
+   ========================================================= */
+
 function makePlayerMove(
     from,
     to,
-    promotion = undefined
-) {
+    promotion
+){
 
-    const moveObject = {
-        from: from,
-        to: to
-    };
+    const move =
+        game.move({
+            from:from,
+            to:to,
+            promotion:promotion
+        });
 
-    if (promotion) {
-        moveObject.promotion = promotion;
-    }
+    if(!move){
 
-    const result =
-        game.move(moveObject);
-
-    if (!result) {
-
-        selectedSquare = null;
-        legalMoves = [];
-
-        renderBoard();
+        clearSelection();
 
         return;
     }
 
     lastMove = {
-        from: from,
-        to: to
+        from:from,
+        to:to
     };
 
-    selectedSquare = null;
+    selected = null;
     legalMoves = [];
 
-    /* Start clock on first actual move */
+    gameStarted = true;
 
-    if (!gameStarted) {
-        gameStarted = true;
-        startClock();
-    }
+    startClock();
 
-    renderEverything();
+    render();
 
-    /* Check whether game ended */
-
-    if (checkGameEnd()) return;
+    if(checkGameEnd()) return;
 
     /*
-       It is now Black's turn.
-       Stockfish gets the move.
+       Now Black is to move.
     */
 
     requestEngineMove();
 }
 
 /* =========================================================
-   PROMOTION
+   PROMOTION BUTTONS
    ========================================================= */
 
-document.querySelectorAll(".promo").forEach(button => {
+document
+    .querySelectorAll(
+        ".promotionButtons button"
+    )
+    .forEach(button => {
 
-    button.addEventListener("click", () => {
+        button.addEventListener(
+            "click",
+            function(){
 
-        if (!pendingPromotion) return;
+                if(!pendingPromotion)
+                    return;
 
-        const promotion =
-            button.dataset.piece;
+                const move =
+                    pendingPromotion;
 
-        const from =
-            pendingPromotion.from;
+                pendingPromotion = null;
 
-        const to =
-            pendingPromotion.to;
+                promotionModal.classList.remove(
+                    "show"
+                );
 
-        pendingPromotion = null;
-
-        promotionModal.classList.remove("show");
-
-        makePlayerMove(
-            from,
-            to,
-            promotion
+                makePlayerMove(
+                    move.from,
+                    move.to,
+                    this.dataset.piece
+                );
+            }
         );
     });
 
-});
-
 /* =========================================================
-   MOVE LIST
+   MOVES
    ========================================================= */
 
-function renderMoves() {
-
-    movesEl.innerHTML = "";
+function renderMoves(){
 
     const history =
         game.history();
 
-    for (
-        let i = 0;
-        i < history.length;
-        i += 2
-    ) {
+    if(!history.length){
 
-        const line =
-            document.createElement("div");
+        movesEl.innerHTML =
+            `
+            <div style="
+                padding:8px;
+                color:#657188;
+                font-size:10px;
+            ">
+                Make your first move.
+            </div>
+            `;
 
-        line.className = "move-line";
-
-        const number =
-            document.createElement("span");
-
-        number.className = "move-number";
-
-        number.textContent =
-            (i / 2 + 1) + ".";
-
-        const white =
-            document.createElement("span");
-
-        white.className = "move-san";
-
-        white.textContent =
-            history[i] || "";
-
-        const black =
-            document.createElement("span");
-
-        black.className = "move-san";
-
-        black.textContent =
-            history[i + 1] || "";
-
-        line.appendChild(number);
-        line.appendChild(white);
-        line.appendChild(black);
-
-        movesEl.appendChild(line);
+        return;
     }
+
+    let html = "";
+
+    for(
+        let i=0;
+        i<history.length;
+        i+=2
+    ){
+
+        html +=
+            `
+            <div class="moveRow">
+
+                <div class="moveNumber">
+                    ${Math.floor(i/2)+1}.
+                </div>
+
+                <div class="${
+                    i === history.length-1
+                        ? "current"
+                        : ""
+                }">
+                    ${history[i] || ""}
+                </div>
+
+                <div class="${
+                    i+1 === history.length-1
+                        ? "current"
+                        : ""
+                }">
+                    ${history[i+1] || ""}
+                </div>
+
+            </div>
+            `;
+    }
+
+    movesEl.innerHTML =
+        html;
 
     movesEl.scrollTop =
         movesEl.scrollHeight;
@@ -1689,12 +2294,13 @@ function renderMoves() {
    CLOCK
    ========================================================= */
 
-function formatTime(seconds) {
+function formatClock(seconds){
 
-    seconds = Math.max(
-        0,
-        Math.ceil(seconds)
-    );
+    seconds =
+        Math.max(
+            0,
+            Math.ceil(seconds)
+        );
 
     const minutes =
         Math.floor(seconds / 60);
@@ -1703,101 +2309,130 @@ function formatTime(seconds) {
         seconds % 60;
 
     return (
-        String(minutes).padStart(2, "0") +
+        minutes +
         ":" +
-        String(secs).padStart(2, "0")
+        String(secs).padStart(2,"0")
     );
 }
 
-function updateClockDisplay() {
+function updateClocks(){
 
-    whiteTimeEl.textContent =
-        formatTime(whiteSeconds);
+    whiteClock.textContent =
+        formatClock(
+            whiteSeconds
+        );
 
-    blackTimeEl.textContent =
-        formatTime(blackSeconds);
+    blackClock.textContent =
+        formatClock(
+            blackSeconds
+        );
 
-    whiteClockEl.classList.toggle(
+    whiteClock.classList.toggle(
         "active",
         game.turn() === "w" &&
         !gameEnded
     );
 
-    blackClockEl.classList.toggle(
+    blackClock.classList.toggle(
         "active",
         game.turn() === "b" &&
         !gameEnded
     );
 }
 
-function startClock() {
+/*
+   ONE clock interval.
 
-    if (clockInterval) return;
+   It never stops just because
+   Stockfish is thinking.
 
-    lastClockTick = performance.now();
+   When game.turn() is Black,
+   Black's clock decreases.
+*/
 
-    clockInterval =
-        setInterval(() => {
+function startClock(){
 
-            if (!gameStarted || gameEnded) {
-                return;
-            }
+    if(clockTimer) return;
 
-            const now =
-                performance.now();
+    lastClockTime =
+        performance.now();
 
-            const elapsed =
-                (now - lastClockTick) / 1000;
+    clockTimer =
+        setInterval(
+            function(){
 
-            lastClockTick = now;
-
-            /*
-               IMPORTANT:
-               We subtract from whoever's turn it is.
-
-               During Stockfish thinking,
-               game.turn() is Black,
-               so Black's clock runs.
-            */
-
-            if (game.turn() === "w") {
-
-                whiteSeconds -= elapsed;
-
-                if (whiteSeconds <= 0) {
-
-                    whiteSeconds = 0;
-
-                    endByTime("Black wins on time.");
-
+                if(
+                    !gameStarted ||
+                    gameEnded
+                ){
+                    return;
                 }
 
-            } else {
+                const now =
+                    performance.now();
 
-                blackSeconds -= elapsed;
+                const elapsed =
+                    (
+                        now -
+                        lastClockTime
+                    ) / 1000;
 
-                if (blackSeconds <= 0) {
+                lastClockTime = now;
 
-                    blackSeconds = 0;
+                if(game.turn() === "w"){
 
-                    endByTime("White wins on time.");
+                    whiteSeconds =
+                        Math.max(
+                            0,
+                            whiteSeconds -
+                            elapsed
+                        );
 
+                }else{
+
+                    blackSeconds =
+                        Math.max(
+                            0,
+                            blackSeconds -
+                            elapsed
+                        );
                 }
-            }
 
-            updateClockDisplay();
+                updateClocks();
 
-        }, 100);
+                if(
+                    whiteSeconds <= 0
+                ){
 
+                    endGame(
+                        "Time",
+                        "Nova wins on time."
+                    );
+
+                }else if(
+                    blackSeconds <= 0
+                ){
+
+                    endGame(
+                        "Time",
+                        "You win on time."
+                    );
+                }
+
+            },
+            100
+        );
 }
 
-function stopClock() {
+function stopClock(){
 
-    if (clockInterval) {
+    if(clockTimer){
 
-        clearInterval(clockInterval);
+        clearInterval(
+            clockTimer
+        );
 
-        clockInterval = null;
+        clockTimer = null;
     }
 }
 
@@ -1805,104 +2440,33 @@ function stopClock() {
    GAME END
    ========================================================= */
 
-function endByTime(message) {
+function checkGameEnd(){
 
-    if (gameEnded) return;
+    if(game.is_checkmate()){
 
-    gameEnded = true;
+        if(game.turn() === "w"){
 
-    engineThinking = false;
+            endGame(
+                "Checkmate",
+                "Nova wins by checkmate."
+            );
 
-    stopClock();
+        }else{
 
-    showGameOver(
-        "Time!",
-        message
-    );
-}
-
-function checkGameEnd() {
-
-    if (game.is_checkmate()) {
-
-        gameEnded = true;
-
-        stopClock();
-
-        engineThinking = false;
-
-        const winner =
-            game.turn() === "w"
-                ? "Nova wins by checkmate."
-                : "You win by checkmate!";
-
-        showGameOver(
-            "Checkmate",
-            winner
-        );
+            endGame(
+                "Checkmate",
+                "You win by checkmate!"
+            );
+        }
 
         return true;
     }
 
-    if (game.is_stalemate()) {
+    if(game.is_draw()){
 
-        gameEnded = true;
-
-        stopClock();
-
-        engineThinking = false;
-
-        showGameOver(
-            "Stalemate",
+        endGame(
+            "Draw",
             "The game ends in a draw."
-        );
-
-        return true;
-    }
-
-    if (game.is_insufficient_material()) {
-
-        gameEnded = true;
-
-        stopClock();
-
-        engineThinking = false;
-
-        showGameOver(
-            "Draw",
-            "There is insufficient material to checkmate."
-        );
-
-        return true;
-    }
-
-    if (game.in_threefold_repetition()) {
-
-        gameEnded = true;
-
-        stopClock();
-
-        engineThinking = false;
-
-        showGameOver(
-            "Draw",
-            "Threefold repetition."
-        );
-
-        return true;
-    }
-
-    if (game.is_draw_by_fifty_moves()) {
-
-        gameEnded = true;
-
-        stopClock();
-
-        engineThinking = false;
-
-        showGameOver(
-            "Draw",
-            "The fifty-move rule has been reached."
         );
 
         return true;
@@ -1911,42 +2475,53 @@ function checkGameEnd() {
     return false;
 }
 
-/* =========================================================
-   GAME OVER MODAL
-   ========================================================= */
+function endGame(title,text){
 
-function showGameOver(title, text) {
+    gameEnded = true;
+    engineThinking = false;
 
-    gameOverTitle.textContent = title;
-    gameOverText.textContent = text;
+    stopClock();
 
-    gameOverModal.classList.add("show");
+    gameOverTitle.textContent =
+        title;
 
-    updateClockDisplay();
+    gameOverText.textContent =
+        text;
+
+    gameOverModal.classList.add(
+        "show"
+    );
+
+    setStatus(
+        text
+    );
+
+    updateClocks();
 }
 
 /* =========================================================
    NEW GAME
    ========================================================= */
 
-function newGame() {
+function newGame(){
 
-    /* Stop old search */
+    if(engine){
 
-    if (engine) {
-        try {
+        try{
             engine.postMessage("stop");
-        } catch (e) {}
+        }catch(_){}
     }
 
     game = new Chess();
 
-    selectedSquare = null;
+    selected = null;
     legalMoves = [];
     lastMove = null;
 
+    pendingPromotion = null;
+
     engineThinking = false;
-    engineTestMode = false;
+    engineTest = false;
 
     gameStarted = false;
     gameEnded = false;
@@ -1956,31 +2531,33 @@ function newGame() {
 
     stopClock();
 
-    promotionModal.classList.remove("show");
-    gameOverModal.classList.remove("show");
-
-    updateClockDisplay();
-
-    renderEverything();
-
-    setEngineStatus(
-        engineReady
-            ? "Stockfish ready"
-            : "Loading Stockfish…",
-        engineReady
-            ? "ready"
-            : "normal"
+    promotionModal.classList.remove(
+        "show"
     );
 
-    /*
-       Reset Stockfish's internal position.
-    */
+    gameOverModal.classList.remove(
+        "show"
+    );
 
-    if (engineReady) {
+    evalText.textContent =
+        "0.00";
 
-        sendEngine("stop");
-        sendEngine("ucinewgame");
-        sendEngine("isready");
+    evalFill.style.width =
+        "50%";
+
+    render();
+
+    updateClocks();
+
+    if(engineReady){
+
+        send("stop");
+        send("ucinewgame");
+        send("isready");
+
+        setStatus(
+            "Resetting Stockfish…"
+        );
     }
 }
 
@@ -1988,65 +2565,74 @@ function newGame() {
    UNDO
    ========================================================= */
 
-function undoMove() {
+function undo(){
 
-    if (engineThinking) return;
+    if(engineThinking) return;
 
-    if (game.history().length === 0) return;
+    const history =
+        game.history();
+
+    if(!history.length) return;
 
     /*
-       Undo Nova's move first,
-       then undo the player's move.
+       Undo Nova's move
+       and the player's move.
     */
 
-    if (game.history().length >= 2) {
+    if(history.length >= 2){
         game.undo();
     }
 
-    game.undo();
+    if(game.history().length){
+        game.undo();
+    }
 
-    selectedSquare = null;
+    selected = null;
     legalMoves = [];
 
-    const history =
+    const newHistory =
         game.history({
-            verbose: true
+            verbose:true
         });
 
-    if (history.length) {
+    if(newHistory.length){
 
-        const last =
-            history[history.length - 1];
+        const move =
+            newHistory[
+                newHistory.length - 1
+            ];
 
         lastMove = {
-            from: last.from,
-            to: last.to
+            from:move.from,
+            to:move.to
         };
 
-    } else {
+    }else{
 
         lastMove = null;
     }
 
     gameEnded = false;
 
-    gameOverModal.classList.remove("show");
+    gameOverModal.classList.remove(
+        "show"
+    );
 
-    renderEverything();
+    render();
 
-    if (
+    if(
         gameStarted &&
-        !clockInterval
-    ) {
+        !clockTimer
+    ){
         startClock();
     }
 }
 
 /* =========================================================
-   FLIP BOARD
+   FLIP
    ========================================================= */
 
-function flipBoard() {
+function flip(){
 
     flipped = !flipped;
 
@@ -2054,15 +2640,14 @@ function flipBoard() {
 }
 
 /* =========================================================
-   RENDER EVERYTHING
+   RENDER
    ========================================================= */
 
-function renderEverything() {
+function render(){
 
     renderBoard();
     renderMoves();
-    updateClockDisplay();
-
+    updateClocks();
 }
 
 /* =========================================================
@@ -2070,35 +2655,35 @@ function renderEverything() {
    ========================================================= */
 
 document
-    .getElementById("newGameBtn")
+    .getElementById("newGame")
     .addEventListener(
         "click",
         newGame
     );
 
 document
-    .getElementById("gameOverNewBtn")
+    .getElementById("gameOverNew")
     .addEventListener(
         "click",
         newGame
     );
 
 document
-    .getElementById("flipBtn")
+    .getElementById("flip")
     .addEventListener(
         "click",
-        flipBoard
+        flip
     );
 
 document
-    .getElementById("undoBtn")
+    .getElementById("undo")
     .addEventListener(
         "click",
-        undoMove
+        undo
     );
 
 document
-    .getElementById("testBtn")
+    .getElementById("testEngine")
     .addEventListener(
         "click",
         testEngine
@@ -2108,7 +2693,7 @@ document
    START
    ========================================================= */
 
-renderEverything();
+render();
 
 startEngine();
 
