@@ -4,9 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Nova Chess V100 — Atlantis Ultimate Edition</title>
+<title>Nova Chess V100 — Atlantis Optimized</title>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js">
+setTimeout(initializeV100, 0);
+</script>
 
 <style>
 :root{
@@ -2582,6 +2584,140 @@ kbd{
     .v100Overlay{padding-top:40px;}
 }
 
+
+/* =========================================================
+   NOVA V100 — PERFORMANCE OPTIMIZATION PATCH
+   Same interface/features, lighter rendering pipeline.
+   ========================================================= */
+
+body{
+    background:
+        radial-gradient(circle at 16% 8%,rgba(46,242,255,.16),transparent 28%),
+        radial-gradient(circle at 86% 17%,rgba(23,174,210,.11),transparent 30%),
+        linear-gradient(145deg,#010a10 0%,#031921 50%,#02242b 100%) !important;
+}
+
+/* Kill expensive full-page blur composition. */
+.card,
+.v4Dock,
+.v100Palette,
+.v100ShortcutPanel{
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+}
+
+/* Preserve the glass appearance using simple alpha backgrounds. */
+.card{
+    background:linear-gradient(
+        180deg,
+        rgba(8,42,51,.97),
+        rgba(4,27,34,.98)
+    ) !important;
+}
+
+.v4Dock{
+    background:linear-gradient(
+        180deg,
+        rgba(3,30,38,.99),
+        rgba(4,24,31,.99)
+    ) !important;
+}
+
+/* One cheap decorative aqua layer instead of multiple animated scenes. */
+body::before{
+    content:"";
+    position:fixed;
+    inset:62px 0 0 0;
+    pointer-events:none;
+    z-index:0;
+    opacity:.22;
+    background:
+        radial-gradient(circle at 8% 82%,rgba(94,243,255,.09),transparent 16%),
+        radial-gradient(circle at 91% 25%,rgba(94,243,255,.07),transparent 14%),
+        repeating-linear-gradient(
+            118deg,
+            transparent 0 115px,
+            rgba(88,239,249,.018) 116px 118px,
+            transparent 120px 230px
+        );
+}
+
+/* Remove older redundant decorative pseudo layers. */
+body::after,
+.app::before,
+.app::after{
+    display:none !important;
+}
+
+/* Keep the small chess/ocean art but static. */
+.v4OceanArt{
+    opacity:.13 !important;
+    animation:none !important;
+}
+
+/* Board should always get rendering priority. */
+.boardColumn,
+.boardShell,
+#board{
+    contain:layout paint;
+}
+
+#board{
+    opacity:1 !important;
+    visibility:visible !important;
+}
+
+/* Piece motion stays crisp but extremely short. */
+.piece{
+    will-change:auto !important;
+    transition:transform .08s ease, filter .08s ease !important;
+}
+
+body:not(.v50NoMotion):not(.v100Performance) .v100Landed{
+    animation:v100Land .14s ease-out !important;
+}
+
+/* No continuous background animation; motion is now interaction-based only. */
+.v50OceanScene{
+    display:none !important;
+}
+
+body:not(.v50NoMotion):not(.v100Performance)::before{
+    animation:none !important;
+}
+
+/* Lighter shadows. */
+.boardShell{
+    box-shadow:
+        0 0 0 1px rgba(100,243,255,.14),
+        0 18px 42px rgba(0,0,0,.42),
+        0 0 28px rgba(31,207,220,.06) !important;
+}
+
+.card{
+    box-shadow:
+        0 8px 22px rgba(0,0,0,.16),
+        inset 0 1px 0 rgba(159,251,255,.025) !important;
+}
+
+/* Avoid repainting the entire app when scrolling the sidebar. */
+.sidebar{
+    contain:layout style;
+}
+
+/* Performance mode becomes even lighter, but default mode is already optimized. */
+body.v100Performance .v4OceanArt,
+body.v100Performance::before{
+    display:none !important;
+}
+
+@media(max-width:980px){
+    body::before,
+    .v4OceanArt{
+        display:none !important;
+    }
+}
+
 </style>
 </head>
 
@@ -2589,36 +2725,6 @@ kbd{
 
 
 
-<svg class="v50OceanScene" viewBox="0 0 1200 700" aria-hidden="true">
-    <defs>
-        <linearGradient id="v50SeaLine" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stop-color="#55eff8" stop-opacity=".02"/>
-            <stop offset=".5" stop-color="#79fbff" stop-opacity=".24"/>
-            <stop offset="1" stop-color="#26c7d7" stop-opacity=".02"/>
-        </linearGradient>
-        <radialGradient id="v50Moon">
-            <stop offset="0" stop-color="#a8fbff" stop-opacity=".18"/>
-            <stop offset="1" stop-color="#43d9e7" stop-opacity="0"/>
-        </radialGradient>
-    </defs>
-    <circle cx="930" cy="145" r="135" fill="url(#v50Moon)"/>
-    <g fill="none" stroke="url(#v50SeaLine)">
-        <path d="M-80 495 C80 420 180 565 340 480 S630 390 780 482 S1040 560 1280 455" stroke-width="5"/>
-        <path d="M-60 540 C100 470 210 610 375 525 S650 450 820 535 S1070 600 1260 510" stroke-width="2"/>
-        <path d="M-100 585 C90 515 220 650 390 575 S700 510 840 590 S1080 645 1280 560" stroke-width="1.5"/>
-    </g>
-    <g fill="none" stroke="#6ef5ff" stroke-opacity=".08" stroke-width="2">
-        <circle cx="105" cy="170" r="12"/>
-        <circle cx="155" cy="118" r="5"/>
-        <circle cx="1080" cy="370" r="17"/>
-        <circle cx="1120" cy="320" r="7"/>
-        <circle cx="315" cy="260" r="9"/>
-    </g>
-    <g transform="translate(85 320)" fill="none" stroke="#73f7ff" stroke-opacity=".085" stroke-width="5">
-        <path d="M125 220H20c7-29 22-54 44-71-16-10-25-30-23-52 2-34 24-61 56-73-4-22 3-42 16-57 24 18 39 44 42 74 3 39-14 70-47 93 23 19 39 48 47 86z"/>
-        <path d="M59 88c19-3 35-13 47-30"/>
-    </g>
-</svg>
 
 <svg class="v4OceanArt" viewBox="0 0 240 170" aria-hidden="true">
     <g fill="none" stroke="rgba(105,245,255,.9)" stroke-width="2">
@@ -6918,6 +7024,8 @@ function updateV100Intelligence(){
 const originalV100Render =
     render;
 
+let v100LastAutosavePly = -1;
+
 render =
     function(){
 
@@ -6925,10 +7033,17 @@ render =
 
         updateV100Intelligence();
 
+        const currentPly =
+            game.history().length;
+
         if(
             v100Autosave &&
-            game.history().length
+            currentPly > 0 &&
+            currentPly !== v100LastAutosavePly
         ){
+            v100LastAutosavePly =
+                currentPly;
+
             saveV100Game(false);
         }
     };
@@ -7148,6 +7263,22 @@ document
         }
     );
 
+
+
+/* V100 safe late initialization */
+function initializeV100(){
+
+    try{
+        updateV100Intelligence();
+        updateV50Session();
+        updateV4Insights();
+    }catch(error){
+        console.warn(
+            "Nova V100 optional UI init:",
+            error
+        );
+    }
+}
 
 /* =========================================================
    START
