@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Nova Chess V3 — Aqua+</title>
+<title>Nova Chess V3 — Spacious Aqua</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
@@ -26,7 +26,7 @@
     --board:
         min(
             calc(100vh - 150px),
-            calc(100vw - 450px),
+            calc(100vw - 525px),
             650px
         );
 }
@@ -802,7 +802,7 @@ select{
         --board:
             min(
                 calc(100vh - 125px),
-                calc(100vw - 420px),
+                calc(100vw - 500px),
                 560px
             );
     }
@@ -922,7 +922,7 @@ body::before{
 }
 
 .main{
-    grid-template-columns:minmax(0,1fr) 370px;
+    grid-template-columns:minmax(0,1fr) 430px;
     gap:18px;
     padding:14px 18px 16px;
 }
@@ -1217,6 +1217,90 @@ body.focusMode .boardColumn{
         min-height:31px;
         padding:6px 8px;
     }
+}
+
+
+/* =========================================================
+   NOVA V3 — SPACIOUS AQUA EDITION
+   ========================================================= */
+:root{ --sidebar-width:430px; }
+
+body{
+    background-color:#021218;
+    background-image:
+        url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27500%27%20height%3D%27500%27%20viewBox%3D%270%200%20500%20500%27%3E%0A%3Cdefs%3E%3CradialGradient%20id%3D%27a%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%237af8ff%27%20stop-opacity%3D%27.18%27/%3E%3Cstop%20offset%3D%27.55%27%20stop-color%3D%27%2334d5e3%27%20stop-opacity%3D%27.07%27/%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%230aa9b8%27%20stop-opacity%3D%270%27/%3E%3C/radialGradient%3E%3C/defs%3E%0A%3Ccircle%20cx%3D%27250%27%20cy%3D%27250%27%20r%3D%27230%27%20fill%3D%27url%28%23a%29%27/%3E%3Ccircle%20cx%3D%27250%27%20cy%3D%27250%27%20r%3D%27160%27%20fill%3D%27none%27%20stroke%3D%27%236cf3ff%27%20stroke-opacity%3D%27.07%27%20stroke-width%3D%272%27/%3E%3Ccircle%20cx%3D%27250%27%20cy%3D%27250%27%20r%3D%27105%27%20fill%3D%27none%27%20stroke%3D%27%236cf3ff%27%20stroke-opacity%3D%27.05%27%20stroke-width%3D%272%27/%3E%0A%3C/svg%3E"),
+        url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27900%27%20height%3D%27520%27%20viewBox%3D%270%200%20900%20520%27%3E%0A%3Cdefs%3E%3ClinearGradient%20id%3D%27g%27%20x1%3D%270%27%20y1%3D%270%27%20x2%3D%271%27%20y2%3D%271%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%2372f7ff%27%20stop-opacity%3D%27.20%27/%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%2318b9c9%27%20stop-opacity%3D%27.04%27/%3E%3C/linearGradient%3E%3C/defs%3E%0A%3Cpath%20d%3D%27M-40%20360%20C110%20250%20220%20430%20380%20320%20S670%20200%20940%20330%27%20fill%3D%27none%27%20stroke%3D%27url%28%23g%29%27%20stroke-width%3D%278%27/%3E%0A%3Cpath%20d%3D%27M-30%20400%20C120%20290%20250%20470%20430%20350%20S700%20255%20960%20385%27%20fill%3D%27none%27%20stroke%3D%27%235cf3ff%27%20stroke-opacity%3D%27.09%27%20stroke-width%3D%273%27/%3E%0A%3Cpath%20d%3D%27M40%20130%20C130%2065%20210%2065%20305%20128%20C400%20190%20480%20190%20575%20125%20C670%2060%20760%2060%20850%20120%27%20fill%3D%27none%27%20stroke%3D%27%2363eff8%27%20stroke-opacity%3D%27.08%27%20stroke-width%3D%274%27/%3E%0A%3Ccircle%20cx%3D%27115%27%20cy%3D%27105%27%20r%3D%2720%27%20fill%3D%27none%27%20stroke%3D%27%2377f7ff%27%20stroke-opacity%3D%27.09%27%20stroke-width%3D%272%27/%3E%0A%3Ccircle%20cx%3D%27170%27%20cy%3D%2770%27%20r%3D%279%27%20fill%3D%27none%27%20stroke%3D%27%2377f7ff%27%20stroke-opacity%3D%27.11%27%20stroke-width%3D%272%27/%3E%0A%3Ccircle%20cx%3D%27760%27%20cy%3D%27100%27%20r%3D%2730%27%20fill%3D%27none%27%20stroke%3D%27%235ceefa%27%20stroke-opacity%3D%27.07%27%20stroke-width%3D%272%27/%3E%0A%3Ccircle%20cx%3D%27815%27%20cy%3D%27145%27%20r%3D%2712%27%20fill%3D%27none%27%20stroke%3D%27%235ceefa%27%20stroke-opacity%3D%27.10%27%20stroke-width%3D%272%27/%3E%0A%3C/svg%3E"),
+        radial-gradient(circle at 15% 10%, rgba(56,238,250,.20), transparent 29%),
+        radial-gradient(circle at 88% 20%, rgba(0,190,205,.14), transparent 30%),
+        linear-gradient(145deg,#020c11 0%,#041b22 48%,#03262c 100%);
+    background-repeat:no-repeat,no-repeat,no-repeat,no-repeat,no-repeat;
+    background-size:560px 560px,980px 570px,auto,auto,auto;
+    background-position:-170px calc(100% + 120px),center 70%,center,center,center;
+    background-attachment:fixed,fixed,fixed,fixed,fixed;
+}
+
+body::after{
+    content:"";
+    position:fixed;
+    right:470px;
+    top:85px;
+    width:250px;
+    height:320px;
+    background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20width%3D%27360%27%20height%3D%27460%27%20viewBox%3D%270%200%20360%20460%27%3E%0A%3Cg%20fill%3D%27none%27%20stroke%3D%27%2373f7ff%27%20stroke-opacity%3D%27.11%27%20stroke-width%3D%276%27%20stroke-linejoin%3D%27round%27%3E%0A%3Cpath%20d%3D%27M250%20382H92c10-42%2031-76%2063-101-23-14-36-42-34-73%203-48%2034-87%2080-105-5-31%204-59%2023-81%2034%2026%2056%2062%2059%20106%204%2055-20%2099-67%20132%2033%2027%2055%2068%2066%20122z%27/%3E%0A%3Cpath%20d%3D%27M150%20194c27-4%2050-18%2067-42%27/%3E%3Cpath%20d%3D%27M178%20119c26%209%2047%2028%2060%2056%27/%3E%0A%3Ccircle%20cx%3D%27210%27%20cy%3D%2797%27%20r%3D%275%27%20fill%3D%27%2373f7ff%27%20stroke%3D%27none%27/%3E%3Cpath%20d%3D%27M105%20410h177%27/%3E%0A%3C/g%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:center;
+    background-size:contain;
+    opacity:.72;
+    pointer-events:none;
+    z-index:0;
+}
+
+.app{ position:relative; z-index:1; }
+
+.main{
+    grid-template-columns:minmax(0,1fr) var(--sidebar-width);
+    gap:24px;
+    padding:18px 24px 22px;
+}
+
+.sidebar{ gap:18px; padding:4px 4px 8px 0; }
+
+.card{ border-radius:19px; backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); }
+.cardHeader{ padding:16px 18px 13px; font-size:11px; letter-spacing:1.45px; }
+.cardBody{ padding:17px 18px 19px; }
+.buttons{ gap:12px; }
+.btn,select{ min-height:46px; font-size:12px; border-radius:12px; }
+.status{ min-height:44px; padding:13px 14px; font-size:12px; }
+.evalRow{ margin-top:12px; font-size:11px; }
+.evalBar{ height:11px; margin-top:8px; }
+.moves{ height:235px; padding:9px; border-radius:11px; }
+.moveRow{ min-height:33px; padding:4px 9px; font-size:12px; }
+.v3ToolGrid{ gap:12px; }
+.v3PositionBox{ margin-top:14px; padding:13px 14px; border-radius:13px; }
+.v3PositionTitle{ margin-bottom:9px; font-size:10px; }
+.v3PositionRow{ padding:5px 0; font-size:11px; }
+.v3PositionRow strong{ font-size:11px; }
+.v3HintBox{ margin-top:13px; min-height:50px; padding:11px 12px; border-radius:12px; font-size:11px; }
+.playerStrip,.bottomPlayer{ height:38px; }
+.playerName,.you{ font-size:13px; }
+.clock{ font-size:20px; min-width:74px; }
+.boardShell{ border-radius:20px; padding:7px; }
+
+@media(max-height:760px) and (min-width:901px){
+    :root{ --sidebar-width:390px; }
+    .main{ grid-template-columns:minmax(0,1fr) var(--sidebar-width); gap:16px; padding:10px 15px 12px; }
+    .sidebar{ gap:11px; }
+    .cardHeader{ padding:10px 13px 8px; }
+    .cardBody{ padding:10px 12px 11px; }
+    .btn,select{ min-height:38px; }
+    .moves{ height:145px; }
+    body::after{ right:410px; width:190px; height:250px; }
+}
+
+@media(max-width:980px){
+    body::after{ display:none; }
+    .main{ display:flex; flex-direction:column; overflow:visible; padding:14px; }
+    .sidebar{ width:100%; gap:14px; padding:0; }
 }
 
 </style>
