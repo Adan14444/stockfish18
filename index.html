@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Nova Chess V4 — Aqua Command Center</title>
+<title>Nova Chess V50 — Ocean Intelligence Edition</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
@@ -1826,11 +1826,387 @@ body.noBoardGlow .boardShell{
     .v4OceanArt{display:none;}
 }
 
+
+/* =========================================================
+   NOVA CHESS V50 — OCEAN INTELLIGENCE EDITION
+   ========================================================= */
+
+:root{
+    --v50-radius:20px;
+    --v50-scale:1;
+}
+
+body{
+    background:
+        radial-gradient(circle at 16% 8%,rgba(46,242,255,.20),transparent 27%),
+        radial-gradient(circle at 87% 17%,rgba(23,174,210,.15),transparent 28%),
+        radial-gradient(circle at 48% 108%,rgba(33,214,193,.12),transparent 42%),
+        linear-gradient(145deg,#010a10 0%,#031921 48%,#02262d 100%) !important;
+}
+
+.v50OceanScene{
+    position:fixed;
+    inset:62px 0 0 0;
+    width:100%;
+    height:calc(100% - 62px);
+    pointer-events:none;
+    z-index:0;
+    opacity:.9;
+}
+
+.v50Badge{
+    color:#d7ffff;
+    background:
+        linear-gradient(135deg,rgba(78,239,250,.22),rgba(63,173,223,.12));
+    box-shadow:0 0 20px rgba(58,227,244,.10);
+}
+
+.v50TopHud{
+    margin-left:auto;
+    display:flex;
+    gap:7px;
+}
+
+.v50HudItem{
+    min-width:62px;
+    padding:6px 9px;
+    border:1px solid rgba(105,239,249,.10);
+    border-radius:10px;
+    background:rgba(7,37,45,.52);
+    text-align:center;
+}
+
+.v50HudItem span{
+    display:block;
+    color:#669ba2;
+    font-size:7px;
+    font-weight:900;
+    letter-spacing:1px;
+}
+
+.v50HudItem strong{
+    display:block;
+    margin-top:2px;
+    color:#dcfdff;
+    font-size:9px;
+    letter-spacing:.35px;
+}
+
+.v50BoardShell{
+    position:relative;
+    overflow:visible;
+}
+
+.v50BoardHud{
+    position:absolute;
+    left:12px;
+    right:12px;
+    top:-35px;
+    display:flex;
+    justify-content:space-between;
+    pointer-events:none;
+}
+
+.v50BoardHud span,
+.v50BoardFooter span{
+    padding:5px 8px;
+    border:1px solid rgba(91,239,250,.13);
+    border-radius:999px;
+    background:rgba(3,26,33,.78);
+    color:#8adce3;
+    font-size:8px;
+    font-weight:900;
+    letter-spacing:.8px;
+    backdrop-filter:blur(10px);
+}
+
+.v50BoardFooter{
+    position:absolute;
+    left:12px;
+    right:12px;
+    bottom:-34px;
+    display:flex;
+    justify-content:space-between;
+    pointer-events:none;
+}
+
+.v50ModeSearchWrap{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    margin-bottom:12px;
+}
+
+.v50ModeSearch{
+    width:100%;
+    min-width:0;
+    min-height:40px;
+    padding:0 12px;
+    border:1px solid rgba(105,239,249,.12);
+    border-radius:11px;
+    outline:none;
+    background:rgba(2,23,29,.65);
+    color:#eaffff;
+    font-size:11px;
+}
+
+.v50ModeSearch:focus{
+    border-color:rgba(85,242,252,.45);
+    box-shadow:0 0 0 3px rgba(70,231,242,.07);
+}
+
+.v50ModeCount{
+    flex:0 0 auto;
+    color:#66aab2;
+    font-size:8px;
+    font-weight:900;
+    letter-spacing:.8px;
+}
+
+.modeChoice{
+    position:relative;
+    overflow:hidden;
+}
+
+.modeChoice::after{
+    content:"";
+    position:absolute;
+    inset:0 auto 0 0;
+    width:3px;
+    background:linear-gradient(#67f6ff,#28bdcf);
+    opacity:0;
+}
+
+.modeChoice.active::after{
+    opacity:1;
+}
+
+.modeChoice[data-mode="boss"]{
+    background:
+        radial-gradient(circle at 90% 0,rgba(255,104,151,.10),transparent 42%),
+        rgba(7,37,45,.72);
+}
+
+.modeChoice[data-mode="zen"]{
+    background:
+        radial-gradient(circle at 90% 0,rgba(118,255,216,.08),transparent 42%),
+        rgba(7,37,45,.72);
+}
+
+.v50EngineGrid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:7px;
+    margin-top:11px;
+}
+
+.v50Metric{
+    min-width:0;
+    padding:8px 5px;
+    border:1px solid rgba(102,238,248,.09);
+    border-radius:10px;
+    background:rgba(3,25,31,.55);
+    text-align:center;
+}
+
+.v50Metric span{
+    display:block;
+    color:#668e94;
+    font-size:7px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.6px;
+}
+
+.v50Metric strong{
+    display:block;
+    margin-top:4px;
+    overflow:hidden;
+    color:#dfffff;
+    font-size:9px;
+    text-overflow:ellipsis;
+}
+
+.v50PvBox{
+    margin-top:9px;
+    padding:10px 11px;
+    border:1px solid rgba(102,238,248,.09);
+    border-radius:11px;
+    background:rgba(3,25,31,.47);
+}
+
+.v50PvBox span{
+    display:block;
+    color:#68a0a7;
+    font-size:7px;
+    font-weight:900;
+    letter-spacing:.8px;
+    text-transform:uppercase;
+}
+
+.v50PvBox strong{
+    display:block;
+    margin-top:5px;
+    color:#a9dce0;
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:9px;
+    font-weight:600;
+    line-height:1.45;
+    word-break:break-word;
+}
+
+.v50SessionGrid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:8px;
+}
+
+.v50SessionStat{
+    padding:10px 6px;
+    border:1px solid rgba(102,238,248,.09);
+    border-radius:11px;
+    background:rgba(3,25,31,.48);
+    text-align:center;
+}
+
+.v50SessionStat span{
+    display:block;
+    color:#668f96;
+    font-size:7px;
+    font-weight:900;
+    text-transform:uppercase;
+}
+
+.v50SessionStat strong{
+    display:block;
+    margin-top:5px;
+    color:#e5ffff;
+    font-size:13px;
+}
+
+.v50SpaceTop{
+    margin-top:14px;
+}
+
+.v50Range{
+    width:100%;
+    accent-color:#59edf4;
+}
+
+.cardHeader{
+    cursor:pointer;
+    user-select:none;
+}
+
+.cardHeader::after{
+    content:"−";
+    float:right;
+    color:#5cabb2;
+    font-size:12px;
+}
+
+.card.v50Collapsed .cardHeader::after{
+    content:"+";
+}
+
+.card.v50Collapsed .cardBody{
+    display:none;
+}
+
+body.v50NoGlass .card,
+body.v50NoGlass .v4Dock{
+    backdrop-filter:none !important;
+    -webkit-backdrop-filter:none !important;
+    background:#06252d !important;
+}
+
+body.v50NoMotion *,
+body.v50NoMotion *::before,
+body.v50NoMotion *::after{
+    animation:none !important;
+    transition:none !important;
+}
+
+@keyframes v50Drift{
+    0%{transform:translate3d(0,0,0)}
+    50%{transform:translate3d(0,-10px,0)}
+    100%{transform:translate3d(0,0,0)}
+}
+
+@keyframes v50Pulse{
+    0%,100%{opacity:.62}
+    50%{opacity:1}
+}
+
+body:not(.v50NoMotion) .v50OceanScene{
+    animation:v50Drift 13s ease-in-out infinite;
+}
+
+body:not(.v50NoMotion) #v50EnginePulse{
+    animation:v50Pulse 1.9s ease-in-out infinite;
+}
+
+body.v50Zen .topbar{
+    opacity:.72;
+}
+
+body.v50Zen .sidebar .card:not(.modeCard):not(.v4InsightCard){
+    opacity:.86;
+}
+
+body.v50Zen .boardShell{
+    box-shadow:
+        0 0 0 1px rgba(100,243,255,.14),
+        0 28px 80px rgba(0,0,0,.52),
+        0 0 70px rgba(75,235,235,.09);
+}
+
+@media(max-width:1180px){
+    .v50TopHud{display:none;}
+}
+
+@media(max-width:980px){
+    .v50OceanScene{display:none;}
+    .v50BoardHud,.v50BoardFooter{display:none;}
+}
+
 </style>
 </head>
 
 <body>
 
+
+
+<svg class="v50OceanScene" viewBox="0 0 1200 700" aria-hidden="true">
+    <defs>
+        <linearGradient id="v50SeaLine" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0" stop-color="#55eff8" stop-opacity=".02"/>
+            <stop offset=".5" stop-color="#79fbff" stop-opacity=".24"/>
+            <stop offset="1" stop-color="#26c7d7" stop-opacity=".02"/>
+        </linearGradient>
+        <radialGradient id="v50Moon">
+            <stop offset="0" stop-color="#a8fbff" stop-opacity=".18"/>
+            <stop offset="1" stop-color="#43d9e7" stop-opacity="0"/>
+        </radialGradient>
+    </defs>
+    <circle cx="930" cy="145" r="135" fill="url(#v50Moon)"/>
+    <g fill="none" stroke="url(#v50SeaLine)">
+        <path d="M-80 495 C80 420 180 565 340 480 S630 390 780 482 S1040 560 1280 455" stroke-width="5"/>
+        <path d="M-60 540 C100 470 210 610 375 525 S650 450 820 535 S1070 600 1260 510" stroke-width="2"/>
+        <path d="M-100 585 C90 515 220 650 390 575 S700 510 840 590 S1080 645 1280 560" stroke-width="1.5"/>
+    </g>
+    <g fill="none" stroke="#6ef5ff" stroke-opacity=".08" stroke-width="2">
+        <circle cx="105" cy="170" r="12"/>
+        <circle cx="155" cy="118" r="5"/>
+        <circle cx="1080" cy="370" r="17"/>
+        <circle cx="1120" cy="320" r="7"/>
+        <circle cx="315" cy="260" r="9"/>
+    </g>
+    <g transform="translate(85 320)" fill="none" stroke="#73f7ff" stroke-opacity=".085" stroke-width="5">
+        <path d="M125 220H20c7-29 22-54 44-71-16-10-25-30-23-52 2-34 24-61 56-73-4-22 3-42 16-57 24 18 39 44 42 74 3 39-14 70-47 93 23 19 39 48 47 86z"/>
+        <path d="M59 88c19-3 35-13 47-30"/>
+    </g>
+</svg>
 
 <svg class="v4OceanArt" viewBox="0 0 240 170" aria-hidden="true">
     <g fill="none" stroke="rgba(105,245,255,.9)" stroke-width="2">
@@ -1852,7 +2228,23 @@ body.noBoardGlow .boardShell{
 
     <div class="logo">
         <div class="logoIcon">♞</div>
-        <span>Nova Chess <b class="v4Badge">V4</b></span>
+        <span>Nova Chess <b class="v4Badge v50Badge">V50</b></span>
+    </div>
+
+
+    <div class="v50TopHud" aria-label="Session information">
+        <div class="v50HudItem">
+            <span>MODE</span>
+            <strong id="v50TopMode">VS NOVA</strong>
+        </div>
+        <div class="v50HudItem">
+            <span>MOVE</span>
+            <strong id="v50TopMove">1</strong>
+        </div>
+        <div class="v50HudItem">
+            <span>ENGINE</span>
+            <strong id="v50TopDepth">D—</strong>
+        </div>
     </div>
 
     <div id="enginePill" class="enginePill">
@@ -1881,8 +2273,16 @@ body.noBoardGlow .boardShell{
 
     </div>
 
-    <div class="boardShell">
+    <div class="boardShell v50BoardShell">
+        <div class="v50BoardHud">
+            <span id="v50PhaseBadge">OPENING</span>
+            <span id="v50EvalBadge">EVAL 0.00</span>
+        </div>
         <div id="board"></div>
+        <div class="v50BoardFooter">
+            <span id="v50LastMove">READY</span>
+            <span id="v50EnginePulse">STOCKFISH 18</span>
+        </div>
     </div>
 
     <div class="bottomPlayer">
@@ -1906,7 +2306,7 @@ body.noBoardGlow .boardShell{
 <div class="v4Dock">
     <div class="v4DockTop">
         <div>
-            <span class="v4Eyebrow">NOVA CONTROL CENTER</span>
+            <span class="v4Eyebrow">NOVA V50 COMMAND DECK</span>
             <strong id="v4ModeTitle">Vs Nova</strong>
         </div>
         <span id="v4TurnChip" class="v4TurnChip">WHITE</span>
@@ -1919,6 +2319,8 @@ body.noBoardGlow .boardShell{
         <button type="button" data-jump="featureSection">Features</button>
         <button type="button" data-jump="movesSection">Moves</button>
         <button type="button" data-jump="toolsSection">Tools</button>
+        <button type="button" data-jump="insightSection">Intel</button>
+        <button type="button" data-jump="v50LabSection">V50 Lab</button>
     </div>
 </div>
 
@@ -1934,6 +2336,12 @@ body.noBoardGlow .boardShell{
 
 <div class="cardBody">
 
+    <div class="v50ModeSearchWrap">
+        <input id="modeSearch" class="v50ModeSearch" type="search"
+               placeholder="Search game modes…" autocomplete="off">
+        <span id="modeCount" class="v50ModeCount">12 MODES</span>
+    </div>
+
     <div class="modeChoices">
         <button type="button" class="modeChoice active" data-mode="computer">
             <span class="modeIcon">♞</span>
@@ -1948,6 +2356,46 @@ body.noBoardGlow .boardShell{
             <span>
                 <strong>Blitz</strong>
                 <small>Fast 3-minute battle vs Nova</small>
+            </span>
+        </button>
+
+        <button type="button" class="modeChoice" data-mode="bullet">
+            <span class="modeIcon">☄</span>
+            <span>
+                <strong>Bullet</strong>
+                <small>1-minute chaos against a fast Nova</small>
+            </span>
+        </button>
+
+        <button type="button" class="modeChoice" data-mode="rapid">
+            <span class="modeIcon">◷</span>
+            <span>
+                <strong>Rapid</strong>
+                <small>10-minute balanced competitive game</small>
+            </span>
+        </button>
+
+        <button type="button" class="modeChoice" data-mode="classical">
+            <span class="modeIcon">♜</span>
+            <span>
+                <strong>Classical</strong>
+                <small>15-minute deeper-thinking Nova match</small>
+            </span>
+        </button>
+
+        <button type="button" class="modeChoice" data-mode="boss">
+            <span class="modeIcon">♛</span>
+            <span>
+                <strong>Nova Boss</strong>
+                <small>Maximum engine depth — survive if you can</small>
+            </span>
+        </button>
+
+        <button type="button" class="modeChoice" data-mode="zen">
+            <span class="modeIcon">◌</span>
+            <span>
+                <strong>Zen Chess</strong>
+                <small>No clock, clean board, calm Nova opponent</small>
             </span>
         </button>
 
@@ -2004,6 +2452,7 @@ body.noBoardGlow .boardShell{
     <div class="modeSubsection">
         <div class="modeLabel">Time Control</div>
         <select id="timeControl">
+            <option value="60">1 minute</option>
             <option value="180">3 minutes</option>
             <option value="300" selected>5 minutes</option>
             <option value="600">10 minutes</option>
@@ -2076,6 +2525,32 @@ body.noBoardGlow .boardShell{
 <div class="evalBar">
     <div id="evalFill" class="evalFill"></div>
 </div>
+
+
+<div class="v50EngineGrid">
+    <div class="v50Metric">
+        <span>Depth</span>
+        <strong id="engineDepth">—</strong>
+    </div>
+    <div class="v50Metric">
+        <span>Nodes</span>
+        <strong id="engineNodes">—</strong>
+    </div>
+    <div class="v50Metric">
+        <span>NPS</span>
+        <strong id="engineNps">—</strong>
+    </div>
+    <div class="v50Metric">
+        <span>Mate</span>
+        <strong id="engineMate">—</strong>
+    </div>
+</div>
+
+<div class="v50PvBox">
+    <span>Principal Variation</span>
+    <strong id="enginePv">Waiting for analysis…</strong>
+</div>
+
 
 <div style="height:7px"></div>
 
@@ -2219,6 +2694,67 @@ body.noBoardGlow .boardShell{
             <small>Soft aqua light around the chessboard</small>
         </span>
         <input id="glowToggle" type="checkbox" checked>
+    </label>
+
+</div>
+</section>
+
+
+<!-- V50 SESSION LAB -->
+
+<section id="v50LabSection" class="card v50LabCard">
+<div class="cardHeader">
+    V50 Session Lab
+</div>
+
+<div class="cardBody">
+
+    <div class="v50SessionGrid">
+        <div class="v50SessionStat">
+            <span>Captures</span>
+            <strong id="v50Captures">0</strong>
+        </div>
+        <div class="v50SessionStat">
+            <span>Checks</span>
+            <strong id="v50Checks">0</strong>
+        </div>
+        <div class="v50SessionStat">
+            <span>Halfmoves</span>
+            <strong id="v50Halfmoves">0</strong>
+        </div>
+        <div class="v50SessionStat">
+            <span>Material</span>
+            <strong id="v50MaterialHud">0</strong>
+        </div>
+    </div>
+
+    <div class="modeLabel v50SpaceTop">Interface Scale</div>
+    <input id="uiScaleRange" class="v50Range" type="range"
+           min="90" max="115" step="5" value="100">
+
+    <div class="modeLabel v50SpaceTop">Sidebar Width</div>
+    <input id="sidebarWidthRange" class="v50Range" type="range"
+           min="390" max="520" step="10" value="430">
+
+    <div class="featureGrid v50SpaceTop">
+        <button id="collapseAllBtn" type="button" class="btn">▱ Collapse Cards</button>
+        <button id="expandAllBtn" type="button" class="btn">▰ Expand Cards</button>
+    </div>
+
+    <label class="featureToggle">
+        <span>
+            <strong>Ambient Motion</strong>
+            <small>Animate the ocean background and interface accents</small>
+        </span>
+        <input id="motionToggle" type="checkbox" checked>
+    </label>
+
+    <label class="featureToggle">
+        <span>
+            <strong>Glass Panels</strong>
+            <small>Use the translucent V50 command-deck look</small>
+        </span>
+        <input id="glassToggle" type="checkbox" checked>
     </label>
 
 </div>
@@ -2629,6 +3165,96 @@ function handleEngineLine(line){
 
 function parseInfo(line){
 
+    const infoParts =
+        line.split(/\s+/);
+
+    const depthIndex =
+        infoParts.indexOf("depth");
+
+    const nodesIndex =
+        infoParts.indexOf("nodes");
+
+    const npsIndex =
+        infoParts.indexOf("nps");
+
+    const pvIndex =
+        infoParts.indexOf("pv");
+
+    const mateIndex =
+        infoParts.indexOf("mate");
+
+    if(depthIndex !== -1){
+
+        const depth =
+            infoParts[
+                depthIndex + 1
+            ];
+
+        document.getElementById(
+            "engineDepth"
+        ).textContent =
+            depth || "—";
+
+        document.getElementById(
+            "v50TopDepth"
+        ).textContent =
+            "D" + (depth || "—");
+    }
+
+    if(nodesIndex !== -1){
+
+        document.getElementById(
+            "engineNodes"
+        ).textContent =
+            compactNumber(
+                infoParts[
+                    nodesIndex + 1
+                ]
+            );
+    }
+
+    if(npsIndex !== -1){
+
+        document.getElementById(
+            "engineNps"
+        ).textContent =
+            compactNumber(
+                infoParts[
+                    npsIndex + 1
+                ]
+            );
+    }
+
+    document.getElementById(
+        "engineMate"
+    ).textContent =
+        mateIndex !== -1
+            ? (
+                "M" +
+                infoParts[
+                    mateIndex + 1
+                ]
+            )
+            : "—";
+
+    if(pvIndex !== -1){
+
+        const pv =
+            infoParts
+                .slice(
+                    pvIndex + 1,
+                    pvIndex + 7
+                )
+                .join(" ");
+
+        if(pv){
+            document.getElementById(
+                "enginePv"
+            ).textContent =
+                pv;
+        }
+    }
+
     const scoreIndex =
         line.indexOf("score");
 
@@ -2666,6 +3292,20 @@ function parseInfo(line){
             pawns >= 0 ? "+" : ""
         ) +
         pawns.toFixed(2);
+
+    const v50EvalBadge =
+        document.getElementById(
+            "v50EvalBadge"
+        );
+
+    if(v50EvalBadge){
+        v50EvalBadge.textContent =
+            "EVAL " +
+            (
+                pawns >= 0 ? "+" : ""
+            ) +
+            pawns.toFixed(2);
+    }
 
     /*
        Convert roughly from
@@ -2754,7 +3394,7 @@ function requestEngineMove(){
     if(game.game_over()) return;
 
     const engineModes =
-        ["computer","blitz","training","random","watch"];
+        ["computer","bullet","blitz","rapid","classical","boss","zen","training","random","watch"];
 
     if(!engineModes.includes(gameMode)) return;
 
@@ -2802,7 +3442,9 @@ function requestEngineMove(){
     const depth =
         gameMode === "watch"
             ? 9
-            : (
+            : gameMode === "boss"
+                ? 16
+                : (
                 parseInt(
                     document.getElementById(
                         "difficulty"
@@ -3279,7 +3921,7 @@ function squareClicked(square){
     if(gameMode === "watch") return;
 
     const versusNova =
-        ["computer","blitz","training","random"]
+        ["computer","bullet","blitz","rapid","classical","boss","zen","training","random"]
         .includes(gameMode);
 
     if(
@@ -3478,7 +4120,7 @@ function makePlayerMove(
     }
 
     if(
-        ["computer","blitz","training","random"]
+        ["computer","bullet","blitz","rapid","classical","boss","zen","training","random"]
         .includes(gameMode) &&
         game.turn() === engineColor
     ){
@@ -3840,6 +4482,31 @@ function newGame(){
         document.getElementById("difficulty").value = "10";
     }
 
+    if(gameMode === "bullet"){
+        document.getElementById("timeControl").value = "60";
+        document.getElementById("difficulty").value = "7";
+    }
+
+    if(gameMode === "rapid"){
+        document.getElementById("timeControl").value = "600";
+        document.getElementById("difficulty").value = "12";
+    }
+
+    if(gameMode === "classical"){
+        document.getElementById("timeControl").value = "900";
+        document.getElementById("difficulty").value = "14";
+    }
+
+    if(gameMode === "boss"){
+        document.getElementById("timeControl").value = "600";
+        document.getElementById("difficulty").value = "16";
+    }
+
+    if(gameMode === "zen"){
+        document.getElementById("timeControl").value = "0";
+        document.getElementById("difficulty").value = "10";
+    }
+
     if(gameMode === "training"){
         document.getElementById("timeControl").value = "0";
         document.getElementById("difficulty").value = "5";
@@ -3865,7 +4532,7 @@ function newGame(){
         clocksEnabled ? timeValue : 0;
 
     if(
-        ["computer","blitz","training","random"]
+        ["computer","bullet","blitz","rapid","classical","boss","zen","training","random"]
         .includes(gameMode)
     ){
 
@@ -3965,7 +4632,7 @@ function newGame(){
     }
 
     if(
-        ["computer","blitz","training","random"]
+        ["computer","bullet","blitz","rapid","classical","boss","zen","training","random"]
         .includes(gameMode) &&
         engineReady &&
         game.turn() === engineColor
@@ -4098,6 +4765,7 @@ function render(){
     updateV3Position();
     updateModeLabels();
     updateV4Insights();
+    updateV50Session();
 }
 
 /* =========================================================
@@ -4173,7 +4841,7 @@ const bottomPlayerName =
 function updateModeLabels(){
 
     const versusNova =
-        ["computer","blitz","training","random"]
+        ["computer","bullet","blitz","rapid","classical","boss","zen","training","random"]
         .includes(gameMode);
 
     if(versusNova){
@@ -4427,7 +5095,12 @@ const OPENINGS = [
 
 const MODE_NAMES = {
     computer:"Vs Nova",
+    bullet:"Bullet",
     blitz:"Blitz",
+    rapid:"Rapid",
+    classical:"Classical",
+    boss:"Nova Boss",
+    zen:"Zen Chess",
     training:"Training",
     random:"Random Opening",
     local:"2 Player",
@@ -4543,7 +5216,7 @@ document
         function(){
 
             const versus =
-                ["computer","blitz","training","random"]
+                ["computer","bullet","blitz","rapid","classical","boss","zen","training","random"]
                 .includes(gameMode);
 
             if(!versus){
@@ -4655,6 +5328,411 @@ document
                 "noBoardGlow",
                 !this.checked
             );
+        }
+    );
+
+
+
+/* =========================================================
+   NOVA CHESS V50 — EXPERIENCE LAYER
+   ========================================================= */
+
+const v50ModeAliases = {
+    computer:"VS NOVA",
+    bullet:"BULLET",
+    blitz:"BLITZ",
+    rapid:"RAPID",
+    classical:"CLASSICAL",
+    boss:"NOVA BOSS",
+    zen:"ZEN CHESS",
+    training:"TRAINING",
+    random:"RANDOM",
+    local:"2 PLAYER",
+    analysis:"FREE PLAY",
+    watch:"WATCH NOVA"
+};
+
+function compactNumber(value){
+
+    const number =
+        Number(value);
+
+    if(!Number.isFinite(number)){
+        return "—";
+    }
+
+    if(number >= 1000000){
+        return (
+            number / 1000000
+        ).toFixed(1) + "M";
+    }
+
+    if(number >= 1000){
+        return (
+            number / 1000
+        ).toFixed(1) + "K";
+    }
+
+    return String(number);
+}
+
+function updateV50Session(){
+
+    const history =
+        game.history({
+            verbose:true
+        });
+
+    let captures = 0;
+    let checks = 0;
+
+    history.forEach(
+        move => {
+
+            if(
+                move.captured ||
+                (
+                    move.flags &&
+                    (
+                        move.flags.includes("c") ||
+                        move.flags.includes("e")
+                    )
+                )
+            ){
+                captures++;
+            }
+
+            if(
+                move.san &&
+                (
+                    move.san.includes("+") ||
+                    move.san.includes("#")
+                )
+            ){
+                checks++;
+            }
+        }
+    );
+
+    const captureNode =
+        document.getElementById(
+            "v50Captures"
+        );
+
+    const checkNode =
+        document.getElementById(
+            "v50Checks"
+        );
+
+    const halfNode =
+        document.getElementById(
+            "v50Halfmoves"
+        );
+
+    const materialNode =
+        document.getElementById(
+            "v50MaterialHud"
+        );
+
+    if(captureNode){
+        captureNode.textContent =
+            String(captures);
+    }
+
+    if(checkNode){
+        checkNode.textContent =
+            String(checks);
+    }
+
+    if(halfNode){
+        halfNode.textContent =
+            String(history.length);
+    }
+
+    if(materialNode && v3Material){
+        materialNode.textContent =
+            v3Material.textContent;
+    }
+
+    const topMode =
+        document.getElementById(
+            "v50TopMode"
+        );
+
+    const topMove =
+        document.getElementById(
+            "v50TopMove"
+        );
+
+    if(topMode){
+        topMode.textContent =
+            v50ModeAliases[gameMode] ||
+            "NOVA";
+    }
+
+    if(topMove){
+        topMove.textContent =
+            String(
+                Math.floor(
+                    history.length / 2
+                ) + 1
+            );
+    }
+
+    const last =
+        document.getElementById(
+            "v50LastMove"
+        );
+
+    if(last){
+        last.textContent =
+            history.length
+                ? "LAST " +
+                  history[
+                      history.length - 1
+                  ].san
+                : "READY";
+    }
+
+    const phaseBadge =
+        document.getElementById(
+            "v50PhaseBadge"
+        );
+
+    if(
+        phaseBadge &&
+        document.getElementById(
+            "phaseText"
+        )
+    ){
+        phaseBadge.textContent =
+            document
+                .getElementById(
+                    "phaseText"
+                )
+                .textContent
+                .toUpperCase();
+    }
+
+    document.body.classList.toggle(
+        "v50Zen",
+        gameMode === "zen"
+    );
+}
+
+const modeSearch =
+    document.getElementById(
+        "modeSearch"
+    );
+
+const modeCount =
+    document.getElementById(
+        "modeCount"
+    );
+
+
+const actualModeCount =
+    document.querySelectorAll(
+        ".modeChoice"
+    ).length;
+
+if(modeCount){
+    modeCount.textContent =
+        actualModeCount +
+        " MODES";
+}
+
+modeSearch.addEventListener(
+    "input",
+    function(){
+
+        const query =
+            this.value
+                .trim()
+                .toLowerCase();
+
+        let visible = 0;
+
+        document
+            .querySelectorAll(
+                ".modeChoice"
+            )
+            .forEach(
+                button => {
+
+                    const matches =
+                        !query ||
+                        button.textContent
+                            .toLowerCase()
+                            .includes(query);
+
+                    button.style.display =
+                        matches
+                            ? ""
+                            : "none";
+
+                    if(matches){
+                        visible++;
+                    }
+                }
+            );
+
+        modeCount.textContent =
+            visible + " MODES";
+    }
+);
+
+document
+    .querySelectorAll(
+        ".sidebar .cardHeader"
+    )
+    .forEach(
+        header => {
+
+            header.setAttribute(
+                "title",
+                "Click to collapse or expand"
+            );
+
+            header.addEventListener(
+                "click",
+                function(){
+
+                    this.parentElement
+                        .classList
+                        .toggle(
+                            "v50Collapsed"
+                        );
+                }
+            );
+        }
+    );
+
+document
+    .getElementById(
+        "collapseAllBtn"
+    )
+    .addEventListener(
+        "click",
+        function(){
+
+            document
+                .querySelectorAll(
+                    ".sidebar .card"
+                )
+                .forEach(
+                    card =>
+                        card.classList.add(
+                            "v50Collapsed"
+                        )
+                );
+        }
+    );
+
+document
+    .getElementById(
+        "expandAllBtn"
+    )
+    .addEventListener(
+        "click",
+        function(){
+
+            document
+                .querySelectorAll(
+                    ".sidebar .card"
+                )
+                .forEach(
+                    card =>
+                        card.classList.remove(
+                            "v50Collapsed"
+                        )
+                );
+        }
+    );
+
+document
+    .getElementById(
+        "uiScaleRange"
+    )
+    .addEventListener(
+        "input",
+        function(){
+
+            const scale =
+                Math.max(
+                    90,
+                    Math.min(
+                        115,
+                        Number(this.value) ||
+                        100
+                    )
+                );
+
+            document.documentElement
+                .style
+                .fontSize =
+                    scale + "%";
+        }
+    );
+
+document
+    .getElementById(
+        "sidebarWidthRange"
+    )
+    .addEventListener(
+        "input",
+        function(){
+
+            const width =
+                Math.max(
+                    390,
+                    Math.min(
+                        520,
+                        Number(this.value) ||
+                        430
+                    )
+                );
+
+            document.documentElement
+                .style
+                .setProperty(
+                    "--sidebar-width",
+                    width + "px"
+                );
+        }
+    );
+
+document
+    .getElementById(
+        "motionToggle"
+    )
+    .addEventListener(
+        "change",
+        function(){
+
+            document.body
+                .classList
+                .toggle(
+                    "v50NoMotion",
+                    !this.checked
+                );
+        }
+    );
+
+document
+    .getElementById(
+        "glassToggle"
+    )
+    .addEventListener(
+        "change",
+        function(){
+
+            document.body
+                .classList
+                .toggle(
+                    "v50NoGlass",
+                    !this.checked
+                );
         }
     );
 
