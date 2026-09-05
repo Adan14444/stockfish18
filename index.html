@@ -1375,6 +1375,12 @@ function handleEngineLine(line){
             "ready"
         );
 
+        // If White already moved while Stockfish was loading,
+        // immediately request Black's move now that the engine is ready.
+        if(!gameEnded && !game.game_over() && game.turn() === "b" && !engineThinking){
+            requestEngineMove();
+        }
+
         return;
     }
 
@@ -1540,6 +1546,10 @@ function requestEngineMove(){
 
     const history =
         uciHistory();
+
+    console.log("[NOVA] Current FEN:", game.fen());
+    console.log("[NOVA] UCI history:", history);
+    console.log("[NOVA] Turn:", game.turn());
 
     send("stop");
 
@@ -2442,7 +2452,7 @@ function stopClock(){
 
 function checkGameEnd(){
 
-    if(game.is_checkmate()){
+    if(game.in_checkmate()){
 
         if(game.turn() === "w"){
 
@@ -2462,7 +2472,7 @@ function checkGameEnd(){
         return true;
     }
 
-    if(game.is_draw()){
+    if(game.in_draw()){
 
         endGame(
             "Draw",
