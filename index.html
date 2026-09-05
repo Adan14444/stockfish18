@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 
-<title>Nova Chess V3 — Aqua</title>
+<title>Nova Chess V3 — Aqua+</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
 
@@ -1082,6 +1082,143 @@ select{
     .moves{ height:160px; }
 }
 
+
+/* =========================================================
+   NOVA V3 AQUA+ — DECORATIVE BACKGROUND + QUICK TOOLS
+   ========================================================= */
+
+body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:-1;
+    background:
+        radial-gradient(circle at 18% 23%, transparent 0 58px, rgba(86,244,255,.08) 59px 60px, transparent 61px 100%),
+        radial-gradient(circle at 82% 72%, transparent 0 105px, rgba(86,244,255,.055) 106px 107px, transparent 108px 100%),
+        linear-gradient(125deg, transparent 0 43%, rgba(76,231,240,.035) 43.2% 43.8%, transparent 44% 100%);
+}
+
+/* soft floating geometric aqua designs */
+.app::before,
+.app::after{
+    content:"";
+    position:fixed;
+    pointer-events:none;
+    z-index:-1;
+    filter:blur(.2px);
+}
+
+.app::before{
+    width:330px;
+    height:330px;
+    left:-105px;
+    bottom:-90px;
+    border:1px solid rgba(86,244,255,.10);
+    border-radius:34% 66% 53% 47% / 55% 38% 62% 45%;
+    transform:rotate(18deg);
+    box-shadow:
+        55px -30px 0 -1px rgba(0,0,0,0),
+        55px -30px 0 0 rgba(86,244,255,.05),
+        115px -70px 0 -1px rgba(0,0,0,0),
+        115px -70px 0 0 rgba(86,244,255,.035);
+}
+
+.app::after{
+    width:260px;
+    height:260px;
+    right:-70px;
+    top:95px;
+    border:1px solid rgba(86,244,255,.08);
+    transform:rotate(35deg);
+    border-radius:38px;
+    box-shadow:
+        -38px 48px 0 -1px rgba(0,0,0,0),
+        -38px 48px 0 0 rgba(86,244,255,.045),
+        -76px 96px 0 -1px rgba(0,0,0,0),
+        -76px 96px 0 0 rgba(86,244,255,.028);
+}
+
+.v3ToolGrid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:9px;
+}
+
+.v3PositionBox{
+    margin-top:11px;
+    padding:10px 11px;
+    border:1px solid rgba(100,239,249,.10);
+    border-radius:11px;
+    background:rgba(2,22,28,.48);
+}
+
+.v3PositionTitle{
+    margin-bottom:7px;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:1.1px;
+    text-transform:uppercase;
+    color:#7ddbe3;
+}
+
+.v3PositionRow{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:3px 0;
+    font-size:10px;
+    color:#80aeb5;
+}
+
+.v3PositionRow strong{
+    color:#eaffff;
+    font-size:10px;
+}
+
+.v3HintBox{
+    margin-top:10px;
+    min-height:38px;
+    padding:9px 10px;
+    display:flex;
+    align-items:center;
+    border-radius:10px;
+    border:1px solid rgba(92,241,255,.10);
+    background:linear-gradient(135deg,rgba(11,55,64,.72),rgba(5,34,41,.72));
+    color:#9fdce2;
+    font-size:10px;
+    line-height:1.4;
+}
+
+body.focusMode .topbar,
+body.focusMode .sidebar{
+    display:none;
+}
+
+body.focusMode .main{
+    grid-template-columns:1fr;
+}
+
+body.focusMode .boardColumn{
+    width:min(calc(100vh - 40px), 820px);
+}
+
+@media(max-height:760px) and (min-width:901px){
+    .v3ToolsCard .cardBody{
+        padding-top:9px;
+        padding-bottom:9px;
+    }
+    .v3PositionBox{
+        margin-top:8px;
+        padding:7px 9px;
+    }
+    .v3HintBox{
+        margin-top:8px;
+        min-height:31px;
+        padding:6px 8px;
+    }
+}
+
 </style>
 </head>
 
@@ -1232,42 +1369,43 @@ select{
 
 </section>
 
-<!-- DEBUG -->
+<!-- V3 QUICK TOOLS -->
 
-<section class="card">
 
-<div class="cardHeader">
-    Diagnostics
-</div>
 
+
+<section class="card v3ToolsCard">
+<div class="cardHeader">Quick Tools</div>
 <div class="cardBody">
 
-<div class="debug">
+    <div class="v3ToolGrid">
+        <button id="hintBtn" class="btn">💡 Hint</button>
+        <button id="copyFenBtn" class="btn">📋 Copy FEN</button>
+        <button id="copyPgnBtn" class="btn">📝 Copy PGN</button>
+        <button id="focusBtn" class="btn">⛶ Focus</button>
+    </div>
 
-<div class="debugLine">
-<strong>State:</strong>
-<span id="debugState">Starting</span>
+    <div class="v3PositionBox">
+        <div class="v3PositionTitle">Position</div>
+        <div class="v3PositionRow">
+            <span>Turn</span>
+            <strong id="v3Turn">White</strong>
+        </div>
+        <div class="v3PositionRow">
+            <span>Move</span>
+            <strong id="v3MoveNo">1</strong>
+        </div>
+        <div class="v3PositionRow">
+            <span>Material</span>
+            <strong id="v3Material">Equal</strong>
+        </div>
+    </div>
+
+    <div id="hintBox" class="v3HintBox">
+        Hint appears here.
+    </div>
+
 </div>
-
-<div class="debugLine">
-<strong>Command:</strong>
-<span id="debugCommand">—</span>
-</div>
-
-<div class="debugLine">
-<strong>Output:</strong>
-<span id="debugOutput">—</span>
-</div>
-
-<div class="debugLine">
-<strong>Engine:</strong>
-stockfish-18-asm.js
-</div>
-
-</div>
-
-</div>
-
 </section>
 
 </aside>
@@ -1410,15 +1548,6 @@ const enginePill =
 const engineText =
     document.getElementById("engineText");
 
-const debugState =
-    document.getElementById("debugState");
-
-const debugCommand =
-    document.getElementById("debugCommand");
-
-const debugOutput =
-    document.getElementById("debugOutput");
-
 const whiteClock =
     document.getElementById("whiteClock");
 
@@ -1457,20 +1586,14 @@ function setStatus(text,type=""){
 
     enginePill.className =
         "enginePill " + type;
-
-    debugState.textContent = text;
 }
 
 function command(text){
-
-    debugCommand.textContent =
-        text;
+    console.log("[Stockfish command]", text);
 }
 
 function output(text){
-
-    debugOutput.textContent =
-        text;
+    console.log("[Stockfish output]", text);
 }
 
 /* =========================================================
@@ -1829,9 +1952,7 @@ function handleBestMove(line){
                 : "error"
         );
 
-        debugState.textContent =
-            "TEST → " +
-            (bestMove || "none");
+        console.log("[Stockfish test]", bestMove || "none");
 
         return;
     }
@@ -1855,9 +1976,7 @@ function handleBestMove(line){
         return;
     }
 
-    debugState.textContent =
-        "BESTMOVE → " +
-        bestMove;
+    console.log("[Stockfish bestmove]", bestMove);
 
     /*
        UCI:
@@ -2874,6 +2993,7 @@ function render(){
     renderBoard();
     renderMoves();
     updateClocks();
+    updateV3Position();
 }
 
 /* =========================================================
@@ -2914,6 +3034,220 @@ document
         "click",
         testEngine
     );
+
+
+/* =========================================================
+   V3 QUICK TOOLS
+   ========================================================= */
+
+const v3Turn =
+    document.getElementById("v3Turn");
+
+const v3MoveNo =
+    document.getElementById("v3MoveNo");
+
+const v3Material =
+    document.getElementById("v3Material");
+
+const hintBox =
+    document.getElementById("hintBox");
+
+const MATERIAL_VALUES = {
+    p:1,
+    n:3,
+    b:3,
+    r:5,
+    q:9,
+    k:0
+};
+
+function updateV3Position(){
+
+    if(v3Turn){
+        v3Turn.textContent =
+            game.turn() === "w"
+                ? "White"
+                : "Black";
+    }
+
+    if(v3MoveNo){
+        v3MoveNo.textContent =
+            Math.floor(
+                game.history().length / 2
+            ) + 1;
+    }
+
+    if(v3Material){
+
+        let white = 0;
+        let black = 0;
+
+        for(let rank=1;rank<=8;rank++){
+
+            for(
+                const file of
+                ["a","b","c","d","e","f","g","h"]
+            ){
+
+                const piece =
+                    game.get(
+                        file + rank
+                    );
+
+                if(!piece) continue;
+
+                const value =
+                    MATERIAL_VALUES[
+                        piece.type
+                    ] || 0;
+
+                if(piece.color === "w"){
+                    white += value;
+                }else{
+                    black += value;
+                }
+            }
+        }
+
+        const diff =
+            white - black;
+
+        if(diff === 0){
+            v3Material.textContent =
+                "Equal";
+        }else if(diff > 0){
+            v3Material.textContent =
+                "White +" + diff;
+        }else{
+            v3Material.textContent =
+                "Black +" + Math.abs(diff);
+        }
+    }
+}
+
+async function copyTextV3(text,label){
+
+    try{
+
+        await navigator.clipboard.writeText(
+            text
+        );
+
+        hintBox.textContent =
+            label + " copied.";
+
+    }catch(error){
+
+        hintBox.textContent =
+            "Copy failed. Browser permission may be blocked.";
+    }
+}
+
+document
+    .getElementById("copyFenBtn")
+    .addEventListener(
+        "click",
+        () =>
+            copyTextV3(
+                game.fen(),
+                "FEN"
+            )
+    );
+
+document
+    .getElementById("copyPgnBtn")
+    .addEventListener(
+        "click",
+        () =>
+            copyTextV3(
+                game.pgn(),
+                "PGN"
+            )
+    );
+
+document
+    .getElementById("focusBtn")
+    .addEventListener(
+        "click",
+        function(){
+
+            document.body
+                .classList
+                .toggle("focusMode");
+
+            this.textContent =
+                document.body
+                    .classList
+                    .contains("focusMode")
+                    ? "↩ Exit Focus"
+                    : "⛶ Focus";
+        }
+    );
+
+document
+    .getElementById("hintBtn")
+    .addEventListener(
+        "click",
+        function(){
+
+            if(gameEnded){
+
+                hintBox.textContent =
+                    "The game is over.";
+
+                return;
+            }
+
+            if(game.turn() !== "w"){
+
+                hintBox.textContent =
+                    "Wait for Nova to finish its move.";
+
+                return;
+            }
+
+            const moves =
+                game.moves({
+                    verbose:true
+                });
+
+            if(!moves.length){
+
+                hintBox.textContent =
+                    "No legal moves.";
+
+                return;
+            }
+
+            /*
+               Lightweight local hint:
+               prefer captures/checks, otherwise
+               show a legal candidate move.
+               This does not interrupt Stockfish.
+            */
+
+            const candidate =
+                moves.find(
+                    move =>
+                        move.flags.includes("c")
+                ) ||
+                moves.find(
+                    move =>
+                        move.san.includes("+")
+                ) ||
+                moves[0];
+
+            hintBox.textContent =
+                "Try looking at " +
+                candidate.san +
+                " (" +
+                candidate.from +
+                " → " +
+                candidate.to +
+                ").";
+        }
+    );
+
 
 /* =========================================================
    START
